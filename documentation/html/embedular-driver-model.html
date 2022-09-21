@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Device model &mdash; embedul.ar  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/sphinx_rtd_custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Core modules" href="embedular-core.html" />
+    <link rel="prev" title="embedul.ar framework" href="embedular.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html">
+            <img src="_static/embedular_logo_alt.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="embedular.html">embedul.ar framework</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Device model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#design-principles">Design principles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#implementation-details">Implementation details</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#no-dynamic-memory-policy">1. No dynamic-memory policy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#platform-independent-device-definition">2. Platform-independent device definition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#device-private-interface">3. Device private interface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#encapsulated-platform-dependant-implementation">4. Encapsulated platform-dependant implementation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#implementation-access-through-its-base-definition-pointer">5. Implementation access through its base definition pointer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#instances-treated-as-opaque-structures">6. Instances treated as opaque structures</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#multiple-instances-and-singletons">7. Multiple instances and singletons</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#one-generic-device-several-implementations">8. One generic device, several implementations</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="embedular-core.html">Core modules</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">embedul.ar</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="embedular.html">embedul.ar framework</a> &raquo;</li>
+      <li>Device model</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/embedular-driver-model.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="device-model">
+<h1>Device model<a class="headerlink" href="#device-model" title="Permalink to this headline"></a></h1>
+<p>This section describes the mechanism used through the embedul.ar framework to implement an object-oriented device abstraction layer modeled in “C.”</p>
+<p>A <em>device</em> is a platform-independent base object with public methods and a predefined, private interface that implementations must follow. Therefore, a driver is an implementation of a device’s private interface. There are a handful of devices in embedul.ar; each represents a given functionality.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This document will deal with the design and implementation details of a simple driver so you can create your own based on the same premises. For a reference of embedul.ar devices, please look here.</p>
+</div>
+<section id="design-principles">
+<h2>Design principles<a class="headerlink" href="#design-principles" title="Permalink to this headline"></a></h2>
+<p>The design requirements stated below satisfy the premises of an object-oriented interface in “C” running on resource-constrained systems like embedded ones. By design, there is also an effort to be compatible with critical systems standards like MISRA-C and CERT C.</p>
+<ol class="arabic simple">
+<li><p>No use of dynamic (heap) memory allocation.</p></li>
+<li><p>Platform-independent devices and their public interfaces (abstraction).</p></li>
+<li><p>Devices enforce the implementation of a precise, predefined private interface similar to private pure virtual functions from an abstract base class in C++ (inheritance).</p></li>
+<li><p>Platform-dependent implementations must remain encapsulated within their definitions.</p></li>
+<li><p>An implementation accessed through a cast to its base device pointer must be able to provide the implemented services through the public base device interface (polymorphism).</p></li>
+<li><p>Both the device and implementation must be treated as opaque structures. The user must perform all interactions through the public device interface (encapsulation).</p></li>
+<li><p>The system must allow for multiple instances of the same base device or a unique instance, also called a “singleton.”</p></li>
+<li><p>A device may have several implementations to cover different platforms, architectures, and libraries to cover the same functionality on the same platform but by diverse methods.</p></li>
+</ol>
+<p>The following section will dive into how each requirement was met by looking at <code class="xref c c-struct docutils literal notranslate"><span class="pre">RANDOM</span></code>’s abstract device definition and one implementation called <code class="xref c c-struct docutils literal notranslate"><span class="pre">RANDOM_SFMT</span></code>. The driver uses a specific pseudorandom number generator library (every other device and implementation should follow the same naming convention.)</p>
+</section>
+<section id="implementation-details">
+<h2>Implementation details<a class="headerlink" href="#implementation-details" title="Permalink to this headline"></a></h2>
+<section id="no-dynamic-memory-policy">
+<h3>1. No dynamic-memory policy<a class="headerlink" href="#no-dynamic-memory-policy" title="Permalink to this headline"></a></h3>
+<p>embedul.ar follows a strict no dynamic-memory policy.</p>
+<p>There is no general-purpose operating system on bare metal programming. On memory-constrained devices like battery-powered embedded systems, perhaps there is an RTOS available at best. Consequently, no operating system dynamic memory management with hardware memory management unit (MMU) exists to safeguard the system integrity from dereferencing dangling pointers, a widespread bug. There is the problem of memory fragmentation arising from memory chunks allocation and deallocation that may lead to unpredictable out-of-memory scenarios. Often, there is the problem of not deallocating a given chunk that creates another widespread bug: memory leaks.</p>
+<p>An out-of-memory event may render the device unusable. Yet, correctly dealing with dynamic out-of-memory situations is a matter that programmers often neglect. Handling such an event safely and consistently is complex; that is why there is hardly any dynamic memory usage in critical systems: it is avoided on purpose when reliability is vital. Apart from eliminating all problems listed above, static memory allows for better planning of memory resource partitioning and even planning a static memory map.</p>
+</section>
+<section id="platform-independent-device-definition">
+<h3>2. Platform-independent device definition<a class="headerlink" href="#platform-independent-device-definition" title="Permalink to this headline"></a></h3>
+<p>Every device implements a struct that contains, if needed, the required struct members to define what it represents at an abstract level:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="nc">RANDOM</span>
+<span class="p">{</span>
+    <span class="c1">// Some member(s).</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>Device names are written in uppercase. In this particular case, there are no generic attributes required to portray a generic random number generator. Devices have specific methods to get/set attributes or perform actions. In the case of <code class="xref c c-struct docutils literal notranslate"><span class="pre">RANDOM</span></code>, these are:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">uint32_t</span> <span class="nf">RANDOM_GetUint32</span> <span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+<span class="kt">uint64_t</span> <span class="nf">RANDOM_GetUint64</span> <span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Device methods begin with the base definition name, an underscore, and the function name, in camelcase, as shown.</p>
+</section>
+<section id="device-private-interface">
+<h3>3. Device private interface<a class="headerlink" href="#device-private-interface" title="Permalink to this headline"></a></h3>
+<p>The private interface enforces a precise internal interface for an implementation to follow. The <code class="xref c c-struct docutils literal notranslate"><span class="pre">RANDOM_IFACE</span></code> defined by the device materializes that requirement:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="nf">uint32_t</span> <span class="p">(</span><span class="o">*</span> <span class="n">RANDOM_GetUint32Func</span><span class="p">)(</span><span class="k">struct</span> <span class="nc">RANDOM</span> <span class="o">*</span><span class="k">const</span> <span class="n">R</span><span class="p">);</span>
+<span class="k">typedef</span> <span class="nf">uint64_t</span> <span class="p">(</span><span class="o">*</span> <span class="n">RANDOM_GetUint64Func</span><span class="p">)(</span><span class="k">struct</span> <span class="nc">RANDOM</span> <span class="o">*</span><span class="k">const</span> <span class="n">R</span><span class="p">);</span>
+
+<span class="k">struct</span> <span class="nc">RANDOM_IFACE</span>
+<span class="p">{</span>
+    <span class="k">const</span> <span class="kt">char</span>                   <span class="o">*</span> <span class="k">const</span> <span class="n">Description</span><span class="p">;</span>
+    <span class="k">const</span> <span class="n">RANDOM_GetUint32Func</span>   <span class="n">GetUint32</span><span class="p">;</span>
+    <span class="k">const</span> <span class="n">RANDOM_GetUint64Func</span>   <span class="n">GetUint64</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>Now that <code class="xref c c-struct docutils literal notranslate"><span class="pre">RANDOM_IFACE</span></code> made its acquaintance, below is the complete <code class="xref c c-struct docutils literal notranslate"><span class="pre">RANDOM</span></code> base definition:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="nc">RANDOM</span>
+<span class="p">{</span>
+    <span class="k">const</span> <span class="k">struct</span> <span class="nc">RANDOM_IFACE</span> <span class="o">*</span> <span class="n">iface</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>The private interface, always called <em>{DEVICE}</em>_IFACE, is the first member of any device structure. The implementation is in charge of setting the required IFACE members:</p>
+<ul class="simple">
+<li><p>A statically allocated string with the implementation description; which platform, device or algorithm it provides. This member is mandatory on all IFACE implementations.</p></li>
+<li><p>Function definitions that follow the purpose, parameters and return values of the corresponding IFACE function pointers.</p></li>
+</ul>
+<p><code class="xref c c-struct docutils literal notranslate"><span class="pre">RANDOM_IFACE</span></code> allows to introduce an essential base driver public interface function:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">RANDOM_Init</span> <span class="p">(</span><span class="k">struct</span> <span class="nc">RANDOM</span> <span class="o">*</span><span class="k">const</span> <span class="n">R</span><span class="p">,</span> <span class="k">const</span> <span class="k">struct</span> <span class="nc">RANDOM_IFACE</span> <span class="o">*</span><span class="k">const</span> <span class="n">Iface</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Along with the required definition of their IFACE, all devices implement a specialized driver function that adheres to the following naming convention:</p>
+<p><em>{DEVICE}</em>_Init (struct <em>{DEVICE}</em> *const X, const struct <em>{DEVICE}</em>_IFACE *const Iface).</p>
+<p>There are two aspects of the driver model that will be clarified by looking at the <code class="xref c c-func docutils literal notranslate"><span class="pre">RANDOM_Init()</span></code> source code:</p>
+<ol class="arabic simple">
+<li><p>What a <em>{DEVICE}</em>_Init() function do.</p></li>
+<li><p>How to check that the implementation provided necessary parts of the <em>{DEVICE}</em>_IFACE.</p></li>
+</ol>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// The only RANDOM instance allowed to exist.</span>
+<span class="k">static</span> <span class="k">struct</span> <span class="nc">RANDOM</span> <span class="o">*</span><span class="n">s_r</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+
+<span class="kt">void</span> <span class="nf">RANDOM_Init</span> <span class="p">(</span><span class="k">struct</span> <span class="nc">RANDOM</span> <span class="o">*</span><span class="k">const</span> <span class="n">R</span><span class="p">,</span> <span class="k">const</span> <span class="k">struct</span> <span class="nc">RANDOM_IFACE</span> <span class="o">*</span><span class="k">const</span> <span class="n">Iface</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">BOARD_AssertState</span>  <span class="p">(</span><span class="o">!</span><span class="n">s_r</span><span class="p">);</span>  <span class="c1">// 1.</span>
+    <span class="n">BOARD_AssertParams</span> <span class="p">(</span><span class="n">R</span> <span class="o">&amp;&amp;</span> <span class="n">Iface</span><span class="p">);</span>  <span class="c1">// 2.</span>
+
+    <span class="c1">// Required interface elements</span>
+    <span class="n">BOARD_AssertInterface</span> <span class="p">(</span><span class="n">Iface</span><span class="o">-&gt;</span><span class="n">Description</span>  <span class="c1">// 3.</span>
+                            <span class="o">&amp;&amp;</span> <span class="n">Iface</span><span class="o">-&gt;</span><span class="n">GetUint32</span>
+                            <span class="o">&amp;&amp;</span> <span class="n">Iface</span><span class="o">-&gt;</span><span class="n">GetUint64</span><span class="p">);</span>
+    <span class="n">ZERO_MEMORY</span> <span class="p">(</span><span class="n">R</span><span class="p">);</span>  <span class="c1">// 4.</span>
+
+    <span class="n">R</span><span class="o">-&gt;</span><span class="n">iface</span> <span class="o">=</span> <span class="n">Iface</span><span class="p">;</span>  <span class="c1">// 5.</span>
+
+    <span class="n">s_r</span> <span class="o">=</span> <span class="n">R</span><span class="p">;</span>  <span class="c1">// 6.</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>As seen in the above listing, a <em>{DEVICE}</em>_Init() function is in charge of:</p>
+<ol class="arabic simple">
+<li><p>Checking for valid system status. In the case of a singleton, the Init() function must be called only once per base driver to assure the existence of a single initialized instance. For example, <code class="xref c c-struct docutils literal notranslate"><span class="pre">RANDOM</span></code>, <code class="xref c c-struct docutils literal notranslate"><span class="pre">BOARD</span></code>, <code class="xref c c-struct docutils literal notranslate"><span class="pre">VIDEO</span></code>, and <code class="xref c c-struct docutils literal notranslate"><span class="pre">SOUND</span></code> are singleton devices by design.</p></li>
+<li><p>Checking for valid parameters (<code class="docutils literal notranslate"><span class="pre">R</span></code> and <code class="docutils literal notranslate"><span class="pre">Iface</span></code> are not NULL pointers).</p></li>
+<li><p>Checking that the implementation filled required interface members, depending on the base driver implementation needs.</p></li>
+<li><p>Clearing base driver instance memory.</p></li>
+<li><p>Assigning the implementation-supplied IFACE struct to the device instance.</p></li>
+<li><p>In the case of a singleton, assigning the initialized instance as the only one in existence.</p></li>
+</ol>
+<p>For the public device interface, the following listing clarifies the relationship between that and the implementation:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">uint32_t</span> <span class="nf">RANDOM_GetUint32</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">BOARD_AssertState</span> <span class="p">(</span><span class="n">s_r</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">s_r</span><span class="o">-&gt;</span><span class="n">iface</span><span class="o">-&gt;</span><span class="n">GetUint32</span><span class="p">(</span><span class="n">s_r</span><span class="p">);</span>
+<span class="p">}</span>
+
+
+<span class="kt">uint64_t</span> <span class="nf">RANDOM_GetUint64</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">BOARD_AssertState</span> <span class="p">(</span><span class="n">s_r</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">s_r</span><span class="o">-&gt;</span><span class="n">iface</span><span class="o">-&gt;</span><span class="n">GetUint64</span><span class="p">(</span><span class="n">s_r</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Both public device methods perform an internal call to the implementation through the IFACE function pointers. Note how both checks for valid system status (initialized singleton) and then call the implementation functions passing the device instance as the first parameter, and returning the results to the caller. There are no assertions on iface or its function pointers; since s_r is private, it’s okay to assume that the initialization function already checked it.</p>
+<p>It is common to store a device using its lowercase name (por example, random.c/.h for the <code class="xref c c-struct docutils literal notranslate"><span class="pre">RANDOM</span></code> device). Devices are stored in the “embedul.ar/source/core/device” directory.</p>
+</section>
+<section id="encapsulated-platform-dependant-implementation">
+<h3>4. Encapsulated platform-dependant implementation<a class="headerlink" href="#encapsulated-platform-dependant-implementation" title="Permalink to this headline"></a></h3>
+<p>The private device interface is an abstract implementation that does not work on its own. It is necessary to implement functionality by giving support to a concrete random number generator. There are hardware devices and software pseudorandom number generators. The implementation presented below, <code class="xref c c-struct docutils literal notranslate"><span class="pre">RANDOM_SFMT</span></code>, uses the Fast Mersenne Twister (SFMT) generator by Mutsuo Saito and Makoto Matsumoto.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&quot;embedul.ar/source/core/device/random.h&quot;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&quot;SFMT.h&quot;</span><span class="cp"></span>
+
+<span class="k">struct</span> <span class="nc">RANDOM_SFMT</span>
+<span class="p">{</span>
+    <span class="k">struct</span> <span class="nc">RANDOM</span>    <span class="n">device</span><span class="p">;</span>
+    <span class="kt">uint64_t</span>         <span class="n">seed</span><span class="p">;</span>
+    <span class="n">sfmt_t</span>           <span class="n">sfmt</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>A device (struct RANDOM) named “device” must be placed as the first implementation member, followed by other implementation-defined members (in that case, sfmt_t).</p>
+<p>Implementation names comply with the following convention: <em>{DEVICE}</em>_*{IMPLEMENTATION}*, all in uppercase. In the case of a hardware device, it is common practice to include the integrated circuit, for example, IO_LP5036. Since it is not a platform-dependent driver but a specific implementation of a random number generator, c:struct:<cite>RANDOM_SFMT</cite> driver implementation resides on embedul.ar/source/drivers. Every other driver follows a similar naming convention as discussed.</p>
+<p>In the listing below, it may be clear how the implementation defines and fills the corresponding base driver <em>{DEVICE}</em>_IFACE:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="kt">void</span>         <span class="n">hardwareInit</span>    <span class="p">(</span><span class="k">struct</span> <span class="nc">RANDOM</span> <span class="o">*</span><span class="k">const</span> <span class="n">R</span><span class="p">);</span>
+<span class="k">static</span> <span class="kt">uint32_t</span>     <span class="n">getUint32</span>       <span class="p">(</span><span class="k">struct</span> <span class="nc">RANDOM</span> <span class="o">*</span><span class="k">const</span> <span class="n">R</span><span class="p">);</span>
+<span class="k">static</span> <span class="kt">uint64_t</span>     <span class="n">getUint64</span>       <span class="p">(</span><span class="k">struct</span> <span class="nc">RANDOM</span> <span class="o">*</span><span class="k">const</span> <span class="n">R</span><span class="p">);</span>
+
+
+<span class="k">static</span> <span class="k">const</span> <span class="k">struct</span> <span class="nc">RANDOM_IFACE</span> <span class="n">RANDOM_SFMT_IFACE</span> <span class="o">=</span>
+<span class="p">{</span>
+    <span class="p">.</span><span class="n">Description</span>    <span class="o">=</span> <span class="s">&quot;Fast Mersenne Twister&quot;</span><span class="p">,</span>
+    <span class="p">.</span><span class="n">HardwareInit</span>   <span class="o">=</span> <span class="n">hardwareInit</span><span class="p">,</span>
+    <span class="p">.</span><span class="n">GetUint32</span>      <span class="o">=</span> <span class="n">getUint32</span><span class="p">,</span>
+    <span class="p">.</span><span class="n">GetUint64</span>      <span class="o">=</span> <span class="n">getUint64</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>Both the IFACE and functions declaration are static; the compiler will not export those symbols outside of the source they are defined. Also, the IFACE struct is const, which states the read-only intend.</p>
+<p>The implementation’s Init function, <code class="xref c c-func docutils literal notranslate"><span class="pre">RANDOM_SFMT_Init()</span></code>, also follows another device model pattern:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">RANDOM_SFMT_Init</span> <span class="p">(</span><span class="k">struct</span> <span class="nc">RANDOM_SFMT</span> <span class="o">*</span><span class="k">const</span> <span class="n">S</span><span class="p">,</span> <span class="k">const</span> <span class="kt">uint64_t</span> <span class="n">Seed</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">BOARD_AssertParams</span> <span class="p">(</span><span class="n">S</span><span class="p">);</span>  <span class="c1">// 1.</span>
+
+    <span class="n">DEVICE_IMPLEMENTATION_Clear</span> <span class="p">(</span><span class="n">S</span><span class="p">);</span>  <span class="c1">// 2.</span>
+
+    <span class="n">S</span><span class="o">-&gt;</span><span class="n">seed</span> <span class="o">=</span> <span class="n">Seed</span><span class="p">;</span> <span class="c1">// 3.</span>
+
+    <span class="n">RANDOM_Init</span> <span class="p">((</span><span class="k">struct</span> <span class="nc">RANDOM</span> <span class="o">*</span><span class="p">)</span><span class="n">s</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">RANDOM_SFMT_IFACE</span><span class="p">);</span>  <span class="c1">// 4.</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Any implementation Init() function must receive its self instance and, as required, any other suitable parameter needed to initialize the implementation. In this case, it requires a 64-bit seed. Once inside the function, it must perform the following steps in order:</p>
+<ol class="arabic simple">
+<li><p>Checking for valid parameters (<code class="docutils literal notranslate"><span class="pre">S</span></code> not NULL).</p></li>
+<li><p>Clearing implementation instance memory.</p></li>
+<li><p>Initialize implementation data members.</p></li>
+<li><p>Calling the device Init() function passing an instance cast from <code class="xref c c-struct docutils literal notranslate"><span class="pre">RANDOM_SFMT</span></code> to <code class="xref c c-struct docutils literal notranslate"><span class="pre">RANDOM</span></code> and a pointer to the IFACE definition.</p></li>
+</ol>
+<p>In turn, <code class="xref c c-func docutils literal notranslate"><span class="pre">RANDOM_Init()</span></code> will perform generic device initialization and it will call the implementation HardwareInit(), if available. That function will perform the actual random number generator initialization, as shown below in the IFACE implementation functions listing:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="kt">void</span> <span class="n">hardwareInit</span> <span class="p">(</span><span class="k">struct</span> <span class="nc">RANDOM</span> <span class="o">*</span><span class="k">const</span> <span class="n">R</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">struct</span> <span class="nc">RANDOM_SFMT</span> <span class="o">*</span><span class="k">const</span> <span class="n">S</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="nc">RANDOM_SFMT</span> <span class="o">*</span><span class="p">)</span> <span class="n">R</span><span class="p">;</span>
+
+    <span class="n">sfmt_init_by_array</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">S</span><span class="o">-&gt;</span><span class="n">sfmt</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint32_t</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">S</span><span class="o">-&gt;</span><span class="n">seed</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+
+    <span class="n">LOG_Items</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">LANG_PERIOD</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint32_t</span><span class="p">)</span><span class="n">SFMT_MEXP</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="kt">uint32_t</span> <span class="n">getUint32</span> <span class="p">(</span><span class="k">struct</span> <span class="nc">RANDOM</span> <span class="o">*</span><span class="k">const</span> <span class="n">R</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">struct</span> <span class="nc">RANDOM_SFMT</span> <span class="o">*</span><span class="k">const</span> <span class="n">S</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="nc">RANDOM_SFMT</span> <span class="o">*</span><span class="p">)</span> <span class="n">R</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="nf">sfmt_genrand_uint32</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">S</span><span class="o">-&gt;</span><span class="n">sfmt</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="kt">uint64_t</span> <span class="n">getUint64</span> <span class="p">(</span><span class="k">struct</span> <span class="nc">RANDOM</span> <span class="o">*</span><span class="k">const</span> <span class="n">R</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">struct</span> <span class="nc">RANDOM_SFMT</span> <span class="o">*</span><span class="k">const</span> <span class="n">S</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="nc">RANDOM_SFMT</span> <span class="o">*</span><span class="p">)</span> <span class="n">R</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="nf">sfmt_genrand_uint64</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">S</span><span class="o">-&gt;</span><span class="n">sfmt</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>As a general rule, all private interface implementation members take a generic device instance pointer. Inside those members, it is okay to cast from a generic device instance to an implementation instance and back. The mechanism allows using an abstract, platform and device-independent interface to pass a generic instance from a specific implementation. It is possible to use any driver implementation through a cast to the corresponding device instance, completely encapsulating the implementation.</p>
+</section>
+<section id="implementation-access-through-its-base-definition-pointer">
+<h3>5. Implementation access through its base definition pointer<a class="headerlink" href="#implementation-access-through-its-base-definition-pointer" title="Permalink to this headline"></a></h3>
+<p>As discussed, a device definition is abstract and does not work on its own. The instance that gets allocated is the one from the implementation, as in the following example:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&quot;embedul.ar/source/core/drivers/random_sfmt.h&quot;</span><span class="cp"></span>
+
+<span class="k">struct</span> <span class="nc">RANDOM_SFMT</span> <span class="n">r_sfmt</span><span class="p">;</span>
+
+<span class="n">RANDOM_SFMT_Init</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">r_sfmt</span><span class="p">,</span> <span class="mi">1234</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Since <code class="xref c c-struct docutils literal notranslate"><span class="pre">RANDOM</span></code> is a singleton, the base drive interface accesses the instance that was already set in RANDOM_Init() as shown earlier, so there is no need to pass any instance to the interface:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">uint32_t</span> <span class="n">number</span> <span class="o">=</span> <span class="n">RANDOM_GetUint32</span> <span class="p">();</span>
+</pre></div>
+</div>
+<p>Suppose that <code class="xref c c-struct docutils literal notranslate"><span class="pre">RANDOM</span></code> is not a singleton but a multi-instance driver. Then, the interface might take a <code class="xref c c-struct docutils literal notranslate"><span class="pre">RANDOM</span></code> instance as the first argument, as already discussed:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="nc">RANDOM</span> <span class="o">*</span> <span class="n">r</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="nc">RANDOM</span> <span class="o">*</span><span class="p">)</span> <span class="n">r_sfmt</span><span class="p">;</span>
+
+<span class="kt">uint32_t</span> <span class="n">number</span> <span class="o">=</span> <span class="n">RANDOM_GetUint32</span> <span class="p">(</span><span class="n">r</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>In any case, the user only manipulates generic device instances and calls to public device members. This abstraction layer allows the embedul.ar framework and its applications to remain detached entirely from platform and driver implementations while still using a strict interface to define and access those implementations.</p>
+</section>
+<section id="instances-treated-as-opaque-structures">
+<h3>6. Instances treated as opaque structures<a class="headerlink" href="#instances-treated-as-opaque-structures" title="Permalink to this headline"></a></h3>
+<p>Public device interface functions should cover all meaningful instance accesses. A good interface disallows forbidden instance member accesses.</p>
+<p>There are ways to enforce a real opaque-ness on a “C” structure. But, as a design decision, keeping code simple is more important than hiding and obfuscating.</p>
+</section>
+<section id="multiple-instances-and-singletons">
+<h3>7. Multiple instances and singletons<a class="headerlink" href="#multiple-instances-and-singletons" title="Permalink to this headline"></a></h3>
+<p><code class="xref c c-struct docutils literal notranslate"><span class="pre">RANDOM</span></code> is a singleton, but simple changes allow to support unlimited instances of it. Start by removing the singleton definition, state check and assignment at initialization:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">RANDOM_Init</span> <span class="p">(</span><span class="k">struct</span> <span class="nc">RANDOM</span> <span class="o">*</span><span class="k">const</span> <span class="n">R</span><span class="p">,</span> <span class="k">const</span> <span class="k">struct</span> <span class="nc">RANDOM_IFACE</span> <span class="o">*</span><span class="k">const</span> <span class="n">Iface</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">BOARD_AssertParams</span> <span class="p">(</span><span class="n">R</span> <span class="o">&amp;&amp;</span> <span class="n">Iface</span><span class="p">);</span>
+
+    <span class="c1">// Required interface elements</span>
+    <span class="n">BOARD_AssertInterface</span> <span class="p">(</span><span class="n">Iface</span><span class="o">-&gt;</span><span class="n">Description</span>
+                            <span class="o">&amp;&amp;</span> <span class="n">Iface</span><span class="o">-&gt;</span><span class="n">GetUint32</span>
+                            <span class="o">&amp;&amp;</span> <span class="n">Iface</span><span class="o">-&gt;</span><span class="n">GetUint64</span><span class="p">);</span>
+    <span class="n">OBJECT_Clear</span> <span class="p">(</span><span class="n">R</span><span class="p">);</span>
+
+    <span class="n">R</span><span class="o">-&gt;</span><span class="n">iface</span> <span class="o">=</span> <span class="n">Iface</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>At the base driver interface, use the instance passed as the first parameter.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">uint32_t</span> <span class="nf">RANDOM_GetUint32</span> <span class="p">(</span><span class="k">struct</span> <span class="nc">RANDOM</span> <span class="o">*</span><span class="k">const</span> <span class="n">R</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">BOARD_AssertParams</span> <span class="p">(</span><span class="n">R</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">R</span><span class="o">-&gt;</span><span class="n">iface</span><span class="o">-&gt;</span><span class="n">GetUint32</span><span class="p">(</span><span class="n">R</span><span class="p">);</span>
+<span class="p">}</span>
+
+
+<span class="kt">uint64_t</span> <span class="nf">RANDOM_GetUint64</span> <span class="p">(</span><span class="k">struct</span> <span class="nc">RANDOM</span> <span class="o">*</span><span class="k">const</span> <span class="n">R</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">BOARD_AssertParams</span> <span class="p">(</span><span class="n">R</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">R</span><span class="o">-&gt;</span><span class="n">iface</span><span class="o">-&gt;</span><span class="n">GetUint64</span><span class="p">(</span><span class="n">R</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>As seen, it is more involved to implement singletons than multiple instances.</p>
+</section>
+<section id="one-generic-device-several-implementations">
+<h3>8. One generic device, several implementations<a class="headerlink" href="#one-generic-device-several-implementations" title="Permalink to this headline"></a></h3>
+<p>Each generic device may have several underlying implementations. <code class="xref c c-struct docutils literal notranslate"><span class="pre">RANDOM</span></code> may have any number of software algorithms and hardware random number generators implemented. However, each implementation exposes the same <code class="xref c c-struct docutils literal notranslate"><span class="pre">RANDOM</span></code> instance type and public interface to the user.</p>
+<p>The following diagram summarizes the generic device and driver implementation.</p>
+<img alt="_images/driver_model.drawio.svg" src="_images/driver_model.drawio.svg" /></section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="embedular.html" class="btn btn-neutral float-left" title="embedul.ar framework" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="embedular-core.html" class="btn btn-neutral float-right" title="Core modules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2022, Santiago Germino.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

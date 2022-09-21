@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:osb="http://www.openswatchbook.org/uri/2009/osb"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="131.99504mm"
+   height="28.352119mm"
+   viewBox="0 0 131.99504 28.352119"
+   version="1.1"
+   id="svg8"
+   sodipodi:docname="embedular_logo.svg"
+   inkscape:version="1.0.2 (e86c870879, 2021-01-15)"
+   inkscape:export-filename="/home/royconejo/projects/software/embedded/embedul.ar/documentation/source/images/embedular_logo.png"
+   inkscape:export-xdpi="399.03397"
+   inkscape:export-ydpi="399.03397">
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="2956"
+     inkscape:window-height="1128"
+     id="namedview21"
+     showgrid="false"
+     inkscape:zoom="3.6849602"
+     inkscape:cx="191.00446"
+     inkscape:cy="68.859469"
+     inkscape:window-x="397"
+     inkscape:window-y="227"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg8"
+     inkscape:pagecheckerboard="true"
+     inkscape:document-rotation="0"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0" />
+  <title
+     id="title865">embedul.ar framework logo</title>
+  <defs
+     id="defs2">
+    <linearGradient
+       id="linearGradient2956"
+       osb:paint="solid">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop2954" />
+    </linearGradient>
+    <rect
+       x="30.826284"
+       y="79.324486"
+       width="140.11092"
+       height="73.638832"
+       id="rect835" />
+  </defs>
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>embedul.ar framework logo</dc:title>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Santiago Germino (sgermino@embedul.ar)</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by-sa/4.0/" />
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by-sa/4.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Notice" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Attribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#ShareAlike" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <text
+     xml:space="preserve"
+     style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;font-size:3.52777px;line-height:0;font-family:Genos;-inkscape-font-specification:'Genos Ultra-Light';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+     x="27.414841"
+     y="20.216505"
+     id="text841-3"><tspan
+       id="tspan839-6"
+       x="27.414841"
+       y="20.216505"
+       style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;font-size:25.4px;line-height:1.25;font-family:Genos;-inkscape-font-specification:'Genos Ultra-Light';stroke-width:0.264583">embedul.ar</tspan></text>
+  <g
+     id="g1799-6-0"
+     transform="matrix(0.07825296,0,0,0.07825296,34.982683,-9.626682)"
+     inkscape:groupmode="layer">
+    <path
+       style="display:inline;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:3.83372;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:1;stroke-dasharray:none;stroke-opacity:1"
+       d="m -278.02861,128.46031 141.72657,104.20814 19.42539,175.38068 -161.31198,70.9181 -161.62022,-71.07092 19.58834,-175.27162 z"
+       id="path1664-4-7-1" />
+    <path
+       style="display:inline;fill:#f0e049;fill-opacity:1;stroke:#808080;stroke-width:1.91686;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m -278.18863,206.2959 87.31401,58.43315 7.22355,104.13394 -94.53756,46.71034 -94.02921,-46.74685 6.9514,-104.33948 z"
+       id="path1726-2-2-6" />
+    <path
+       style="display:inline;fill:none;stroke:#808080;stroke-width:1.91686;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m -420.22051,232.62464 141.98251,81.8784 -0.18225,164.56603 -161.3886,-71.17276 z"
+       id="path1728-0-6-2" />
+    <path
+       style="display:inline;fill:none;stroke:#808080;stroke-width:1.91686;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m -136.32378,232.47197 -141.86485,82.00253 -0.23162,164.59457 162.34243,-71.37112 z"
+       id="path1730-0-18-6" />
+    <path
+       style="fill:none;fill-opacity:0.250835;stroke:#000000;stroke-width:3.83372;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:1;stroke-dasharray:none;stroke-opacity:1"
+       d="M -278.18863,314.4745 V 128.34264 l 141.88659,104.3258 19.42539,175.38069 z"
+       id="path1690-9-9-8" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:3.83372;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:1;stroke-dasharray:none;stroke-opacity:1"
+       d="M -278.18863,128.34264 -420.4345,232.78142 -439.76385,407.49359 -278.18863,314.5314 Z"
+       id="path1692-0-2-7" />
+    <path
+       style="display:inline;fill:none;stroke:#000000;stroke-width:3.83372;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:1;stroke-dasharray:none;stroke-opacity:1"
+       d="m -439.76385,407.49359 161.57522,-92.96219 161.31198,93.51773 -161.5436,71.01994 z"
+       id="path1694-1-0-9" />
+  </g>
+  <rect
+     style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.139675;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+     id="rect3034-2"
+     width="131.99504"
+     height="28.352119"
+     x="0"
+     y="0"
+     ry="0"
+     inkscape:export-xdpi="400"
+     inkscape:export-ydpi="400" />
+</svg>

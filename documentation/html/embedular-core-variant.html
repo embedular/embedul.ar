@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VARIANT &mdash; embedul.ar  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/sphinx_rtd_custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="UTF-8" href="embedular-core-utf8.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html">
+            <img src="_static/embedular_logo_alt.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="embedular.html">embedul.ar framework</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="embedular-driver-model.html">Device model</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="embedular-core.html">Core modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-anim.html">ANIM</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-array.html">ARRAY</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-bitfield.html">BITFIELD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-cyclic.html">CYCLIC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-mempool.html">MEMPOOL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-queue.html">QUEUE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-timer.html">TIMER</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-utf8.html">UTF-8</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">VARIANT</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api-guide">API guide</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#design-and-development-status">Design and development status</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#changelog">Changelog</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api-reference">API reference</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">embedul.ar</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="embedular.html">embedul.ar framework</a> &raquo;</li>
+          <li><a href="embedular-core.html">Core modules</a> &raquo;</li>
+      <li>VARIANT</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/embedular-core-variant.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="variant">
+<h1>VARIANT<a class="headerlink" href="#variant" title="Permalink to this headline"></a></h1>
+<section id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline"></a></h2>
+<p>A variant is a generic data type with automatic type conversion.
+It is first assigned a value from a supported type; then queried by
+requesting its value in the same or any other supported type.
+Type conversion, if needed, is handled automatically. A variant
+holds up to a 64-bit signed/unsigned integer or a double-precision
+floating-point number. See <a class="reference internal" href="#c.VARIANT_Type" title="VARIANT_Type"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type</span></code></a> for supported types.
+The unsigned int type supports multiple string conversion styles by
+choosing from different <a class="reference internal" href="#c.VARIANT_Base" title="VARIANT_Base"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Base</span></code></a> representations.</p>
+<p>Variants allow for arbitrary parameter count with automatic types on
+functions through the framework. For example, see
+<a class="reference internal" href="#c.VARIANT_ParseStringArgs" title="VARIANT_ParseStringArgs"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_ParseStringArgs()</span></code></a> and <a class="reference internal" href="#c.VARIANT_ParseString" title="VARIANT_ParseString"><code class="xref c c-macro docutils literal notranslate"><span class="pre">VARIANT_ParseString</span></code></a>.</p>
+</section>
+<section id="api-guide">
+<h2>API guide<a class="headerlink" href="#api-guide" title="Permalink to this headline"></a></h2>
+<section id="common-use-cases">
+<h3>Common use cases<a class="headerlink" href="#common-use-cases" title="Permalink to this headline"></a></h3>
+<section id="persistent-data-named-variables">
+<h4>Persistent data/named variables<a class="headerlink" href="#persistent-data-named-variables" title="Permalink to this headline"></a></h4>
+<p>A typical variable containing a value that is read or modified multiple
+times. A <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> must be instantiated. Then a value can be set
+by assignment:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="nc">VARIANT</span> <span class="n">v</span> <span class="o">=</span> <span class="n">VARIANT_CreateUint</span> <span class="p">(</span><span class="mi">42</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>or by taking the object instance address:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="nc">VARIANT</span> <span class="n">v</span><span class="p">;</span>
+<span class="n">VARIANT_SetUint</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">v</span><span class="p">,</span> <span class="mi">42</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The following functions work on an existing <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instance;
+VARIANT_Create* returns an object to set by assignment, while VARIANT_Set*
+updates the instance stored value. Both methods are equal in terms of the
+final result.</p>
+<div class="line-block">
+<div class="line"><a class="reference internal" href="#c.VARIANT_CreateUint" title="VARIANT_CreateUint"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_CreateUint()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_CreateInt" title="VARIANT_CreateInt"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_CreateInt()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_CreateFp" title="VARIANT_CreateFp"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_CreateFp()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_CreatePointer" title="VARIANT_CreatePointer"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_CreatePointer()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_CreateBaseString" title="VARIANT_CreateBaseString"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_CreateBaseString()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_CreateString" title="VARIANT_CreateString"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_CreateString()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_CreateCopy" title="VARIANT_CreateCopy"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_CreateCopy()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_CreateBoolean" title="VARIANT_CreateBoolean"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_CreateBoolean()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_CreateBaseUint" title="VARIANT_CreateBaseUint"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_CreateBaseUint()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_SetUint" title="VARIANT_SetUint"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_SetUint()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_SetInt" title="VARIANT_SetInt"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_SetInt()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_SetFp" title="VARIANT_SetFp"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_SetFp()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_SetPointer" title="VARIANT_SetPointer"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_SetPointer()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_SetBaseString" title="VARIANT_SetBaseString"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_SetBaseString()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_SetString" title="VARIANT_SetString"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_SetString()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_SetCopy" title="VARIANT_SetCopy"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_SetCopy()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_SetBoolean" title="VARIANT_SetBoolean"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_SetBoolean()</span></code></a></div>
+</div>
+</section>
+<section id="inline-unnamed-instances">
+<h4>Inline/unnamed instances<a class="headerlink" href="#inline-unnamed-instances" title="Permalink to this headline"></a></h4>
+<p>These <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> unnamed allocations are immediately destroyed
+after use by going out-of-context.
+Used to convenientry pass parameters to functions that take them:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>:c:macro:`LOG` (NOBJ, &quot;Hello `0&quot;, VARIANT_SpawnString(&quot;World&quot;));
+</pre></div>
+</div>
+<p>or convert to and from supported types:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">char</span> <span class="o">*</span><span class="n">str</span> <span class="o">=</span> <span class="s">&quot;1234&quot;</span><span class="p">;</span>
+<span class="kt">uint32_t</span> <span class="n">num</span> <span class="o">=</span> <span class="n">VARIANT_ToUint</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">VARIANT_SpawnString</span><span class="p">(</span><span class="n">str</span><span class="p">));</span>
+</pre></div>
+</div>
+<p>The VARIANT_Spawn* macros perform inline/unnamed
+<a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instantiations with explicit data type:</p>
+<div class="line-block">
+<div class="line"><a class="reference internal" href="#c.VARIANT_SpawnBaseUint" title="VARIANT_SpawnBaseUint"><code class="xref c c-macro docutils literal notranslate"><span class="pre">VARIANT_SpawnBaseUint</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_SpawnUint" title="VARIANT_SpawnUint"><code class="xref c c-macro docutils literal notranslate"><span class="pre">VARIANT_SpawnUint</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_SpawnInt" title="VARIANT_SpawnInt"><code class="xref c c-macro docutils literal notranslate"><span class="pre">VARIANT_SpawnInt</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_SpawnFp" title="VARIANT_SpawnFp"><code class="xref c c-macro docutils literal notranslate"><span class="pre">VARIANT_SpawnFp</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_SpawnPointer" title="VARIANT_SpawnPointer"><code class="xref c c-macro docutils literal notranslate"><span class="pre">VARIANT_SpawnPointer</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_SpawnBaseString" title="VARIANT_SpawnBaseString"><code class="xref c c-macro docutils literal notranslate"><span class="pre">VARIANT_SpawnBaseString</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_SpawnString" title="VARIANT_SpawnString"><code class="xref c c-macro docutils literal notranslate"><span class="pre">VARIANT_SpawnString</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_SpawnCopy" title="VARIANT_SpawnCopy"><code class="xref c c-macro docutils literal notranslate"><span class="pre">VARIANT_SpawnCopy</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_SpawnBoolean" title="VARIANT_SpawnBoolean"><code class="xref c c-macro docutils literal notranslate"><span class="pre">VARIANT_SpawnBoolean</span></code></a></div>
+</div>
+<p>or by automatic parameter data type acquisition, statically detected at
+compile-time:</p>
+<div class="line-block">
+<div class="line"><a class="reference internal" href="#c.VARIANT_SpawnBaseAuto" title="VARIANT_SpawnBaseAuto"><code class="xref c c-macro docutils literal notranslate"><span class="pre">VARIANT_SpawnBaseAuto</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_SpawnAuto" title="VARIANT_SpawnAuto"><code class="xref c c-macro docutils literal notranslate"><span class="pre">VARIANT_SpawnAuto</span></code></a></div>
+</div>
+<p>for example:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">char</span> <span class="o">*</span><span class="n">str</span> <span class="o">=</span> <span class="s">&quot;1234&quot;</span><span class="p">;</span>
+<span class="kt">uint32_t</span> <span class="n">num</span> <span class="o">=</span> <span class="n">VARIANT_ToUint</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">VARIANT_SpawnAuto</span><span class="p">(</span><span class="n">str</span><span class="p">));</span>
+</pre></div>
+</div>
+<p>the aforementioned “Auto” macros allow automatic instantiation of multiple
+length, multiple type parameter lists:</p>
+<div class="line-block">
+<div class="line"><a class="reference internal" href="#c.VARIANT_SpawnAutoVector" title="VARIANT_SpawnAutoVector"><code class="xref c c-macro docutils literal notranslate"><span class="pre">VARIANT_SpawnAutoVector</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.VARIANT_AutoParams" title="VARIANT_AutoParams"><code class="xref c c-macro docutils literal notranslate"><span class="pre">VARIANT_AutoParams</span></code></a></div>
+</div>
+</section>
+</section>
+</section>
+<section id="design-and-development-status">
+<h2>Design and development status<a class="headerlink" href="#design-and-development-status" title="Permalink to this headline"></a></h2>
+<p>Feature-complete.</p>
+</section>
+<section id="changelog">
+<h2>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline"></a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 14%" />
+<col style="width: 26%" />
+<col style="width: 51%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Version</p></th>
+<th class="head"><p>Date*</p></th>
+<th class="head"><p>Author</p></th>
+<th class="head"><p>Comment</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1.0.0</p></td>
+<td><p>2022.9.7</p></td>
+<td><p>sgermino</p></td>
+<td><p>Initial release.</p></td>
+</tr>
+</tbody>
+</table>
+<p>* Date format is Year.Month.Day.</p>
+</section>
+<section id="api-reference">
+<h2>API reference<a class="headerlink" href="#api-reference" title="Permalink to this headline"></a></h2>
+<dl class="c type">
+<dt class="sig sig-object c" id="c.VARIANT_PSA_OutProc">
+<span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_PSA_OutProc</span></span></span><a class="headerlink" href="#c.VARIANT_PSA_OutProc" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Function pointer type used in <a class="reference internal" href="#c.VARIANT_ParseStringArgs" title="VARIANT_ParseStringArgs"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_ParseStringArgs()</span></code></a>.
+This function pointer references a user-defined function.
+In each call, the function should append or transmit the octets
+provided to form a complete parsed string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Param</strong> – Parameter passed by the caller.</p></li>
+<li><p><strong>Data</strong> – Pointer to a const array of <code class="docutils literal notranslate"><span class="pre">uint8_t</span></code> elements
+containing available data to store.</p></li>
+<li><p><strong>Octets</strong> – Number of octets in the <code class="docutils literal notranslate"><span class="pre">Data</span></code> array.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.VARIANT_CONV_SIZE_MAX_OCTETS">
+<span class="sig-name descname"><span class="n"><span class="pre">VARIANT_CONV_SIZE_MAX_OCTETS</span></span></span><a class="headerlink" href="#c.VARIANT_CONV_SIZE_MAX_OCTETS" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Maximum length of a string conversion associated to a <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a>,
+in octets. This holds the worst case, lenghtiest conversions: an unsigned
+integer with base <a class="reference internal" href="#c.VARIANT_Base.VARIANT_Base_Oct" title="VARIANT_Base.VARIANT_Base_Oct"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Base.VARIANT_Base_Oct</span></code></a> converted to a
+string, or to a string formatted as an Octal number. The constant is
+calculated as follows: 2^64 for a 64-bit number gives 22 Octal digits, plus
+the “o” suffix and null-termination for a maximum of 24 octets.</p>
+</dd></dl>
+
+<dl class="c enum">
+<dt class="sig sig-object c" id="c.VARIANT_Type">
+<span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_Type</span></span></span><a class="headerlink" href="#c.VARIANT_Type" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Initial value type assigned to a <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instance
+by using VARIANT_Spawn* or VARIANT_Set* functions.</p>
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.VARIANT_Type.VARIANT_Type_Uint">
+<span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_Type_Uint</span></span></span><a class="headerlink" href="#c.VARIANT_Type.VARIANT_Type_Uint" title="Permalink to this definition"></a><br /></dt>
+<dd><p><code class="xref c c-type docutils literal notranslate"><span class="pre">uint64_t</span></code> 64-bit unsigned integer.</p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.VARIANT_Type.VARIANT_Type_Int">
+<span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_Type_Int</span></span></span><a class="headerlink" href="#c.VARIANT_Type.VARIANT_Type_Int" title="Permalink to this definition"></a><br /></dt>
+<dd><p><code class="xref c c-type docutils literal notranslate"><span class="pre">int64_t</span></code> 64-bit signed integer.</p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.VARIANT_Type.VARIANT_Type_Fp">
+<span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_Type_Fp</span></span></span><a class="headerlink" href="#c.VARIANT_Type.VARIANT_Type_Fp" title="Permalink to this definition"></a><br /></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">double</span></code> double precision floating point.</p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.VARIANT_Type.VARIANT_Type_Pointer">
+<span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_Type_Pointer</span></span></span><a class="headerlink" href="#c.VARIANT_Type.VARIANT_Type_Pointer" title="Permalink to this definition"></a><br /></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">void</span></code> memory pointer.</p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.VARIANT_Type.VARIANT_Type_String">
+<span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_Type_String</span></span></span><a class="headerlink" href="#c.VARIANT_Type.VARIANT_Type_String" title="Permalink to this definition"></a><br /></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">char</span></code> string pointer. Pointed data must be static.</p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.VARIANT_Type.VARIANT_Type_Boolean">
+<span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_Type_Boolean</span></span></span><a class="headerlink" href="#c.VARIANT_Type.VARIANT_Type_Boolean" title="Permalink to this definition"></a><br /></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">_Bool</span></code> boolean.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="c enum">
+<dt class="sig sig-object c" id="c.VARIANT_Base">
+<span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_Base</span></span></span><a class="headerlink" href="#c.VARIANT_Base" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Variant numeric bases. Used to convert an unsigned integer value to string
+or a string to an unsigned integer.</p>
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.VARIANT_Base.VARIANT_Base_Dec_NoSuffix">
+<span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_Base_Dec_NoSuffix</span></span></span><a class="headerlink" href="#c.VARIANT_Base.VARIANT_Base_Dec_NoSuffix" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Default decimal style: no suffix.</p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.VARIANT_Base.VARIANT_Base_Oct_Suffix">
+<span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_Base_Oct_Suffix</span></span></span><a class="headerlink" href="#c.VARIANT_Base.VARIANT_Base_Oct_Suffix" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Octal, “o” suffix.</p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.VARIANT_Base.VARIANT_Base_Oct_NoSuffix">
+<span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_Base_Oct_NoSuffix</span></span></span><a class="headerlink" href="#c.VARIANT_Base.VARIANT_Base_Oct_NoSuffix" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Octal, no suffix.</p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.VARIANT_Base.VARIANT_Base_Hex_LowerSuffix">
+<span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_Base_Hex_LowerSuffix</span></span></span><a class="headerlink" href="#c.VARIANT_Base.VARIANT_Base_Hex_LowerSuffix" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Hexadecimal. Lowercase digits, “h” suffix.</p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.VARIANT_Base.VARIANT_Base_Hex_LowerNoSuffix">
+<span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_Base_Hex_LowerNoSuffix</span></span></span><a class="headerlink" href="#c.VARIANT_Base.VARIANT_Base_Hex_LowerNoSuffix" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Hexadecimal. Lowercase digits.</p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.VARIANT_Base.VARIANT_Base_Hex_UpperSuffix">
+<span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_Base_Hex_UpperSuffix</span></span></span><a class="headerlink" href="#c.VARIANT_Base.VARIANT_Base_Hex_UpperSuffix" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Hexadecimal. Uppercase digits, “h” suffix.</p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.VARIANT_Base.VARIANT_Base_Hex_UpperNoSuffix">
+<span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_Base_Hex_UpperNoSuffix</span></span></span><a class="headerlink" href="#c.VARIANT_Base.VARIANT_Base_Hex_UpperNoSuffix" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Hexadecimal. Uppercase digits.</p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.VARIANT_Base.VARIANT_Base_Oct">
+<span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_Base_Oct</span></span></span><a class="headerlink" href="#c.VARIANT_Base.VARIANT_Base_Oct" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Default octal style: suffix.</p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.VARIANT_Base.VARIANT_Base_Dec">
+<span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_Base_Dec</span></span></span><a class="headerlink" href="#c.VARIANT_Base.VARIANT_Base_Dec" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Default decimal style: no suffix.</p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.VARIANT_Base.VARIANT_Base_Hex">
+<span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_Base_Hex</span></span></span><a class="headerlink" href="#c.VARIANT_Base.VARIANT_Base_Hex" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Default hexadecimal style: uppercase digits and suffix.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.VARIANT">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT</span></span></span><a class="headerlink" href="#c.VARIANT" title="Permalink to this definition"></a><br /></dt>
+<dd><p>The user should treat this as an opaque structure. No member should be
+directly accessed or modified.</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.VARIANT_SpawnBaseUint">
+<span class="sig-name descname"><span class="n"><span class="pre">VARIANT_SpawnBaseUint</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">_b</span></span>, <span class="n"><span class="pre">_u</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_SpawnBaseUint" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Creates an unnamed VARIANT of type <a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_Uint" title="VARIANT_Type.VARIANT_Type_Uint"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_Uint</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>_b</strong> – <a class="reference internal" href="#c.VARIANT_Base" title="VARIANT_Base"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Base</span></code></a> to format the contained value when
+converted to string.</p></li>
+<li><p><strong>_u</strong> – Uint value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.VARIANT_SpawnUint">
+<span class="sig-name descname"><span class="n"><span class="pre">VARIANT_SpawnUint</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">_u</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_SpawnUint" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Creates an unnamed VARIANT of type <a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_Uint" title="VARIANT_Type.VARIANT_Type_Uint"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_Uint</span></code></a>
+with a default base <a class="reference internal" href="#c.VARIANT_Base.VARIANT_Base_Dec" title="VARIANT_Base.VARIANT_Base_Dec"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Base.VARIANT_Base_Dec</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>_u</strong> – Uint value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.VARIANT_SpawnInt">
+<span class="sig-name descname"><span class="n"><span class="pre">VARIANT_SpawnInt</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">_i</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_SpawnInt" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Creates an unnamed VARIANT of type <a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_Int" title="VARIANT_Type.VARIANT_Type_Int"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_Int</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>_i</strong> – Int value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.VARIANT_SpawnFp">
+<span class="sig-name descname"><span class="n"><span class="pre">VARIANT_SpawnFp</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">_d</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_SpawnFp" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Creates an unnamed VARIANT of type <a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_Fp" title="VARIANT_Type.VARIANT_Type_Fp"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_Fp</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>_d</strong> – Floating point value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.VARIANT_SpawnPointer">
+<span class="sig-name descname"><span class="n"><span class="pre">VARIANT_SpawnPointer</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">_p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_SpawnPointer" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Creates an unnamed VARIANT of type
+<a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_Pointer" title="VARIANT_Type.VARIANT_Type_Pointer"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_Pointer</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>_p</strong> – Pointer value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.VARIANT_SpawnBaseString">
+<span class="sig-name descname"><span class="n"><span class="pre">VARIANT_SpawnBaseString</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">_b</span></span>, <span class="n"><span class="pre">_s</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_SpawnBaseString" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Creates an unnamed VARIANT of type
+<a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_String" title="VARIANT_Type.VARIANT_Type_String"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_String</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>_b</strong> – <a class="reference internal" href="#c.VARIANT_Base" title="VARIANT_Base"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Base</span></code></a> to interpret the string when converted
+to a numeric type.</p></li>
+<li><p><strong>_s</strong> – String value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.VARIANT_SpawnString">
+<span class="sig-name descname"><span class="n"><span class="pre">VARIANT_SpawnString</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">_s</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_SpawnString" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Creates an unnamed VARIANT of type
+<a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_String" title="VARIANT_Type.VARIANT_Type_String"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_String</span></code></a>. The string will be interpreted
+as of base <a class="reference internal" href="#c.VARIANT_Base.VARIANT_Base_Dec" title="VARIANT_Base.VARIANT_Base_Dec"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Base.VARIANT_Base_Dec</span></code></a> when converted to a
+numeric type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>_s</strong> – String value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.VARIANT_SpawnBoolean">
+<span class="sig-name descname"><span class="n"><span class="pre">VARIANT_SpawnBoolean</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">_b</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_SpawnBoolean" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Creates an unnamed VARIANT of type
+<a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_Boolean" title="VARIANT_Type.VARIANT_Type_Boolean"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_Boolean</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>_b</strong> – Boolean value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.VARIANT_SpawnCopy">
+<span class="sig-name descname"><span class="n"><span class="pre">VARIANT_SpawnCopy</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">_v</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_SpawnCopy" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Creates an unnamed exact copy of a VARIANT.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>_v</strong> – a valid <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instance.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.VARIANT_SpawnBaseAuto">
+<span class="sig-name descname"><span class="n"><span class="pre">VARIANT_SpawnBaseAuto</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">_b</span></span>, <span class="n"><span class="pre">_v</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_SpawnBaseAuto" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Automatically creates an unnamed VARIANT of the specified type and base.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>_b</strong> – <a class="reference internal" href="#c.VARIANT_Base" title="VARIANT_Base"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Base</span></code></a> to interpret the string when converted
+to a numeric type, or to format the unsigned value when
+converted to a string.</p></li>
+<li><p><strong>_v</strong> – Generic unsigned or string types.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.VARIANT_SpawnAuto">
+<span class="sig-name descname"><span class="n"><span class="pre">VARIANT_SpawnAuto</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">_v</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_SpawnAuto" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Automatically creates an unnamed VARIANT by using the specified type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>_v</strong> – Any generic supported type.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.VARIANT_SpawnAutoVector">
+<span class="sig-name descname"><span class="n"><span class="pre">VARIANT_SpawnAutoVector</span></span></span><span class="sig-paren">(</span><span class="p"><span class="pre">...</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_SpawnAutoVector" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Automatically creates an unnamed VARIANT array consisting of automatically
+created unnamed VARIANTs from a list of variable-length macro parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>...</strong> – Up to 16 parameters consisting of generic supported types.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.VARIANT_AutoParams">
+<span class="sig-name descname"><span class="n"><span class="pre">VARIANT_AutoParams</span></span></span><span class="sig-paren">(</span><span class="p"><span class="pre">...</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_AutoParams" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Takes a list of variable-length macro parameters and automatically creates
+the following two elements, separated by a single comma:</p>
+<ul class="simple">
+<li><p>An unnamed VARIANT array consisting of automatically created
+unnamed VARIANTs from a list of variable-length macro parameters.</p></li>
+<li><p>Array element count, as literal.</p></li>
+</ul>
+<p>The resulting macro-expanded parameters are convenient to call functions
+(whose names usually end in “Args”) that take those as a mechanism of
+variable-length, typed parameters in “C”.</p>
+<p>For example, <a class="reference internal" href="#c.VARIANT_ParseString" title="VARIANT_ParseString"><code class="xref c c-macro docutils literal notranslate"><span class="pre">VARIANT_ParseString</span></code></a> properly calls
+<a class="reference internal" href="#c.VARIANT_ParseStringArgs" title="VARIANT_ParseStringArgs"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_ParseStringArgs()</span></code></a> by constructing its required array and
+array length parameters from <code class="docutils literal notranslate"><span class="pre">__VA_ARGS__</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>...</strong> – Up to 16 parameters consisting of generic supported types.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.VARIANT_ParseString">
+<span class="sig-name descname"><span class="n"><span class="pre">VARIANT_ParseString</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">_oc</span></span>, <span class="n"><span class="pre">_mx</span></span>, <span class="n"><span class="pre">_s</span></span>, <span class="n"><span class="pre">_op</span></span>, <span class="n"><span class="pre">_opp</span></span>, <span class="p"><span class="pre">...</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_ParseString" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Automatically instances the parameters list and parameter count required to
+call <a class="reference internal" href="#c.VARIANT_ParseStringArgs" title="VARIANT_ParseStringArgs"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_ParseStringArgs()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>_oc</strong> – <code class="docutils literal notranslate"><span class="pre">OutColumn</span></code>, see <a class="reference internal" href="#c.VARIANT_ParseStringArgs" title="VARIANT_ParseStringArgs"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_ParseStringArgs()</span></code></a>.</p></li>
+<li><p><strong>_mx</strong> – <code class="docutils literal notranslate"><span class="pre">MaxOctets</span></code>, see <a class="reference internal" href="#c.VARIANT_ParseStringArgs" title="VARIANT_ParseStringArgs"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_ParseStringArgs()</span></code></a>.</p></li>
+<li><p><strong>_s</strong> – <code class="docutils literal notranslate"><span class="pre">Str</span></code>, see <a class="reference internal" href="#c.VARIANT_ParseStringArgs" title="VARIANT_ParseStringArgs"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_ParseStringArgs()</span></code></a>.</p></li>
+<li><p><strong>_op</strong> – <code class="docutils literal notranslate"><span class="pre">OutProc</span></code>, see <a class="reference internal" href="#c.VARIANT_ParseStringArgs" title="VARIANT_ParseStringArgs"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_ParseStringArgs()</span></code></a>.</p></li>
+<li><p><strong>_opp</strong> – <code class="docutils literal notranslate"><span class="pre">OutProcParam</span></code>, see <a class="reference internal" href="#c.VARIANT_ParseStringArgs" title="VARIANT_ParseStringArgs"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_ParseStringArgs()</span></code></a>.</p></li>
+<li><p><strong>...</strong> – Up to 16 parameters consisting of generic supported types.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>see <a class="reference internal" href="#c.VARIANT_ParseStringArgs" title="VARIANT_ParseStringArgs"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_ParseStringArgs()</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_CreateBaseUint">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_CreateBaseUint</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT_Base" title="VARIANT_Base"><span class="n"><span class="pre">VARIANT_Base</span></span></a><span class="w"> </span><span class="n"><span class="pre">Base</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">Uint</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_CreateBaseUint" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Returns a VARIANT of type <a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_Uint" title="VARIANT_Type.VARIANT_Type_Uint"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_Uint</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Base</strong> – <a class="reference internal" href="#c.VARIANT_Base" title="VARIANT_Base"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Base</span></code></a> to format <code class="docutils literal notranslate"><span class="pre">Uint</span></code> when
+converted to a string.</p></li>
+<li><p><strong>Uint</strong> – Unsigned int value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A VARIANT.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_CreateUint">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_CreateUint</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">Uint</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_CreateUint" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Returns a VARIANT of type <a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_Uint" title="VARIANT_Type.VARIANT_Type_Uint"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_Uint</span></code></a>
+and <a class="reference internal" href="#c.VARIANT_Base.VARIANT_Base_Dec" title="VARIANT_Base.VARIANT_Base_Dec"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Base.VARIANT_Base_Dec</span></code></a> base.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Uint</strong> – Unsigned int value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A VARIANT.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_CreateInt">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_CreateInt</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">int64_t</span></span><span class="w"> </span><span class="n"><span class="pre">Int</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_CreateInt" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Returns a VARIANT of type <a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_Int" title="VARIANT_Type.VARIANT_Type_Int"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_Int</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Int</strong> – Signed int value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A VARIANT.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_CreateFp">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_CreateFp</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n"><span class="pre">Fp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_CreateFp" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Returns a VARIANT of type <a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_Fp" title="VARIANT_Type.VARIANT_Type_Fp"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_Fp</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Fp</strong> – Floating point value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A VARIANT.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_CreatePointer">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_CreatePointer</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Pointer</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_CreatePointer" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Returns a VARIANT of type <a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_Pointer" title="VARIANT_Type.VARIANT_Type_Pointer"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_Pointer</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Pointer</strong> – Pointer value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A VARIANT.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_CreateBaseString">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_CreateBaseString</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT_Base" title="VARIANT_Base"><span class="n"><span class="pre">VARIANT_Base</span></span></a><span class="w"> </span><span class="n"><span class="pre">Base</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">String</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_CreateBaseString" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Returns a VARIANT of type <a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_String" title="VARIANT_Type.VARIANT_Type_String"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_String</span></code></a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The object created will keep a pointer copy; it won’t duplicate the
+original string contents. to avoid a dangling pointer, care must be taken
+to guarantee that the string pointer passed will not change its memory
+allocation.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Base</strong> – The format of <code class="docutils literal notranslate"><span class="pre">String</span></code> is <a class="reference internal" href="#c.VARIANT_Base" title="VARIANT_Base"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Base</span></code></a>. Used when
+converting to a numeric type.</p></li>
+<li><p><strong>String</strong> – String pointer.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A VARIANT.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_CreateString">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_CreateString</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">String</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_CreateString" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Returns a VARIANT of type <a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_String" title="VARIANT_Type.VARIANT_Type_String"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_String</span></code></a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The object created will keep a pointer copy; it won’t duplicate the
+original string contents. to avoid a dangling pointer, care must be taken
+to guarantee that the string pointer passed will not change its memory
+allocation.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>String</strong> – String value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A VARIANT.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_CreateCopy">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_CreateCopy</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">V</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_CreateCopy" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Returns a VARIANT of type <a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_String" title="VARIANT_Type.VARIANT_Type_String"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_String</span></code></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the original instance is of type
+<a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_String" title="VARIANT_Type.VARIANT_Type_String"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_String</span></code></a> then a dangling pointer
+warning also applies to the second instance, as discussed in
+<a class="reference internal" href="#c.VARIANT_SetString" title="VARIANT_SetString"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_SetString()</span></code></a>.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>String</strong> – String value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A VARIANT.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_CreateBoolean">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_CreateBoolean</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">_Bool</span></span><span class="w"> </span><span class="n"><span class="pre">Boolean</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_CreateBoolean" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Returns a VARIANT of type <a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_Boolean" title="VARIANT_Type.VARIANT_Type_Boolean"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_Boolean</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Boolean</strong> – Boolean value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A VARIANT.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_SetBaseUint">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_SetBaseUint</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">V</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT_Base" title="VARIANT_Base"><span class="n"><span class="pre">VARIANT_Base</span></span></a><span class="w"> </span><span class="n"><span class="pre">Base</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">Value</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_SetBaseUint" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Sets a <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instance to hold an unsigned int value.
+<a class="reference internal" href="#c.VARIANT_ToString" title="VARIANT_ToString"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_ToString()</span></code></a> will use the <a class="reference internal" href="#c.VARIANT_Base" title="VARIANT_Base"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Base</span></code></a> specified
+to print <code class="docutils literal notranslate"><span class="pre">value</span></code> as a string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Base</strong> – A base in the <a class="reference internal" href="#c.VARIANT_Base" title="VARIANT_Base"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Base</span></code></a> enum.</p></li>
+<li><p><strong>Value</strong> – Unsigned int value.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Usage example:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="nc">VARIANT</span> <span class="n">v</span><span class="p">;</span>
+
+<span class="n">VARIANT_SetBaseUint</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">v</span><span class="p">,</span> <span class="n">VARIANT_Base_Dec</span><span class="p">,</span> <span class="mi">2748</span><span class="p">);</span>
+<span class="k">const</span> <span class="kt">char</span> <span class="o">*</span> <span class="n">str</span> <span class="o">=</span> <span class="n">VARIANT_ToString</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">v</span><span class="p">);</span>
+<span class="c1">// &#39;str&#39; points to the string &quot;2748&quot;.</span>
+
+<span class="n">VARIANT_SetBaseUint</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">v</span><span class="p">,</span> <span class="n">VARIANT_Base_Hex</span><span class="p">,</span> <span class="mi">2748</span><span class="p">);</span>
+<span class="k">const</span> <span class="kt">char</span> <span class="o">*</span> <span class="n">str</span> <span class="o">=</span> <span class="n">VARIANT_ToString</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">v</span><span class="p">);</span>
+<span class="c1">// &#39;str&#39; points to the string &quot;ABCh&quot;.</span>
+
+<span class="n">VARIANT_SetBaseUint</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">v</span><span class="p">,</span> <span class="n">VARIANT_Base_Oct</span><span class="p">,</span> <span class="mi">2748</span><span class="p">);</span>
+<span class="k">const</span> <span class="kt">char</span> <span class="o">*</span> <span class="n">str</span> <span class="o">=</span> <span class="n">VARIANT_ToString</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">v</span><span class="p">);</span>
+<span class="c1">// &#39;str&#39; points to the string &quot;5274o&quot;.</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_SetUint">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_SetUint</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">V</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">Value</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_SetUint" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Sets a <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instance to hold a signed integer value
+using a default base of <a class="reference internal" href="#c.VARIANT_Base.VARIANT_Base_Dec" title="VARIANT_Base.VARIANT_Base_Dec"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Base.VARIANT_Base_Dec</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Value</strong> – Unsigned integer value.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Usage example:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="nc">VARIANT</span> <span class="n">v</span><span class="p">;</span>
+
+<span class="n">VARIANT_SetUint</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">v</span><span class="p">,</span> <span class="mi">2748</span><span class="p">);</span>
+<span class="k">const</span> <span class="kt">char</span> <span class="o">*</span> <span class="n">str</span> <span class="o">=</span> <span class="n">VARIANT_ToString</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">v</span><span class="p">);</span>
+<span class="c1">// &#39;str&#39; points to the string &quot;2748&quot;.</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_SetInt">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_SetInt</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">V</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">int64_t</span></span><span class="w"> </span><span class="n"><span class="pre">Value</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_SetInt" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Sets a <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instance to hold a signed integer value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Value</strong> – Signed integer value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_SetFp">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_SetFp</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">V</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n"><span class="pre">Value</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_SetFp" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Sets a <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instance to hold a double-precision
+floating-point value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Value</strong> – Double-precision floating-point value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_SetPointer">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_SetPointer</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">V</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Ptr</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_SetPointer" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Sets a <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instance to hold a pointer value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Ptr</strong> – Pointer value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_SetBaseString">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_SetBaseString</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">V</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT_Base" title="VARIANT_Base"><span class="n"><span class="pre">VARIANT_Base</span></span></a><span class="w"> </span><span class="n"><span class="pre">Base</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Str</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_SetBaseString" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Sets a <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instance to hold a pointer to a string.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This instance will keep a pointer copy; it won’t duplicate the
+original string contents. Care must be taken to avoid a dangling pointer
+by ensuring that the string pointer passed will not change its memory
+allocation in the lifetime of this <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> object.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Base</strong> – The string has a number formatted according to
+the <a class="reference internal" href="#c.VARIANT_Base" title="VARIANT_Base"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Base</span></code></a> specified.
+It is used to convert from string to a numeric data type.</p></li>
+<li><p><strong>Str</strong> – String pointer.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Usage example:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="nc">VARIANT</span> <span class="n">v</span><span class="p">;</span>
+
+<span class="n">VARIANT_SetBaseString</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">v</span><span class="p">,</span> <span class="n">VARIANT_Base_Hex</span><span class="p">,</span> <span class="s">&quot;ABC&quot;</span><span class="p">);</span>
+<span class="k">const</span> <span class="n">VARIANT_Uint</span> <span class="n">v</span> <span class="o">=</span> <span class="n">VARIANT_ToUint</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">v</span><span class="p">);</span>
+<span class="c1">// &#39;v&#39; equals 2748.</span>
+
+<span class="n">VARIANT_SetBaseString</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">v</span><span class="p">,</span> <span class="n">VARIANT_Base_Oct</span><span class="p">,</span> <span class="s">&quot;777&quot;</span><span class="p">);</span>
+<span class="k">const</span> <span class="n">VARIANT_Uint</span> <span class="n">v</span> <span class="o">=</span> <span class="n">VARIANT_ToUint</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">v</span><span class="p">);</span>
+<span class="c1">// &#39;v&#39; equals 511.</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_SetString">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_SetString</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">V</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Str</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_SetString" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Sets a <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instance to hold a pointer to a string.
+This string may or may not represent a number. Nevertheless,
+string to integer conversion defaults to
+<a class="reference internal" href="#c.VARIANT_Base.VARIANT_Base_Dec" title="VARIANT_Base.VARIANT_Base_Dec"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Base.VARIANT_Base_Dec</span></code></a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This instance will keep a pointer copy; it won’t duplicate the
+original string contents. Care must be taken to avoid a dangling pointer
+by ensuring that the string pointer passed will not change its memory
+allocation in the lifetime of this <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> object.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Str</strong> – string pointer.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Usage example:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="nc">VARIANT</span> <span class="n">v</span><span class="p">;</span>
+
+<span class="n">VARIANT_SetString</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">v</span><span class="p">,</span> <span class="s">&quot;12345&quot;</span><span class="p">);</span>
+<span class="k">const</span> <span class="n">VARIANT_Uint</span> <span class="n">v</span> <span class="o">=</span> <span class="n">VARIANT_ToUint</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">v</span><span class="p">);</span>
+<span class="c1">// &#39;v&#39; equals 12345.</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_SetCopy">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_SetCopy</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">V</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">A</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_SetCopy" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Copies type and value of a <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instance into a second
+existing instance object. The following example code performs the same
+operation:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="nc">VARIANT</span> <span class="n">v</span><span class="p">;</span>
+<span class="k">struct</span> <span class="nc">VARIANT</span> <span class="n">a</span><span class="p">;</span>
+
+<span class="n">v</span> <span class="o">=</span> <span class="n">a</span><span class="p">;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the original instance is of type
+<a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_String" title="VARIANT_Type.VARIANT_Type_String"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_String</span></code></a> then a dangling pointer
+warning also applies to the second instance, as discussed in
+<a class="reference internal" href="#c.VARIANT_SetString" title="VARIANT_SetString"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_SetString()</span></code></a>.</p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_SetBoolean">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_SetBoolean</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">V</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">_Bool</span></span><span class="w"> </span><span class="n"><span class="pre">Value</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_SetBoolean" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Sets a <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instance to hold a boolean value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Value</strong> – Boolean value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_ToUint">
+<span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_ToUint</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">V</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_ToUint" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Gets the original <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instance hold value as an unsigned
+integer number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Value as an unsigned integer.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_ToInt">
+<span class="n"><span class="pre">int64_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_ToInt</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">V</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_ToInt" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Gets the <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instance hold value as a signed integer
+number.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A value of type <a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_Pointer" title="VARIANT_Type.VARIANT_Type_Pointer"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_Pointer</span></code></a>
+cannot be converted to a signed integer. Do not call this function
+on pointers; this condition is asserted.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Value as a signed integer.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_ToDouble">
+<span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_ToDouble</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">V</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_ToDouble" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Gets the <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instance hold value as a double-precision
+floating-point number.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Conversion from <a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_Pointer" title="VARIANT_Type.VARIANT_Type_Pointer"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_Pointer</span></code></a>
+or <a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_Boolean" title="VARIANT_Type.VARIANT_Type_Boolean"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_Boolean</span></code></a> to floating-point is
+invalid; this condition is asserted. Do not call this function on a
+<a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> holding those types.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Value as a double-precision floating-point.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_ToString">
+<span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_ToString</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">V</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_ToString" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Gets the <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instance hold value as a string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><p>Pointer to the <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instance temporary
+buffer with its value converted to a string.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Except for a <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> of type
+<a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_Boolean" title="VARIANT_Type.VARIANT_Type_Boolean"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_Boolean</span></code></a> where values are
+statically allocated, the returned string
+pointer contents are temporary and may change
+on subsequent calls. The caller must
+duplicate the contents immediately to preserve them.</p>
+</div>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_ToStringBuffer">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_ToStringBuffer</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">V</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">Size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_ToStringBuffer" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Gets the <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instance hold value converted to a string and
+copy it to an already allocated char array buffer.
+Buffer must hold the entire string including its trailing NULL character.
+This condition is asserted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Buffer</strong> – An already allocated char array.</p></li>
+<li><p><strong>Size</strong> – Char array size, in octets.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_ToBoolean">
+<span class="kt"><span class="pre">_Bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_ToBoolean</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">V</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_ToBoolean" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Gets the <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instance hold value as a boolean; either
+one (True) or zero (False).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Value as a boolean.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_ChangeBaseUint">
+<span class="k"><span class="pre">enum</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT_Base" title="VARIANT_Base"><span class="n"><span class="pre">VARIANT_Base</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_ChangeBaseUint</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">V</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT_Base" title="VARIANT_Base"><span class="n"><span class="pre">VARIANT_Base</span></span></a><span class="w"> </span><span class="n"><span class="pre">Base</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_ChangeBaseUint" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Changes base conversion on a <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instance of type
+<a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_Uint" title="VARIANT_Type.VARIANT_Type_Uint"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_Uint</span></code></a>. It does nothing on other types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Base</strong> – New base. <a class="reference internal" href="#c.VARIANT_ToString" title="VARIANT_ToString"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_ToString()</span></code></a> will format this
+unsigned value accordingly. If zero, nothing will be changed
+and the return value will be zero.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Last base. Zero if the <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instance is
+not of type <a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_Uint" title="VARIANT_Type.VARIANT_Type_Uint"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_Uint</span></code></a> or <code class="docutils literal notranslate"><span class="pre">Base</span></code>
+is zero.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_StringOctetCount">
+<span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_StringOctetCount</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">V</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_StringOctetCount" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Gets the <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instance hold value as a string and return the
+number of octets required to store the string, including its trailing NULL.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Octet count.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_IsEqual">
+<span class="kt"><span class="pre">_Bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_IsEqual</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">V</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">A</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_IsEqual" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Checks types and values of two <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instances for equality.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><code class="xref c c-macro docutils literal notranslate"><span class="pre">true</span></code> if both types and values are equal,
+<code class="xref c c-macro docutils literal notranslate"><span class="pre">false</span></code> otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_IsEqualAsUint">
+<span class="kt"><span class="pre">_Bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_IsEqualAsUint</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">V</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">A</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_IsEqualAsUint" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Checks values of two <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> instances for equality
+by converting both values to unsigned int.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><code class="xref c c-macro docutils literal notranslate"><span class="pre">true</span></code> if both unsigned int values are equal,
+<code class="xref c c-macro docutils literal notranslate"><span class="pre">false</span></code> otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.VARIANT_ParseStringArgs">
+<span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VARIANT_ParseStringArgs</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">OutColumn</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">MaxOctets</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Str</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT_PSA_OutProc" title="VARIANT_PSA_OutProc"><span class="n"><span class="pre">VARIANT_PSA_OutProc</span></span></a><span class="w"> </span><span class="n"><span class="pre">OutProc</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">OutProcParam</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">ArgValues</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">ArgCount</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.VARIANT_ParseStringArgs" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Parses a UTF-8 string to interpret and substitute special character sequences
+with corresponding arguments in a <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> array, insert
+characters to fill spaces, perform argument tabulation, or specify argument
+formatting. The character that initiates a interpreted character sequence is
+the grave accent (`).</p>
+<p>There are four special interpreted character sequence categories, each one
+starts with the grave accent:</p>
+<ol class="arabic simple">
+<li><p>Markers: `0 to `99.</p></li>
+<li><p>Marker style specifiers: `o, `O, `d, `x, `X, `h, `H,
+`U, `l, `c, and `w.</p></li>
+<li><p>Commands: `R, `S, `P, `T, `M, `F, and `L.</p></li>
+<li><p>Parser state options: `$, `#, `^, and `&amp;.</p></li>
+</ol>
+<p><strong>Markers</strong> follows the format “`n”, where ‘n’ represents a
+decimal number from 0 to 99 inclusive, for example “`0”, “`7”, “`25”.
+A marker indexes a zero-based array of <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> arguments to
+output that indexed array value in place of the marker.</p>
+<p>Markers have the following advantages over classic <code class="xref c c-func docutils literal notranslate"><span class="pre">printf()</span></code> format
+specifiers:</p>
+<ul class="simple">
+<li><p>They represent indices to an array of <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a>;
+there is no need to state argument types as any <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a>
+knows the type it contains and can automatically convert it to a string.</p></li>
+<li><p>They can be placed on the string in non-sequential order (”`6`0`3”) or
+be repeated (”`0`0”), helping string translation and
+internationalization.</p></li>
+<li><p>The argument parameter list is automatically constructed from user supplied
+arguments. There is no risk of illegal memory accesses or memory corruption
+when referencing undefined arguments.</p></li>
+</ul>
+<p>A marker will be replaced with a Unicode replacement character (�) if there
+is an error retrieving the <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> value. For example, when the
+marker index is higher or equal than array elements available.</p>
+<p><strong>Marker style specifiers</strong> modifies the marker argument (‘n’) output as
+follows:</p>
+<dl class="simple">
+<dt>`o<em>n</em></dt><dd><p>Octal (base 8).</p>
+</dd>
+<dt>`O<em>n</em></dt><dd><p>Octal (base 8) suffixed with an “o”.</p>
+</dd>
+<dt>`d<em>n</em></dt><dd><p>Decimal (base 10).</p>
+</dd>
+<dt>`x<em>n</em></dt><dd><p>Hexadecimal (base 16) with lowercase digits (a-f).</p>
+</dd>
+<dt>`X<em>n</em></dt><dd><p>Hexadecimal (base 16) with uppercase digits (A-F).</p>
+</dd>
+<dt>`h<em>n</em></dt><dd><p>Hexadecimal (base 16) with lowercase digits (a-f), suffixed with an “h”.</p>
+</dd>
+<dt>`H<em>n</em></dt><dd><p>Hexadecimal (base 16) with uppercase digits (A-F), suffixed with an “h”.</p>
+</dd>
+</dl>
+<p>As an example, “`o2” will format the output of <code class="docutils literal notranslate"><span class="pre">ArgValues[2]</span></code> to octal,
+while “`H1” will format <code class="docutils literal notranslate"><span class="pre">ArgValues[1]</span></code> as hexadecimal with uppercase
+digits and an appended “h” suffix.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Base conversion will only work with a <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> whose original
+data type is an unsigned integer. it will do nothing on a signed integer,
+double, string or pointer values. While it is possible to represent signed
+integers with different bases, it is a limitation of snprintf; the
+standard function internally used by <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> to convert an
+integer to string.</p>
+<p>The default representation for all numeric types is decimal.</p>
+</div>
+<p>The following marker style specifiers only affect 7-bit ASCII character
+strings, any other character or UTF-8 sequence will be ignored:</p>
+<dl class="simple">
+<dt>`U<em>n</em></dt><dd><p>Uppercase.</p>
+</dd>
+<dt>`l<em>n</em></dt><dd><p>Lowercase.</p>
+</dd>
+<dt>`c<em>n</em></dt><dd><p>Lowercase with capitalisation.</p>
+</dd>
+<dt>`w<em>n</em></dt><dd><p>Lowercase with capitalisation on each word.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Marker style specifiers are mutually exclusive: only a single specifier
+modifies the foremost marker. Sequences like “`X`l1” are invalid.</p>
+</div>
+<p>The purpose of <strong>Commands</strong> is to generate spacing, tabulation and centering
+by inserting a number of characters from a character pattern. A command
+follows the format “`Xp”, where ‘X’ is a single letter that represents
+the command and ‘p’ is the command parameter: a decimal number from 0 to
+99 inclusive.</p>
+<p>The following commands are available:</p>
+<dl>
+<dt>`R<em>p</em> - Reset pattern</dt><dd><p>Resets current character pattern by assigning a predefined pattern ‘p’ as
+shown in the following table:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 32%" />
+<col style="width: 29%" />
+<col style="width: 38%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Pattern ‘p’</p></th>
+<th class="head"><p>Characters</p></th>
+<th class="head"><p>Sample output</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>‘ ‘</p></td>
+<td><p>”     “</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>‘-’</p></td>
+<td><p>“-----”</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>‘.’</p></td>
+<td><p>“…..”</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>‘*’</p></td>
+<td><p>“*****”</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>‘-’, ‘ ‘</p></td>
+<td><p>“- - -”</p></td>
+</tr>
+<tr class="row-odd"><td><p>5</p></td>
+<td><p>‘.’, ‘ ‘</p></td>
+<td><p>“. . .”</p></td>
+</tr>
+<tr class="row-even"><td><p>6</p></td>
+<td><p>‘*’, ‘ ‘</p></td>
+<td><p>“* * *”</p></td>
+</tr>
+<tr class="row-odd"><td><p>7</p></td>
+<td><p>‘0’</p></td>
+<td><p>“00000”</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>`S<em>p</em> - Set pattern</dt><dd><p>Stores the next ‘p’ UTF-8 characters as the current character pattern to
+use in spacing and tabulation commands. Up to four characters of three
+octets each can be stored. Stored characters are considered part of the
+command itself and won’t be printed.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Reset pattern 0 is the default. A set pattern is persistent
+thorough the parsed string.</p>
+</div>
+<dl class="simple">
+<dt>`P<em>p</em> - Out pattern</dt><dd><p>Inserts ‘p’ pattern characters.</p>
+</dd>
+<dt>`T<em>p</em> - Next marker argument tabulation</dt><dd><p>Tabulates the next marker argument to the <strong>left</strong> of line column ‘p’ by
+inserting sufficient pattern characters.</p>
+</dd>
+<dt>`M<em>p</em> - Next marker argument centering</dt><dd><p>Centers the next marker argument around column ‘p’ by inserting
+sufficient pattern characters.</p>
+</dd>
+<dt>`F<em>p</em> - Fill to column</dt><dd><p>Inserts sufficient pattern characters to reach column ‘p’.</p>
+</dd>
+<dt>`L<em>p</em> - Newline</dt><dd><p>Inserts ‘p’ newline sequences (”\r\n”). An `L with no numeric parameter
+placed right before the string end (”`L\0”) will print a single newline.</p>
+</dd>
+</dl>
+<p>For example, “`T30`0” places <code class="docutils literal notranslate"><span class="pre">ArgValues[0]</span></code> to the left of column 30,
+“`M15`1” centers <code class="docutils literal notranslate"><span class="pre">ArgValues[1]</span></code> around column 15, and “`R7`T8`X0”
+formats an eight-digit hexadecimal number with leading zeros.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Argument tabulation and centering commands insert no pattern characters
+when line column ‘p’ is lower than the argument character count.</p>
+</div>
+<p>Finally, <strong>Parser state options</strong> changes the parser behavior on
+<em>command parameters</em> and controls printing of hints on argument types.</p>
+<dl>
+<dt>`# - Command parameter behaviour: immediate mode.</dt><dd><p>Command parameter (‘p’) is passed as-is to the command.
+This is the default. For example, the command “`#`P5” will insert five
+pattern characters.</p>
+</dd>
+<dt>`$ - Command parameter behaviour: indirect mode.</dt><dd><p>Command parameter (‘p’) is interpreted as a marker (‘n’) to index
+<code class="docutils literal notranslate"><span class="pre">ArgValues</span></code>. Then, the command gets the <a class="reference internal" href="#c.VARIANT_ToUint" title="VARIANT_ToUint"><code class="xref c c-func docutils literal notranslate"><span class="pre">VARIANT_ToUint()</span></code></a>
+conversion of <code class="docutils literal notranslate"><span class="pre">ArgValues[n]</span></code> as its parameter. For example, the command
+“`$`P2” will insert <code class="docutils literal notranslate"><span class="pre">VARIANT_ToUint(ArgValues[2])</span></code> pattern characters.</p>
+</dd>
+<dt>`^<em>x</em> - Argument type hint for strings.</dt><dd><p>Decorates arguments of type <a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_String" title="VARIANT_Type.VARIANT_Type_String"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_String</span></code></a>
+as follows:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 40%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>‘x’</p></th>
+<th class="head"><p>Effect on strings</p></th>
+<th class="head"><p>Sample output</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>Print verbatim</p></td>
+<td><p>This is a “test”.</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>Double quotes</p></td>
+<td><p>“This is a \”test\”.”</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>Single quotes</p></td>
+<td><p>‘This is a “test”.’</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>`&amp;<em>x</em> - Argument value hint for numbers.</dt><dd><p>Decorates arguments of types other than
+<a class="reference internal" href="#c.VARIANT_Type.VARIANT_Type_String" title="VARIANT_Type.VARIANT_Type_String"><code class="xref c c-enum docutils literal notranslate"><span class="pre">VARIANT_Type.VARIANT_Type_String</span></code></a> as follows:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 37%" />
+<col style="width: 45%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>‘x’</p></th>
+<th class="head"><p>Effect on numbers</p></th>
+<th class="head"><p>Sample output = 255
+(base hex, upper, no suffix)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>Print verbatim</p></td>
+<td><p>FF</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>Base as subscript</p></td>
+<td><p>FF₁₆</p></td>
+</tr>
+</tbody>
+</table>
+<p>For example, let <code class="docutils literal notranslate"><span class="pre">ArgValues[0]</span></code> == “String value”,
+<code class="docutils literal notranslate"><span class="pre">ArgValues[1]</span></code> == false, and parser string “Sample: `^21`0, `1”.
+The resulting message will be: “Sample: ‘String value’, false₂”.</p>
+</dd>
+</dl>
+<p>To escape the grave accent character, use two grave acents “``”. Any other
+octet after the grave accent not discussed above is invalid, for example:
+“`!”, “`V”, or “`Z”. An interpreted character sequence or octet can
+immediately follow a previous valid sequence. These are valid examples:
+“`4`5”, “`h`0[`P3`1]`L2”, or “`0`0``”.</p>
+<p>The resulting parsed string is sequentially stored in one or more calls
+using the user-supplied <a class="reference internal" href="#c.VARIANT_PSA_OutProc" title="VARIANT_PSA_OutProc"><code class="xref c c-type docutils literal notranslate"><span class="pre">VARIANT_PSA_OutProc</span></code></a> function.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>There is no way to know how many octets will require a parsed
+string without parsing it first. The application programmer can
+implement a <a class="reference internal" href="#c.VARIANT_PSA_OutProc" title="VARIANT_PSA_OutProc"><code class="xref c c-type docutils literal notranslate"><span class="pre">VARIANT_PSA_OutProc</span></code></a> function to store partial
+results to a fixed-sized buffer but should also handle out of memory
+situations whilst parsing. There are convenient alternatives already
+designed and thoroughly used across the framework:</p>
+<ul class="simple">
+<li><p>Use the same fixed-sized buffer but managed through a
+<a class="reference internal" href="embedular-core-cyclic.html#c.CYCLIC" title="CYCLIC"><code class="xref c c-struct docutils literal notranslate"><span class="pre">CYCLIC</span></code></a> data structure with no risk of memory overruns. See
+<a class="reference internal" href="embedular-core-cyclic.html#c.CYCLIC_IN_FromParsedStringArgs" title="CYCLIC_IN_FromParsedStringArgs"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_IN_FromParsedStringArgs()</span></code></a>.</p></li>
+<li><p>Use a <code class="xref c c-struct docutils literal notranslate"><span class="pre">STREAM</span></code> to directly output to, for example, a
+hardware UART implementation.
+See <code class="xref c c-func docutils literal notranslate"><span class="pre">STREAM_IN_FromParsedStringArgs()</span></code>.</p></li>
+</ul>
+<p>Both implement their own <a class="reference internal" href="#c.VARIANT_PSA_OutProc" title="VARIANT_PSA_OutProc"><code class="xref c c-type docutils literal notranslate"><span class="pre">VARIANT_PSA_OutProc</span></code></a> internally.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>OutColumn</strong> – Initial output column in current line. Usually the
+last output column retured from a previous call.</p></li>
+<li><p><strong>MaxOctets</strong> – The null termination in <code class="docutils literal notranslate"><span class="pre">Str</span></code> must appear before
+reaching <code class="docutils literal notranslate"><span class="pre">MaxOctets</span></code>; this condition is asserted.</p></li>
+<li><p><strong>Str</strong> – Pointer to a string with <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> markers to
+substitute. It may be <a class="reference internal" href="embedular-core-utf8.html#utf8-description"><span class="std std-ref">UTF-8</span></a>
+encoded.</p></li>
+<li><p><strong>OutProc</strong> – Function that stores resulting string octets as <code class="docutils literal notranslate"><span class="pre">Str</span></code> is
+parsed and substituted. See <a class="reference internal" href="#c.VARIANT_PSA_OutProc" title="VARIANT_PSA_OutProc"><code class="xref c c-type docutils literal notranslate"><span class="pre">VARIANT_PSA_OutProc</span></code></a>
+for details.</p></li>
+<li><p><strong>OutProcParam</strong> – Optional parameter passed by the caller to the
+<code class="docutils literal notranslate"><span class="pre">OutProc</span></code> function.</p></li>
+<li><p><strong>ArgValues</strong> – Array of <a class="reference internal" href="#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a>, or <code class="xref c c-macro docutils literal notranslate"><span class="pre">NULL</span></code> if there
+are no arguments available.</p></li>
+<li><p><strong>ArgCount</strong> – Number of elements in the <code class="docutils literal notranslate"><span class="pre">ArgValues</span></code> array or zero
+if <code class="docutils literal notranslate"><span class="pre">ArgValues</span></code> is <code class="xref c c-macro docutils literal notranslate"><span class="pre">NULL</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Last output column in current line. Useful to keep track of
+last output column between parsing calls. Typically zero if
+<code class="docutils literal notranslate"><span class="pre">Str</span></code> ended with a newline character or newline command.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="embedular-core-utf8.html" class="btn btn-neutral float-left" title="UTF-8" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2022, Santiago Germino.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

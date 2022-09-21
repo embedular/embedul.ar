@@ -1,0 +1,101 @@
+{
+    "assets": {
+        "name": "nyancat",
+        "output": {
+            "image": "../../../build/tools/tilemaker/images"
+        }
+    },
+
+	"tileset": {
+		"nyancat": {
+			"sheet": [{
+					"name": "body",
+					"area": {
+						"width": 3,
+						"height": 3
+					}
+				},
+				{
+					"name": "head",
+					"area": {
+						"x": 3,
+						"width": 2,
+						"height": 2
+					}
+				},
+				{
+					"name": "star",
+					"area": {
+                        "x": 5,
+						"width": 6,
+						"height": 1
+					},
+					"frames": {
+						"width": 1,
+						"height": 1
+                    }
+				},
+				{
+					"name": "tail",
+					"area": {
+						"y": 3,
+						"width": 12,
+						"height": 1
+					},
+					"frames": {
+						"width": 1,
+						"height": 1
+                    }
+				},
+				{
+					"name": "leg0",
+					"area": {
+						"y": 4,
+						"width": 12,
+						"height": 1
+					},
+					"frames": {
+						"width": 1,
+						"height": 1
+                    }
+				},
+				{
+					"name": "leg1",
+					"area": {
+						"y": 5,
+						"width": 12,
+						"height": 1
+					},
+					"frames": {
+						"width": 1,
+						"height": 1
+                    }
+				},
+				{
+					"name": "leg2",
+					"area": {
+						"y": 6,
+						"width": 12,
+						"height": 1
+					},
+					"frames": {
+						"width": 1,
+						"height": 1
+                    }
+				},
+				{
+					"name": "leg3",
+					"area": {
+						"y": 7,
+						"width": 12,
+						"height": 1
+					},
+					"frames": {
+						"width": 1,
+						"height": 1
+                    }
+				}
+			]
+		}
+	}
+}

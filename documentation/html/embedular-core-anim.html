@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ANIM &mdash; embedul.ar  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/sphinx_rtd_custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ARRAY" href="embedular-core-array.html" />
+    <link rel="prev" title="Core modules" href="embedular-core.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html">
+            <img src="_static/embedular_logo_alt.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="embedular.html">embedul.ar framework</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="embedular-driver-model.html">Device model</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="embedular-core.html">Core modules</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">ANIM</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#design-and-development-status">Design and development status</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#changelog">Changelog</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api-reference">API reference</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-array.html">ARRAY</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-bitfield.html">BITFIELD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-cyclic.html">CYCLIC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-mempool.html">MEMPOOL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-queue.html">QUEUE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-timer.html">TIMER</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-utf8.html">UTF-8</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-variant.html">VARIANT</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">embedul.ar</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="embedular.html">embedul.ar framework</a> &raquo;</li>
+          <li><a href="embedular-core.html">Core modules</a> &raquo;</li>
+      <li>ANIM</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/embedular-core-anim.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="anim">
+<h1>ANIM<a class="headerlink" href="#anim" title="Permalink to this headline"></a></h1>
+<section id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline"></a></h2>
+<p>Performs linear interpolations and holds at specific milisecond periods to
+animate an initial <code class="xref c c-type docutils literal notranslate"><span class="pre">uint32_t</span></code> value. Use cases include LED vibrant
+patterns and display flashes.</p>
+</section>
+<section id="design-and-development-status">
+<h2>Design and development status<a class="headerlink" href="#design-and-development-status" title="Permalink to this headline"></a></h2>
+<p>Feature-complete.</p>
+</section>
+<section id="changelog">
+<h2>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline"></a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 14%" />
+<col style="width: 26%" />
+<col style="width: 51%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Version</p></th>
+<th class="head"><p>Date*</p></th>
+<th class="head"><p>Author</p></th>
+<th class="head"><p>Comment</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1.0.0</p></td>
+<td><p>2022.9.7</p></td>
+<td><p>sgermino</p></td>
+<td><p>Initial release.</p></td>
+</tr>
+</tbody>
+</table>
+<p>* Date format is Year.Month.Day.</p>
+</section>
+<section id="api-reference">
+<h2>API reference<a class="headerlink" href="#api-reference" title="Permalink to this headline"></a></h2>
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.ANIM_REPEAT_FOREVER">
+<span class="sig-name descname"><span class="n"><span class="pre">ANIM_REPEAT_FOREVER</span></span></span><a class="headerlink" href="#c.ANIM_REPEAT_FOREVER" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Pass this value on the <code class="docutils literal notranslate"><span class="pre">repeat</span></code> parameter of <a class="reference internal" href="#c.ANIM_Start" title="ANIM_Start"><code class="xref c c-func docutils literal notranslate"><span class="pre">ANIM_Start()</span></code></a> to
+perpetually repeat an animation.</p>
+</dd></dl>
+
+<dl class="c enum">
+<dt class="sig sig-object c" id="c.ANIM_Type">
+<span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ANIM_Type</span></span></span><a class="headerlink" href="#c.ANIM_Type" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Specifies the animation flow to follow through <code class="docutils literal notranslate"><span class="pre">begin</span></code>, <code class="docutils literal notranslate"><span class="pre">end</span></code>, <code class="docutils literal notranslate"><span class="pre">delay</span></code>,
+<code class="docutils literal notranslate"><span class="pre">phase</span></code> and <code class="docutils literal notranslate"><span class="pre">duration</span></code> parameters of <a class="reference internal" href="#c.ANIM_Start" title="ANIM_Start"><code class="xref c c-func docutils literal notranslate"><span class="pre">ANIM_Start()</span></code></a>.</p>
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.ANIM_Type.ANIM_Type_None">
+<span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ANIM_Type_None</span></span></span><a class="headerlink" href="#c.ANIM_Type.ANIM_Type_None" title="Permalink to this definition"></a><br /></dt>
+<dd><p>No animation / animation finished. Static value assigned.</p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.ANIM_Type.ANIM_Type_Blink">
+<span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ANIM_Type_Blink</span></span></span><a class="headerlink" href="#c.ANIM_Type.ANIM_Type_Blink" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Holds <code class="docutils literal notranslate"><span class="pre">vBegin</span></code> value until <code class="docutils literal notranslate"><span class="pre">delay</span></code> milliseconds passed. Then linear
+interpolates <code class="docutils literal notranslate"><span class="pre">vBegin</span></code> through <code class="docutils literal notranslate"><span class="pre">vEnd</span></code> in <code class="docutils literal notranslate"><span class="pre">phase</span></code> milliseconds.
+<code class="docutils literal notranslate"><span class="pre">vEnd</span></code> value is on hold until completion of the animation time</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">duration</span></code> also in milliseconds.</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.ANIM_Type.ANIM_Type_PingPong">
+<span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ANIM_Type_PingPong</span></span></span><a class="headerlink" href="#c.ANIM_Type.ANIM_Type_PingPong" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Holds <code class="docutils literal notranslate"><span class="pre">vBegin</span></code> value until <code class="docutils literal notranslate"><span class="pre">delay</span></code> milliseconds passed. Then linear
+interpolates <code class="docutils literal notranslate"><span class="pre">vBegin</span></code> through <code class="docutils literal notranslate"><span class="pre">vEnd</span></code> in <code class="docutils literal notranslate"><span class="pre">phase</span></code> milliseconds.
+Finally, there is a linear interpolation from <code class="docutils literal notranslate"><span class="pre">vEnd</span></code> to <code class="docutils literal notranslate"><span class="pre">vBegin</span></code>
+through the rest of the animation time <code class="docutils literal notranslate"><span class="pre">duration</span></code>, also expressed in</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>milliseconds.</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.ANIM">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ANIM</span></span></span><a class="headerlink" href="#c.ANIM" title="Permalink to this definition"></a><br /></dt>
+<dd><p>The user should treat this as an opaque structure. No member should be
+directly accessed or modified.</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.ANIM_Start">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ANIM_Start</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.ANIM" title="ANIM"><span class="n"><span class="pre">ANIM</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">A</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><a class="reference internal" href="#c.ANIM_Type" title="ANIM_Type"><span class="n"><span class="pre">ANIM_Type</span></span></a><span class="w"> </span><span class="n"><span class="pre">Type</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">VBegin</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">VEnd</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">Delay</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">Phase</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">Duration</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">Repeat</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.ANIM_Start" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Start to process an animation according to passed parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Type</strong> – Animation flow to follow.</p></li>
+<li><p><strong>VBegin</strong> – Interpolated value initial state.</p></li>
+<li><p><strong>VEnd</strong> – Interpolated value end state.</p></li>
+<li><p><strong>Delay</strong> – Amount of milliseconds to stop at <code class="docutils literal notranslate"><span class="pre">VBegin</span></code>.</p></li>
+<li><p><strong>Phase</strong> – <code class="docutils literal notranslate"><span class="pre">VBegin</span></code> to <code class="docutils literal notranslate"><span class="pre">VEnd</span></code> period, in milliseconds.</p></li>
+<li><p><strong>Duration</strong> – Total duration, including <code class="docutils literal notranslate"><span class="pre">Delay</span></code> and <code class="docutils literal notranslate"><span class="pre">Phase</span></code>, in
+milliseconds. Depends on animation type, see
+<a class="reference internal" href="#c.ANIM_Type" title="ANIM_Type"><code class="xref c c-enum docutils literal notranslate"><span class="pre">ANIM_Type</span></code></a>.</p></li>
+<li><p><strong>Repeat</strong> – Animation repeat count. For infinite repeats use
+<a class="reference internal" href="#c.ANIM_REPEAT_FOREVER" title="ANIM_REPEAT_FOREVER"><code class="xref c c-macro docutils literal notranslate"><span class="pre">ANIM_REPEAT_FOREVER</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.ANIM_TimeShift">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ANIM_TimeShift</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.ANIM" title="ANIM"><span class="n"><span class="pre">ANIM</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">A</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">Delta</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.ANIM_TimeShift" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Used to fast-forward an animation. Repeatedly going back and forth in time
+may cause undefined behavior. You have been warned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Delta</strong> – Amount of time to fast-forward the animation, in
+milliseconds.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.ANIM_Update">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ANIM_Update</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.ANIM" title="ANIM"><span class="n"><span class="pre">ANIM</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">A</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.ANIM_Update" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Update animation state with millisecond granularity at most.</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.ANIM_SetValue">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ANIM_SetValue</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.ANIM" title="ANIM"><span class="n"><span class="pre">ANIM</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">A</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">Value</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.ANIM_SetValue" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Set a static current value. The animation type will be set to
+<a class="reference internal" href="#c.ANIM_Type.ANIM_Type_None" title="ANIM_Type.ANIM_Type_None"><code class="xref c c-enum docutils literal notranslate"><span class="pre">ANIM_Type.ANIM_Type_None</span></code></a>. This is usually used to stop an ongoing
+animation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Value</strong> – New current, static value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.ANIM_GetValue">
+<span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ANIM_GetValue</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.ANIM" title="ANIM"><span class="n"><span class="pre">ANIM</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">A</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.ANIM_GetValue" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Get current value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Animation current value. Depends on <a class="reference internal" href="#c.ANIM_Type" title="ANIM_Type"><code class="xref c c-enum docutils literal notranslate"><span class="pre">ANIM_Type</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.ANIM_Pending">
+<span class="kt"><span class="pre">_Bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ANIM_Pending</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.ANIM" title="ANIM"><span class="n"><span class="pre">ANIM</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">A</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.ANIM_Pending" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Get pending status. An animation is pending when its current type is
+other than <a class="reference internal" href="#c.ANIM_Type.ANIM_Type_None" title="ANIM_Type.ANIM_Type_None"><code class="xref c c-enum docutils literal notranslate"><span class="pre">ANIM_Type.ANIM_Type_None</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><code class="xref c c-macro docutils literal notranslate"><span class="pre">true</span></code> if pending, <code class="xref c c-macro docutils literal notranslate"><span class="pre">false</span></code> otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="embedular-core.html" class="btn btn-neutral float-left" title="Core modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="embedular-core-array.html" class="btn btn-neutral float-right" title="ARRAY" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2022, Santiago Germino.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

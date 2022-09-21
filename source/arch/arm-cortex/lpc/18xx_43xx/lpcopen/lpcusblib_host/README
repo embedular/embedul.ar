@@ -1,0 +1,58 @@
+LPCUSBLib necesita lo definido en el archivo "cr_section_macros.h" para
+definir posicion en memoria de variables/buffers.
+
+##syscall.c es necesario ya que LPCUSBLib utiliza funciones estandar que a su vez
+##requieren system calls, pero retrociaa compila por defecto "sin sistema".
+ahora se usa -lnosys
+
+
+Del paquete LPCOpen se tomo:
+
+software/filesystems/
+    fs_usb.c        Driver fatfs, renombrado a ffdisk.c
+                    Este archivo a su vez llama a funciones FSUSB_*
+                    que no estan definidas en este directorio sino en una
+                    app de prueba! el include "fsusb_cfg.h" tambien es
+                    parte de esa app!! un desastre :/
+    rtc.c/h         Quedaron igual.
+
+applications/LPCUSBlib/lpcusblib_MassStorageHost/
+    fsusb_cfg.h         Prototipos de FSUSB_*, archivo rencombrado a fsusb.h
+    MassStorageHost.h   Archivo totalmente al pedo
+    MassStorageHost.c   Definicion de FSUSB_*, renombrado a fsusb.c agregando
+                        includes de MassStorageHost.h y quitando todo lo demas.
+
+SE MODIFICO:
+
+    Drivers/USB/Core/HAL/LPC18XX/HAL_LPC18xx.h
+
+        en ---> #define USBRAM_SECTION  RAM2
+        se cambio RAM2 (RamLoc40) por RAM5 (RamAHB_ETB16) ya que, en el mapa de 
+        memoria de retro-ciaa, RAM2 esta casi toda ocupada con uno de los 
+        framebuffers de video.
+
+        Usando el ultimo banco de memoria se puede controlar facilmente cuanta 
+        esta ocupando el stack USB.
+
+    lpcopen.mk tambien define USB_HOST_ONLY para no compilar con soporte
+    para DEVICE.
+
+REQUISITOS:
+
+- LPCUSBLib
+- fatfs
+
+
+USB Mass Storage Host example
+
+Example Description
+This example shows how to use the USB host stack to implement USB mass storage
+class. This example reads the USB mass storage device connected to USB host
+port 0. It will read the contents of file MESSAGE.TXT (if present in the
+attached device's root directory and prints its content to the UART console).
+It writes a file named HELLO.TXT with the content "Hello World!" and it lists
+the content of the root directory.
+
+Connection requirements
+A USB Mass storage device to be connected to the USB0 host port. Open terminal
+program, connect UART and configure for baud 115200, 8-bits and 1 stopbit

@@ -1,0 +1,4 @@
+ACTION!="add", SUBSYSTEM!="usb_device", GOTO="segger_rules_end"
+ATTRS{idVendor}=="1366" ENV{ID_MM_DEVICE_IGNORE}="1"
+#ATTRS{idVendor}=="1366" ATTRS{idProduct}=="0105", ENV{ID_MM_DEVICE_IGNORE}="1"
+LABEL="segger_rules_end"

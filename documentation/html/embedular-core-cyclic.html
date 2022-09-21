@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CYCLIC &mdash; embedul.ar  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/sphinx_rtd_custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="MEMPOOL" href="embedular-core-mempool.html" />
+    <link rel="prev" title="BITFIELD" href="embedular-core-bitfield.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html">
+            <img src="_static/embedular_logo_alt.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="embedular.html">embedul.ar framework</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="embedular-driver-model.html">Device model</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="embedular-core.html">Core modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-anim.html">ANIM</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-array.html">ARRAY</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-bitfield.html">BITFIELD</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">CYCLIC</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api-guide">API guide</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#design-and-development-status">Design and development status</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#changelog">Changelog</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api-reference">API reference</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-mempool.html">MEMPOOL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-queue.html">QUEUE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-timer.html">TIMER</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-utf8.html">UTF-8</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-variant.html">VARIANT</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">embedul.ar</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="embedular.html">embedul.ar framework</a> &raquo;</li>
+          <li><a href="embedular-core.html">Core modules</a> &raquo;</li>
+      <li>CYCLIC</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/embedular-core-cyclic.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="cyclic">
+<h1>CYCLIC<a class="headerlink" href="#cyclic" title="Permalink to this headline"></a></h1>
+<section id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline"></a></h2>
+<p>Manages an already allocated buffer of <code class="xref c c-type docutils literal notranslate"><span class="pre">uint8_t</span></code> elements to
+perform a cyclic (also called circular or ring) buffer access to memory
+as if both buffer ends were connected. Please see the <a class="reference external" href="https://en.wikipedia.org/wiki/Circular_buffer">Wikipedia article on
+circular buffers</a> for detailed information about this data structure.</p>
+<p>The typical use case is buffering of data streams where a consumer reads
+data at a different pace than the producer.
+Elements are inserted to (Data IN) or extracted from (Data OUT) the
+<a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><code class="xref c c-struct docutils literal notranslate"><span class="pre">CYCLIC</span></code></a> instance.</p>
+<p>Input sources (producers) are single octets, buffers,
+null-terminated strings, string with variable arguments
+(see <a class="reference internal" href="embedular-core-variant.html#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a>) and octets provided by streams
+(see <code class="xref c c-struct docutils literal notranslate"><span class="pre">STREAM</span></code>). Output destinations (consumers) are single octets,
+buffers or streams. Produced input data can be discarded, peeked,
+overwritten or replaced before consumed. The figure below depicts producers,
+consumers and operations on buffered data.</p>
+<img alt="_images/cyclic.drawio.svg" src="_images/cyclic.drawio.svg" /><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Inserted data may overflow the available buffer capacity,
+overwriting older values not yet consumed; this is especially
+true when reading from a <code class="xref c c-struct docutils literal notranslate"><span class="pre">STREAM</span></code>. That’s not a bug,
+but a feature™. The user must employ a buffer with an appropriate
+size for the intended application to avoid this data structure
+feature.</p>
+</div>
+<p>There are three <a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><code class="xref c c-struct docutils literal notranslate"><span class="pre">CYCLIC</span></code></a> buffer usage metrics:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Capacity</dt>
+<dd class="field-odd"><p>Total amount of <code class="xref c c-type docutils literal notranslate"><span class="pre">uint8_t</span></code> buffer elements.
+See <a class="reference internal" href="#c.CYCLIC_Capacity" title="CYCLIC_Capacity"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_Capacity()</span></code></a>.</p>
+</dd>
+<dt class="field-even">Elements</dt>
+<dd class="field-even"><p>Number of inserted elements waiting to be consumed.
+See <a class="reference internal" href="#c.CYCLIC_Elements" title="CYCLIC_Elements"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_Elements()</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Available</dt>
+<dd class="field-odd"><p>Free space to insert further elements.</p>
+</dd>
+</dl>
+<p>On a given time, the actual <code class="xref c c-type docutils literal notranslate"><span class="pre">uint8_t</span></code> linear memory buffer usage may
+look as in the following figure:</p>
+<img alt="_images/cyclic_buffer.drawio.svg" src="_images/cyclic_buffer.drawio.svg" /><p>Current IN and OUT buffer pointers are managed by the <a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><code class="xref c c-struct docutils literal notranslate"><span class="pre">CYCLIC</span></code></a>
+instance and are opaque to the user.</p>
+</section>
+<section id="api-guide">
+<h2>API guide<a class="headerlink" href="#api-guide" title="Permalink to this headline"></a></h2>
+<section id="initialization-related-functions">
+<h3>Initialization-related functions<a class="headerlink" href="#initialization-related-functions" title="Permalink to this headline"></a></h3>
+<div class="line-block">
+<div class="line"><a class="reference internal" href="#c.CYCLIC_Init" title="CYCLIC_Init"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_Init()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.CYCLIC_Reset" title="CYCLIC_Reset"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_Reset()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.CYCLIC_Capacity" title="CYCLIC_Capacity"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_Capacity()</span></code></a></div>
+</div>
+</section>
+<section id="status-functions">
+<h3>Status functions<a class="headerlink" href="#status-functions" title="Permalink to this headline"></a></h3>
+<div class="line-block">
+<div class="line"><a class="reference internal" href="#c.CYCLIC_Elements" title="CYCLIC_Elements"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_Elements()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.CYCLIC_Available" title="CYCLIC_Available"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_Available()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.CYCLIC_IN_Count" title="CYCLIC_IN_Count"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_IN_Count()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.CYCLIC_OUT_Count" title="CYCLIC_OUT_Count"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_OUT_Count()</span></code></a></div>
+</div>
+</section>
+<section id="data-in">
+<h3>Data IN<a class="headerlink" href="#data-in" title="Permalink to this headline"></a></h3>
+<div class="line-block">
+<div class="line"><a class="reference internal" href="#c.CYCLIC_IN_FromOctet" title="CYCLIC_IN_FromOctet"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_IN_FromOctet()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.CYCLIC_IN_FromBuffer" title="CYCLIC_IN_FromBuffer"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_IN_FromBuffer()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.CYCLIC_IN_FromString" title="CYCLIC_IN_FromString"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_IN_FromString()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.CYCLIC_IN_FromParsedStringArgs" title="CYCLIC_IN_FromParsedStringArgs"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_IN_FromParsedStringArgs()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.CYCLIC_IN_FromStream" title="CYCLIC_IN_FromStream"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_IN_FromStream()</span></code></a></div>
+</div>
+</section>
+<section id="data-out">
+<h3>Data OUT<a class="headerlink" href="#data-out" title="Permalink to this headline"></a></h3>
+<div class="line-block">
+<div class="line"><a class="reference internal" href="#c.CYCLIC_OUT_ToOctet" title="CYCLIC_OUT_ToOctet"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_OUT_ToOctet()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.CYCLIC_OUT_ToBuffer" title="CYCLIC_OUT_ToBuffer"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_OUT_ToBuffer()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.CYCLIC_OUT_ToStream" title="CYCLIC_OUT_ToStream"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_OUT_ToStream()</span></code></a></div>
+</div>
+</section>
+<section id="peek-overwrite-and-replace-contents">
+<h3>Peek, overwrite and replace contents<a class="headerlink" href="#peek-overwrite-and-replace-contents" title="Permalink to this headline"></a></h3>
+<div class="line-block">
+<div class="line"><a class="reference internal" href="#c.CYCLIC_Peek" title="CYCLIC_Peek"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_Peek()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.CYCLIC_PeekToBuffer" title="CYCLIC_PeekToBuffer"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_PeekToBuffer()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.CYCLIC_PeekToCyclic" title="CYCLIC_PeekToCyclic"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_PeekToCyclic()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.CYCLIC_Overwrite" title="CYCLIC_Overwrite"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_Overwrite()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.CYCLIC_OverwriteFromBuffer" title="CYCLIC_OverwriteFromBuffer"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_OverwriteFromBuffer()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.CYCLIC_Replace" title="CYCLIC_Replace"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_Replace()</span></code></a></div>
+<div class="line"><a class="reference internal" href="#c.CYCLIC_ReplaceAll" title="CYCLIC_ReplaceAll"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_ReplaceAll()</span></code></a></div>
+</div>
+</section>
+</section>
+<section id="design-and-development-status">
+<h2>Design and development status<a class="headerlink" href="#design-and-development-status" title="Permalink to this headline"></a></h2>
+<p>Feature-complete.</p>
+</section>
+<section id="changelog">
+<h2>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline"></a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 14%" />
+<col style="width: 26%" />
+<col style="width: 51%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Version</p></th>
+<th class="head"><p>Date*</p></th>
+<th class="head"><p>Author</p></th>
+<th class="head"><p>Comment</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1.0.0</p></td>
+<td><p>2022.9.7</p></td>
+<td><p>sgermino</p></td>
+<td><p>Initial release.</p></td>
+</tr>
+</tbody>
+</table>
+<p>* Date format is Year.Month.Day.</p>
+</section>
+<section id="api-reference">
+<h2>API reference<a class="headerlink" href="#api-reference" title="Permalink to this headline"></a></h2>
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.CYCLIC_IN_FromParsedString">
+<span class="sig-name descname"><span class="n"><span class="pre">CYCLIC_IN_FromParsedString</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">_c</span></span>, <span class="n"><span class="pre">_m</span></span>, <span class="n"><span class="pre">_s</span></span>, <span class="p"><span class="pre">...</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.CYCLIC_IN_FromParsedString" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Automatically instances the parameters list and parameter count required to
+call <a class="reference internal" href="#c.CYCLIC_IN_FromParsedStringArgs" title="CYCLIC_IN_FromParsedStringArgs"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_IN_FromParsedStringArgs()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>_c</strong> – The <a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><code class="xref c c-struct docutils literal notranslate"><span class="pre">CYCLIC</span></code></a> instance.</p></li>
+<li><p><strong>_u</strong> – <code class="docutils literal notranslate"><span class="pre">MaxOctets</span></code>, see <a class="reference internal" href="#c.CYCLIC_IN_FromParsedStringArgs" title="CYCLIC_IN_FromParsedStringArgs"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_IN_FromParsedStringArgs()</span></code></a>.</p></li>
+<li><p><strong>_s</strong> – <code class="docutils literal notranslate"><span class="pre">Str</span></code>, see <a class="reference internal" href="#c.CYCLIC_IN_FromParsedStringArgs" title="CYCLIC_IN_FromParsedStringArgs"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_IN_FromParsedStringArgs()</span></code></a>.</p></li>
+<li><p><strong>...</strong> – Up to 16 parameters consisting of generic supported types.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.CYCLIC">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CYCLIC</span></span></span><a class="headerlink" href="#c.CYCLIC" title="Permalink to this definition"></a><br /></dt>
+<dd><p>The user should treat this as an opaque structure. No member should be
+directly accessed or modified.</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.CYCLIC_Init">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CYCLIC_Init</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><span class="n"><span class="pre">CYCLIC</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">C</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">Capacity</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.CYCLIC_Init" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Initializes a <a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><code class="xref c c-struct docutils literal notranslate"><span class="pre">CYCLIC</span></code></a> instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Buffer</strong> – An already allocated <code class="xref c c-type docutils literal notranslate"><span class="pre">uint8_t</span></code> buffer.</p></li>
+<li><p><strong>Capacity</strong> – Buffer capacity, in <code class="xref c c-type docutils literal notranslate"><span class="pre">uint8_t</span></code> elements.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Buffer capacity must be a power of two. This condition is asserted.</p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.CYCLIC_Reset">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CYCLIC_Reset</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><span class="n"><span class="pre">CYCLIC</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">C</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.CYCLIC_Reset" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Resets the state of a <a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><code class="xref c c-struct docutils literal notranslate"><span class="pre">CYCLIC</span></code></a> instance, keeping the
+<code class="xref c c-type docutils literal notranslate"><span class="pre">uint8_t</span></code> buffer pointer, its declared capacity and usage
+statistics.</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.CYCLIC_Discard">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CYCLIC_Discard</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><span class="n"><span class="pre">CYCLIC</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">C</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.CYCLIC_Discard" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Discard elements inserted and not yet consumed.</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.CYCLIC_Capacity">
+<span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CYCLIC_Capacity</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><span class="n"><span class="pre">CYCLIC</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">C</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.CYCLIC_Capacity" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Returns buffer capacity passed when initializing this <a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><code class="xref c c-struct docutils literal notranslate"><span class="pre">CYCLIC</span></code></a>
+instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of <code class="xref c c-type docutils literal notranslate"><span class="pre">uint8_t</span></code> elements,
+as declared at initialization.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.CYCLIC_Elements">
+<span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CYCLIC_Elements</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><span class="n"><span class="pre">CYCLIC</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">C</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.CYCLIC_Elements" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Return elements inserted and not yet consumed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of <code class="xref c c-type docutils literal notranslate"><span class="pre">uint8_t</span></code> elements available to
+consume.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.CYCLIC_Available">
+<span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CYCLIC_Available</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><span class="n"><span class="pre">CYCLIC</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">C</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.CYCLIC_Available" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Returns space available to insert elements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of <code class="xref c c-type docutils literal notranslate"><span class="pre">uint8_t</span></code> elements available.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.CYCLIC_IN_FromOctet">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CYCLIC_IN_FromOctet</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><span class="n"><span class="pre">CYCLIC</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">C</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n"><span class="pre">Octet</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.CYCLIC_IN_FromOctet" title="Permalink to this definition"></a><br /></dt>
+<dd><p><strong>[Data IN]</strong> Inserts a single <code class="xref c c-type docutils literal notranslate"><span class="pre">uint8_t</span></code> element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Octet</strong> – Element value to insert.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.CYCLIC_IN_FromBuffer">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CYCLIC_IN_FromBuffer</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><span class="n"><span class="pre">CYCLIC</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">C</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Data</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">Count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.CYCLIC_IN_FromBuffer" title="Permalink to this definition"></a><br /></dt>
+<dd><p><strong>[Data IN]</strong> Inserts an array of <code class="xref c c-type docutils literal notranslate"><span class="pre">uint8_t</span></code> elements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Data</strong> – Array of <code class="xref c c-type docutils literal notranslate"><span class="pre">uint8_t</span></code> elements.</p></li>
+<li><p><strong>Count</strong> – Number of <code class="xref c c-type docutils literal notranslate"><span class="pre">uint8_t</span></code> elements to insert.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.CYCLIC_IN_FromString">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CYCLIC_IN_FromString</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><span class="n"><span class="pre">CYCLIC</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">C</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Str</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">MaxLen</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.CYCLIC_IN_FromString" title="Permalink to this definition"></a><br /></dt>
+<dd><p><strong>[Data IN]</strong> Inserts a null-terminated string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>str</strong> – Pointer to a null-terminated string.</p></li>
+<li><p><strong>MaxLen</strong> – The null termination in <code class="docutils literal notranslate"><span class="pre">str</span></code> must be found before
+processing this maximum amount of <code class="docutils literal notranslate"><span class="pre">char</span></code> elements.
+This condition is asserted.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.CYCLIC_IN_FromParsedStringArgs">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CYCLIC_IN_FromParsedStringArgs</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><span class="n"><span class="pre">CYCLIC</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">C</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">MaxOctets</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Str</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="embedular-core-variant.html#c.VARIANT" title="VARIANT"><span class="n"><span class="pre">VARIANT</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">ArgValues</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">ArgCount</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.CYCLIC_IN_FromParsedStringArgs" title="Permalink to this definition"></a><br /></dt>
+<dd><p><strong>[Data IN]</strong> Inserts a null-terminated string with <a class="reference internal" href="embedular-core-variant.html#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a>
+argument substitution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Str</strong> – Pointer to a null-terminated string with indexed argument
+placeholders.</p></li>
+<li><p><strong>MaxOctets</strong> – The null termination in <code class="docutils literal notranslate"><span class="pre">Str</span></code> must be found before
+reaching <code class="docutils literal notranslate"><span class="pre">MaxOctets</span></code>; this condition is asserted.</p></li>
+<li><p><strong>ArgValues</strong> – Array of <a class="reference internal" href="embedular-core-variant.html#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> elements whose values will
+replace the argument placeholders in <code class="docutils literal notranslate"><span class="pre">Str</span></code>.</p></li>
+<li><p><strong>ArgCount</strong> – Number of indexed elements in the <a class="reference internal" href="embedular-core-variant.html#c.VARIANT" title="VARIANT"><code class="xref c c-struct docutils literal notranslate"><span class="pre">VARIANT</span></code></a> array.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.CYCLIC_IN_FromStream">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CYCLIC_IN_FromStream</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><span class="n"><span class="pre">CYCLIC</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">C</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">STREAM</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">S</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.CYCLIC_IN_FromStream" title="Permalink to this definition"></a><br /></dt>
+<dd><p><strong>[Data IN]</strong> Reads a <code class="xref c c-struct docutils literal notranslate"><span class="pre">STREAM</span></code> and insert each <code class="xref c c-type docutils literal notranslate"><span class="pre">uint8_t</span></code>
+element until the <code class="xref c c-struct docutils literal notranslate"><span class="pre">STREAM</span></code> signals an end of file (EOF).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>S</strong> – <code class="xref c c-struct docutils literal notranslate"><span class="pre">STREAM</span></code> to read and insert elements until EOF.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.CYCLIC_OUT_ToOctet">
+<span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CYCLIC_OUT_ToOctet</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><span class="n"><span class="pre">CYCLIC</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">C</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.CYCLIC_OUT_ToOctet" title="Permalink to this definition"></a><br /></dt>
+<dd><p><strong>[Data OUT]</strong> Consumes an octet and returns its value. The caller must have
+confirmed with <a class="reference internal" href="#c.CYCLIC_Elements" title="CYCLIC_Elements"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_Elements()</span></code></a> that there is at least one octet
+to consume; this condition is asserted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The octet value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.CYCLIC_OUT_ToBuffer">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CYCLIC_OUT_ToBuffer</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><span class="n"><span class="pre">CYCLIC</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">C</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Data</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">Count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.CYCLIC_OUT_ToBuffer" title="Permalink to this definition"></a><br /></dt>
+<dd><p><strong>[Data OUT]</strong> Consumes a given amount of octets by storing them in an
+<code class="xref c c-type docutils literal notranslate"><span class="pre">uint8_t</span></code> array already allocated by the user. The user must have
+confirmed with <a class="reference internal" href="#c.CYCLIC_Elements" title="CYCLIC_Elements"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_Elements()</span></code></a> that the required amount of
+elements is available; this condition is asserted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Data</strong> – Already allocated <code class="xref c c-type docutils literal notranslate"><span class="pre">uint8_t</span></code> array.</p></li>
+<li><p><strong>Count</strong> – Number of octets to consume by storing them in the array.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.CYCLIC_OUT_ToStream">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CYCLIC_OUT_ToStream</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><span class="n"><span class="pre">CYCLIC</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">C</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">STREAM</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">S</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.CYCLIC_OUT_ToStream" title="Permalink to this definition"></a><br /></dt>
+<dd><p><strong>[Data OUT]</strong> Tries to consume all elements transferring them to a
+<code class="xref c c-struct docutils literal notranslate"><span class="pre">STREAM</span></code>. The user must have confirmed that there is at least one
+element to consume; this condition is asserted. After the call, the user
+must not assume all elements were effectively consumed. The operation may
+stop prematurely if the stream is unable to receive more items. Depending on
+the actual <code class="xref c c-struct docutils literal notranslate"><span class="pre">STREAM</span></code> implementation, the user may need to wait
+some time and repeatedly call this function until all elements are consumed.
+See <a class="reference internal" href="#c.CYCLIC_Elements" title="CYCLIC_Elements"><code class="xref c c-func docutils literal notranslate"><span class="pre">CYCLIC_Elements()</span></code></a> and <code class="xref c c-func docutils literal notranslate"><span class="pre">STREAM_IN_Count()</span></code>.</p>
+<p>Below is an usage example:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// &quot;s&quot; is an instance of a hypothetical STREAM implementation to handle a</span>
+<span class="c1">// particular hardware UART. Suppose this UART has a limited baud rate and</span>
+<span class="c1">// TX buffering, so it may not send all cyclic elements at once. That is why</span>
+<span class="c1">// CYCLIC_OUT_ToStream() may return before consuming every element.</span>
+<span class="c1">//</span>
+<span class="c1">// &quot;retries&quot; is the maximum number of times to keep calling</span>
+<span class="c1">// CYCLIC_OUT_ToStream() after a STREAM EOF.</span>
+
+<span class="kt">uint32_t</span> <span class="n">retries</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+
+<span class="k">while</span> <span class="p">(</span><span class="n">retries</span> <span class="o">--</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">// Consume elements from the cyclic instance &quot;c&quot; and send them to the</span>
+    <span class="c1">// STREAM &quot;s&quot;.</span>
+    <span class="n">CYCLIC_OUT_ToStream</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">c</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">);</span>
+    <span class="c1">// Call returned.</span>
+    
+    <span class="c1">// Check for STREAM EOF</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">STREAM_EOF</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">s</span><span class="p">))</span>
+    <span class="p">{</span>
+        <span class="c1">// Not an EOF. CYCLIC_OUT_ToStream should have consumed and sent all</span>
+        <span class="c1">// elements.</span>
+        <span class="c1">// TEST: Assert that all elements have been consumed.</span>
+        <span class="n">BOARD_AssertState</span> <span class="p">(</span><span class="n">CYCLIC_Elements</span><span class="p">(</span><span class="o">&amp;</span><span class="n">c</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>
+        <span class="c1">// Do not retry anymore.</span>
+        <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">else</span>
+    <span class="p">{</span>
+        <span class="c1">// STREAM EOF. Keep trying.</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// TEST: invalid states.</span>
+<span class="c1">// 1) Not a STREAM EOF and no more retries.</span>
+<span class="c1">// 2) STREAM EOF and all elements consumed.</span>
+<span class="n">BOARD_AssertState</span> <span class="p">(</span><span class="o">!</span><span class="n">STREAM_EOF</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">retries</span><span class="p">);</span>
+<span class="n">BOARD_AssertState</span> <span class="p">(</span><span class="n">STREAM_EOF</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">CYCLIC_Elements</span><span class="p">(</span><span class="o">&amp;</span><span class="n">c</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>
+
+<span class="c1">// There are two valid states:</span>
+<span class="c1">// A) STREAM EOF, run out of retries and not all elements consumed.</span>
+<span class="c1">// B) not a STREAM EOF and all elements consumed.</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>S</strong> – <code class="xref c c-struct docutils literal notranslate"><span class="pre">STREAM</span></code> instance to transfer consumed elements.
+The STREAM may abort the operation at any time.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.CYCLIC_Peek">
+<span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CYCLIC_Peek</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><span class="n"><span class="pre">CYCLIC</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">C</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">Index</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.CYCLIC_Peek" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Peeks an inserted element before consuming it. The user must check that
+there are enough inserted elements for the requested <code class="docutils literal notranslate"><span class="pre">Index</span></code>; otherwise,
+the return value will be invalid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Index</strong> – A Zero-based <code class="docutils literal notranslate"><span class="pre">Index</span></code> selects which element to peek;
+zero is the first element consumed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A copy of the element.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.CYCLIC_PeekToBuffer">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CYCLIC_PeekToBuffer</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><span class="n"><span class="pre">CYCLIC</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">C</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">Index</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Data</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">Count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.CYCLIC_PeekToBuffer" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Peeks inserted elements before consuming them by copying their values to an
+already allocated array of <code class="xref c c-type docutils literal notranslate"><span class="pre">uint8_t</span></code>. The user must check that
+there are enough inserted elements for the requested <code class="docutils literal notranslate"><span class="pre">Index</span></code> plus
+<code class="docutils literal notranslate"><span class="pre">Count</span></code>; otherwise, the return value will be invalid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Index</strong> – A Zero-based <code class="docutils literal notranslate"><span class="pre">Index</span></code> selects from which element it starts to
+peek; zero is the first element consumed.</p></li>
+<li><p><strong>Data</strong> – <code class="xref c c-type docutils literal notranslate"><span class="pre">uint8_t</span></code> array to copy element values.</p></li>
+<li><p><strong>Count</strong> – Number of elements to peek, starting from <code class="docutils literal notranslate"><span class="pre">Index</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.CYCLIC_PeekToCyclic">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CYCLIC_PeekToCyclic</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><span class="n"><span class="pre">CYCLIC</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">C</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">Index</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">Count</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><span class="n"><span class="pre">CYCLIC</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">D</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.CYCLIC_PeekToCyclic" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Peek inserted elements before consuming them by inserting a copy of their
+values to another c:struct:<cite>CYCLIC</cite> instance. The user must check that
+there are enough inserted elements for the requested <code class="docutils literal notranslate"><span class="pre">Index</span></code> plus
+<code class="docutils literal notranslate"><span class="pre">Count</span></code>; otherwise, the return value will be invalid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Index</strong> – A Zero-based <code class="docutils literal notranslate"><span class="pre">Index</span></code> selects from which element it starts to
+peek; zero is the first element consumed.</p></li>
+<li><p><strong>Count</strong> – Number of elements to peek, starting from <code class="docutils literal notranslate"><span class="pre">Index</span></code>.</p></li>
+<li><p><strong>D</strong> – c:struct:<cite>CYCLIC</cite> instance to store a copy of the elements.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.CYCLIC_Overwrite">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CYCLIC_Overwrite</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><span class="n"><span class="pre">CYCLIC</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">C</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">Index</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n"><span class="pre">Octet</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.CYCLIC_Overwrite" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Overwrites an inserted element. The user must check that
+there are enough inserted elements for the requested <code class="docutils literal notranslate"><span class="pre">Index</span></code>; this
+condition is asserted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Index</strong> – A Zero-based <code class="docutils literal notranslate"><span class="pre">Index</span></code> selects which element to overwrite;
+zero is the first element consumed.</p></li>
+<li><p><strong>Octet</strong> – Overwrite the inserted element with this value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.CYCLIC_OverwriteFromBuffer">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CYCLIC_OverwriteFromBuffer</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><span class="n"><span class="pre">CYCLIC</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">C</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">Index</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Data</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">Count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.CYCLIC_OverwriteFromBuffer" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Overwrites inserted elements by replacing their values with the ones in an
+array of <code class="xref c c-type docutils literal notranslate"><span class="pre">uint8_t</span></code>. The user must check that there are enough
+inserted elements for the requested <code class="docutils literal notranslate"><span class="pre">Index</span></code> plus <code class="docutils literal notranslate"><span class="pre">Count</span></code>; this
+condition is asserted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Index</strong> – A Zero-based <code class="docutils literal notranslate"><span class="pre">Index</span></code> selects from which element it starts to
+overwrite; zero is the first element consumed.</p></li>
+<li><p><strong>Data</strong> – Overwrite the inserted elements with the ones from this
+<code class="xref c c-type docutils literal notranslate"><span class="pre">uint8_t</span></code> array.</p></li>
+<li><p><strong>Count</strong> – Number of elements to overwrite starting from <code class="docutils literal notranslate"><span class="pre">Index</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.CYCLIC_Replace">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CYCLIC_Replace</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><span class="n"><span class="pre">CYCLIC</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">C</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">Index</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">Count</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n"><span class="pre">Match</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n"><span class="pre">Replace</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.CYCLIC_Replace" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Replaces an inserted element that is equal to a given value. The user must
+check that there are enough inserted elements for the requested <code class="docutils literal notranslate"><span class="pre">Index</span></code>
+plus <code class="docutils literal notranslate"><span class="pre">Count</span></code>; this condition is asserted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Index</strong> – A Zero-based <code class="docutils literal notranslate"><span class="pre">Index</span></code> selects from which element it starts to
+check; zero is the first element consumed.</p></li>
+<li><p><strong>Count</strong> – Number of elements to check, starting from <code class="docutils literal notranslate"><span class="pre">Index</span></code>.</p></li>
+<li><p><strong>Match</strong> – Value to check for equality.</p></li>
+<li><p><strong>Replace</strong> – If equal, replace with this value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.CYCLIC_ReplaceAll">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CYCLIC_ReplaceAll</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><span class="n"><span class="pre">CYCLIC</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">C</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n"><span class="pre">Match</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n"><span class="pre">Replace</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.CYCLIC_ReplaceAll" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Replaces all inserted elements that are equal to a given value. The user must
+check that there is at least one element; this condition is asserted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Match</strong> – Value to check for equality.</p></li>
+<li><p><strong>Replace</strong> – If equal, replace with this value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.CYCLIC_IN_Count">
+<span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CYCLIC_IN_Count</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><span class="n"><span class="pre">CYCLIC</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">C</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.CYCLIC_IN_Count" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Returns number of insertions from the last <strong>[Data IN]</strong> operation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of insertions.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.CYCLIC_OUT_Count">
+<span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CYCLIC_OUT_Count</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.CYCLIC" title="CYCLIC"><span class="n"><span class="pre">CYCLIC</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">C</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.CYCLIC_OUT_Count" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Returns number of consumptions from the last <strong>[Data OUT]</strong> operation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of consumptions.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="embedular-core-bitfield.html" class="btn btn-neutral float-left" title="BITFIELD" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="embedular-core-mempool.html" class="btn btn-neutral float-right" title="MEMPOOL" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2022, Santiago Germino.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

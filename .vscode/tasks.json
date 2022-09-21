@@ -1,0 +1,100 @@
+// -----------------------------------------------------------------------------
+// embedul.ar build/run tasks.
+// -----------------------------------------------------------------------------
+// This particular file will perform a Debug or Release run on a selected
+// example compiled for one of all supported framework TARGETs.
+
+// Feel free to use this file as a template for your projects. If you do,
+// you might not need "EXAMPLE=${input:example}", and perhaps you might be
+// interested in one or fewer TARGET choices.
+// -----------------------------------------------------------------------------
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Debug",
+            "detail": "Build w/debug symbols and no optimization.",
+            "type": "shell",
+            "command": "bear -- make EXAMPLE=${input:example} BUILD_TARGET=${input:target} OLEVEL=0 DEBUG=yes FLASH_TOOL=${input:gdb-flash-tool}",
+            "problemMatcher": [],
+            "group": "build"
+        },
+        {
+            "label": "Release",
+            "detail": "Build w/optimizations.",
+            "type": "shell",
+            "command": "bear -- make EXAMPLE=${input:example} BUILD_TARGET=${input:target} OLEVEL=${input:optimization} DEBUG=no FLASH_TOOL=${input:gdb-flash-tool}",
+            "problemMatcher": [],
+            "group": "build"
+        },
+        {
+            "label": "Documentation",
+            "detail": "Rebuild documentation.",
+            "type": "shell",
+            "command": "cd ./documentation && make html",
+            "problemMatcher": [],
+            "group": "build"
+        },
+        {
+            "label": "Run [HOSTED]",
+            "detail": "Run a hosted release build.",
+            "type": "shell",
+            "command": "make EXAMPLE=${input:example} BUILD_TARGET=native_hosted OLEVEL=${input:optimization} DEBUG=no run",
+            "problemMatcher": [],
+            "group": "test"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "example",
+            "type": "pickString",
+            "description": "Framework example",
+            "options": [
+                "log_hello_world",
+                "log_functions",
+                "log_context",
+                "empty",
+            ],
+            "default": "log_context"
+        },
+        {
+            "id": "target",
+            "type": "pickString",
+            "description": "Hardware target",
+            "options": [
+                "edu_ciaa-m4",
+                "edu_ciaa_retro_poncho-m4",
+                "retro_ciaa-m4",
+                "nucleo_144-stm32f429zi",
+                "native_hosted"
+            ],
+            "default": "native_hosted"
+        },
+        {
+            "id": "optimization",
+            "type": "pickString",
+            "description": "Optimization level",
+            "options": [
+                "1",
+                "2",
+                "3",
+                "s",
+                "z"
+            ],
+            "default": "3"
+        },
+        {
+            "id": "gdb-flash-tool",
+            "type": "pickString",
+            "description": "Flash firmware?",
+            "options": [
+                "no",
+                "openocd-elf flash",
+                "segger-jlink flash"
+            ],
+            "default": "no"
+        }
+    ]
+}

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BITFIELD &mdash; embedul.ar  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/sphinx_rtd_custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="CYCLIC" href="embedular-core-cyclic.html" />
+    <link rel="prev" title="ARRAY" href="embedular-core-array.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html">
+            <img src="_static/embedular_logo_alt.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="embedular.html">embedul.ar framework</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="embedular-driver-model.html">Device model</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="embedular-core.html">Core modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-anim.html">ANIM</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-array.html">ARRAY</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">BITFIELD</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#design-and-development-status">Design and development status</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#changelog">Changelog</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api-reference">API reference</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-cyclic.html">CYCLIC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-mempool.html">MEMPOOL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-queue.html">QUEUE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-timer.html">TIMER</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-utf8.html">UTF-8</a></li>
+<li class="toctree-l3"><a class="reference internal" href="embedular-core-variant.html">VARIANT</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">embedul.ar</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="embedular.html">embedul.ar framework</a> &raquo;</li>
+          <li><a href="embedular-core.html">Core modules</a> &raquo;</li>
+      <li>BITFIELD</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/embedular-core-bitfield.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="bitfield">
+<h1>BITFIELD<a class="headerlink" href="#bitfield" title="Permalink to this headline"></a></h1>
+<section id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline"></a></h2>
+<p>Manages accesses and writes to a bitfield stored in an already allocated
+buffer of <code class="xref c c-type docutils literal notranslate"><span class="pre">uint32_t</span></code> elements. A <a class="reference internal" href="#c.BITFIELD" title="BITFIELD"><code class="xref c c-struct docutils literal notranslate"><span class="pre">BITFIELD</span></code></a> instance should
+manage its unique buffer. Each <code class="xref c c-type docutils literal notranslate"><span class="pre">uint32_t</span></code> in the buffer will give 32
+unique bits. Bits are indexed from the least significant bit starting at
+zero. For example, the first <code class="xref c c-type docutils literal notranslate"><span class="pre">uint32_t</span></code> in the buffer will hold bits
+0 to 31, the second <code class="xref c c-type docutils literal notranslate"><span class="pre">uint32_t</span></code> will hold bits 32 to 63 and so on.</p>
+<p>There are two modes of operation with their own set of functions:</p>
+<dl class="simple">
+<dt>Single bit</dt><dd><p>Individual bits are set and get by their <code class="docutils literal notranslate"><span class="pre">BitIndex</span></code>.</p>
+</dd>
+<dt>Bit range (multibit values)</dt><dd><p>An array of <a class="reference internal" href="#c.BITFIELD_RANGE" title="BITFIELD_RANGE"><code class="xref c c-struct docutils literal notranslate"><span class="pre">BITFIELD_RANGE</span></code></a> is passed to
+<a class="reference internal" href="#c.BITFIELD_Init" title="BITFIELD_Init"><code class="xref c c-func docutils literal notranslate"><span class="pre">BITFIELD_Init()</span></code></a>. The <code class="xref c c-type docutils literal notranslate"><span class="pre">uint32_t</span></code> buffer will hold
+bit ranges; bits grouped as specified by elements on a
+<a class="reference internal" href="#c.BITFIELD_RANGE" title="BITFIELD_RANGE"><code class="xref c c-struct docutils literal notranslate"><span class="pre">BITFIELD_RANGE</span></code></a> array. Each range element is indexed on that
+array by a <code class="docutils literal notranslate"><span class="pre">RangeIndex</span></code>.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is OK to define a <a class="reference internal" href="#c.BITFIELD_RANGE" title="BITFIELD_RANGE"><code class="xref c c-struct docutils literal notranslate"><span class="pre">BITFIELD_RANGE</span></code></a> array with ranges
+starting at some arbitrary bitIndex, then managing the bits below
+as single bits. An actual framework use case stores a gamepad’s
+state with several digital switches as single bits and additional
+analog inputs like sticks and accelerometers as bit ranges
+according to the required resolution.</p>
+</div>
+</section>
+<section id="design-and-development-status">
+<h2>Design and development status<a class="headerlink" href="#design-and-development-status" title="Permalink to this headline"></a></h2>
+<p>Feature-complete.</p>
+</section>
+<section id="changelog">
+<h2>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline"></a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 14%" />
+<col style="width: 26%" />
+<col style="width: 51%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Version</p></th>
+<th class="head"><p>Date*</p></th>
+<th class="head"><p>Author</p></th>
+<th class="head"><p>Comment</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1.0.0</p></td>
+<td><p>2022.9.7</p></td>
+<td><p>sgermino</p></td>
+<td><p>Initial release.</p></td>
+</tr>
+</tbody>
+</table>
+<p>* Date format is Year.Month.Day.</p>
+</section>
+<section id="api-reference">
+<h2>API reference<a class="headerlink" href="#api-reference" title="Permalink to this headline"></a></h2>
+<dl class="c type">
+<dt class="sig sig-object c" id="c.BITFIELD_Index">
+<span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">BITFIELD_Index</span></span></span><a class="headerlink" href="#c.BITFIELD_Index" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Data type that stores a <code class="docutils literal notranslate"><span class="pre">BitIndex</span></code> or a <code class="docutils literal notranslate"><span class="pre">RangeIndex</span></code>. On a
+<code class="docutils literal notranslate"><span class="pre">BitIndex</span></code>, it allows a maximum of 65536 bit indices stored in
+65536/32 = 2048 <code class="xref c c-type docutils literal notranslate"><span class="pre">uint32_t</span></code> buffer elements. On a <code class="docutils literal notranslate"><span class="pre">RangeIndex</span></code>, it
+allows a maximum indexing of 65536 ranges.</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.BITFIELD_INDEX_MAX">
+<span class="sig-name descname"><span class="n"><span class="pre">BITFIELD_INDEX_MAX</span></span></span><a class="headerlink" href="#c.BITFIELD_INDEX_MAX" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Maximum value represented in a <a class="reference internal" href="#c.BITFIELD_Index" title="BITFIELD_Index"><code class="xref c c-type docutils literal notranslate"><span class="pre">BITFIELD_Index</span></code></a>.</p>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.BITFIELD_RANGE">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">BITFIELD_RANGE</span></span></span><a class="headerlink" href="#c.BITFIELD_RANGE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Defines a single bit range by giving a first bit index and
+the number of additional bits in the range. For example,
+<a class="reference internal" href="#c.BITFIELD_RANGE.bitIndex" title="BITFIELD_RANGE.bitIndex"><code class="xref c c-struct docutils literal notranslate"><span class="pre">BITFIELD_RANGE.bitIndex</span></code></a> = 3 and
+<a class="reference internal" href="#c.BITFIELD_RANGE.count" title="BITFIELD_RANGE.count"><code class="xref c c-struct docutils literal notranslate"><span class="pre">BITFIELD_RANGE.count</span></code></a> = 4 will define a range of four bits from
+bit 3 to bit 6 as follows:</p>
+<img alt="_images/bitfield_range_3to6.drawio.svg" src="_images/bitfield_range_3to6.drawio.svg" /><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Valid bit ranges do not span across <code class="xref c c-type docutils literal notranslate"><span class="pre">uint32_t</span></code> buffer
+elements. For example, <a class="reference internal" href="#c.BITFIELD_RANGE.bitIndex" title="BITFIELD_RANGE.bitIndex"><code class="xref c c-struct docutils literal notranslate"><span class="pre">BITFIELD_RANGE.bitIndex</span></code></a> = 30
+and <a class="reference internal" href="#c.BITFIELD_RANGE.count" title="BITFIELD_RANGE.count"><code class="xref c c-struct docutils literal notranslate"><span class="pre">BITFIELD_RANGE.count</span></code></a> = 3 is an invalid bit range
+since bit 32 lies on the next buffer element.</p>
+</div>
+<dl class="c member">
+<dt class="sig sig-object c" id="c.BITFIELD_RANGE.bitIndex">
+<a class="reference internal" href="#c.BITFIELD_Index" title="BITFIELD_Index"><span class="n"><span class="pre">BITFIELD_Index</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">bitIndex</span></span></span><a class="headerlink" href="#c.BITFIELD_RANGE.bitIndex" title="Permalink to this definition"></a><br /></dt>
+<dd><p>bit index of the least significant bit in the range.</p>
+</dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.BITFIELD_RANGE.count">
+<span class="n"><span class="pre">uint16_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">count</span></span></span><a class="headerlink" href="#c.BITFIELD_RANGE.count" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Number of additional bits in the range.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The maximum number of bits in a bit range is 32.
+The <code class="xref c c-type docutils literal notranslate"><span class="pre">uint16_t</span></code> data type is used for struct padding.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.BITFIELD">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">BITFIELD</span></span></span><a class="headerlink" href="#c.BITFIELD" title="Permalink to this definition"></a><br /></dt>
+<dd><p>The user should treat this as an opaque structure. No member should be
+directly accessed or modified.</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.BITFIELD_RANGE_MAX_COUNT">
+<span class="sig-name descname"><span class="n"><span class="pre">BITFIELD_RANGE_MAX_COUNT</span></span></span><a class="headerlink" href="#c.BITFIELD_RANGE_MAX_COUNT" title="Permalink to this definition"></a><br /></dt>
+<dd><p>The maximum number of bits in a bit range.</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.BITFIELD_Init">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">BITFIELD_Init</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.BITFIELD" title="BITFIELD"><span class="n"><span class="pre">BITFIELD</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">B</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint16_t</span></span><span class="w"> </span><span class="n"><span class="pre">Capacity</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.BITFIELD_RANGE" title="BITFIELD_RANGE"><span class="n"><span class="pre">BITFIELD_RANGE</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Range</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint16_t</span></span><span class="w"> </span><span class="n"><span class="pre">RangeCount</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.BITFIELD_Init" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Initialize a <a class="reference internal" href="#c.BITFIELD" title="BITFIELD"><code class="xref c c-struct docutils literal notranslate"><span class="pre">BITFIELD</span></code></a> instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Buffer</strong> – An already allocated <code class="xref c c-type docutils literal notranslate"><span class="pre">uint32_t</span></code> buffer.</p></li>
+<li><p><strong>Capacity</strong> – Buffer capacity, in <code class="xref c c-type docutils literal notranslate"><span class="pre">uint32_t</span></code> elements.</p></li>
+<li><p><strong>Range</strong> – Pointer to an array of <a class="reference internal" href="#c.BITFIELD_RANGE" title="BITFIELD_RANGE"><code class="xref c c-struct docutils literal notranslate"><span class="pre">BITFIELD_RANGE</span></code></a> defining
+bit ranges. The <a class="reference internal" href="#c.BITFIELD" title="BITFIELD"><code class="xref c c-struct docutils literal notranslate"><span class="pre">BITFIELD</span></code></a> instance will be
+initialized in bit range mode. This function asserts
+valid ranges. To initialize the <a class="reference internal" href="#c.BITFIELD" title="BITFIELD"><code class="xref c c-struct docutils literal notranslate"><span class="pre">BITFIELD</span></code></a>
+instance as single bit addressing mode only,
+set this parameter to <code class="xref c c-macro docutils literal notranslate"><span class="pre">NULL</span></code>.</p></li>
+<li><p><strong>RangeCount</strong> – Number of elements in the array of
+<a class="reference internal" href="#c.BITFIELD_RANGE" title="BITFIELD_RANGE"><code class="xref c c-struct docutils literal notranslate"><span class="pre">BITFIELD_RANGE</span></code></a> passed as the <code class="docutils literal notranslate"><span class="pre">range</span></code>
+parameter. if <code class="docutils literal notranslate"><span class="pre">range</span></code> is set to <code class="xref c c-macro docutils literal notranslate"><span class="pre">NULL</span></code>, then
+this parameter must be zero.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.BITFIELD_SetBit">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">BITFIELD_SetBit</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.BITFIELD" title="BITFIELD"><span class="n"><span class="pre">BITFIELD</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">B</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.BITFIELD_Index" title="BITFIELD_Index"><span class="n"><span class="pre">BITFIELD_Index</span></span></a><span class="w"> </span><span class="n"><span class="pre">BitIndex</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">_Bool</span></span><span class="w"> </span><span class="n"><span class="pre">State</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.BITFIELD_SetBit" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Set a single bit state by its <code class="docutils literal notranslate"><span class="pre">BitIndex</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>BitIndex</strong> – The bit position, from the least significant bit starting at
+zero. A bit number larger than a <code class="xref c c-type docutils literal notranslate"><span class="pre">uint32_t</span></code> (for
+example, 32, 74, etc) will fit on the appropiate element
+index in the <code class="xref c c-type docutils literal notranslate"><span class="pre">uint32_t</span></code> buffer. This function
+asserts the condition of sufficient buffer elements for a
+given <code class="docutils literal notranslate"><span class="pre">BitIndex</span></code>.</p></li>
+<li><p><strong>State</strong> – New bit state, either <code class="xref c c-macro docutils literal notranslate"><span class="pre">true</span></code> or <code class="xref c c-macro docutils literal notranslate"><span class="pre">false</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.BITFIELD_GetBit">
+<span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">BITFIELD_GetBit</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.BITFIELD" title="BITFIELD"><span class="n"><span class="pre">BITFIELD</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">B</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.BITFIELD_Index" title="BITFIELD_Index"><span class="n"><span class="pre">BITFIELD_Index</span></span></a><span class="w"> </span><span class="n"><span class="pre">BitIndex</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.BITFIELD_GetBit" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Get a single bit state by its <code class="docutils literal notranslate"><span class="pre">BitIndex</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>BitIndex</strong> – The bit position, from the least significant bit starting at
+zero. A bit number larger than a <code class="xref c c-type docutils literal notranslate"><span class="pre">uint32_t</span></code> (for
+example, 32, 74, etc) will fit on the appropiate element
+index in the <code class="xref c c-type docutils literal notranslate"><span class="pre">uint32_t</span></code> buffer. This function
+asserts the condition of sufficient buffer elements for a
+given <code class="docutils literal notranslate"><span class="pre">BitIndex</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Current bit state as positioned in the corresponding
+<code class="xref c c-type docutils literal notranslate"><span class="pre">uint32_t</span></code> buffer element.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.BITFIELD_SetRangeValue">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">BITFIELD_SetRangeValue</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.BITFIELD" title="BITFIELD"><span class="n"><span class="pre">BITFIELD</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">B</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.BITFIELD_Index" title="BITFIELD_Index"><span class="n"><span class="pre">BITFIELD_Index</span></span></a><span class="w"> </span><span class="n"><span class="pre">RangeIndex</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">Value</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.BITFIELD_SetRangeValue" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Set the bit range value of a given <code class="docutils literal notranslate"><span class="pre">RangeIndex</span></code>. Do not use this
+function on <a class="reference internal" href="#c.BITFIELD" title="BITFIELD"><code class="xref c c-struct docutils literal notranslate"><span class="pre">BITFIELD</span></code></a> instances initialized as <strong>Single bit</strong>
+mode; this condition is asserted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>RangeIndex</strong> – Index in the array of <a class="reference internal" href="#c.BITFIELD_RANGE" title="BITFIELD_RANGE"><code class="xref c c-struct docutils literal notranslate"><span class="pre">BITFIELD_RANGE</span></code></a>
+with the bit range value to update.</p></li>
+<li><p><strong>Value</strong> – New value to set in the specified bit range. Should not be
+higher than the maximum number allowed by the bit count in
+the range; this condition is asserted.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.BITFIELD_GetRangeValue">
+<span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">BITFIELD_GetRangeValue</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#c.BITFIELD" title="BITFIELD"><span class="n"><span class="pre">BITFIELD</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">B</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.BITFIELD_Index" title="BITFIELD_Index"><span class="n"><span class="pre">BITFIELD_Index</span></span></a><span class="w"> </span><span class="n"><span class="pre">RangeIndex</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.BITFIELD_GetRangeValue" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Get the bit range value of a given <code class="docutils literal notranslate"><span class="pre">RangeIndex</span></code>. Do not use this
+function on <a class="reference internal" href="#c.BITFIELD" title="BITFIELD"><code class="xref c c-struct docutils literal notranslate"><span class="pre">BITFIELD</span></code></a> instances initialized as <strong>Single bit</strong>
+mode; this condition is asserted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>RangeIndex</strong> – Index in the array of <a class="reference internal" href="#c.BITFIELD_RANGE" title="BITFIELD_RANGE"><code class="xref c c-struct docutils literal notranslate"><span class="pre">BITFIELD_RANGE</span></code></a>
+with the bit range value to retrieve.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Current value of the specified bit range.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="embedular-core-array.html" class="btn btn-neutral float-left" title="ARRAY" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="embedular-core-cyclic.html" class="btn btn-neutral float-right" title="CYCLIC" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2022, Santiago Germino.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

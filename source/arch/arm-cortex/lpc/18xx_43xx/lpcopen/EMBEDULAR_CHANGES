@@ -1,0 +1,19 @@
+LPCOpen 3.0.2
+Changes made by Santiago Germino:
+
+- Fixed the inclusion of <core_cm#.h>. <core_cmInstr.h> and <core_cmFunc.h> source files.
+  Reason: According to the C standard, this is the exact use case for colons, not angle brackets. The latter follows a compiler implementation-defined behavior.
+
+- Added several relative paths on header inclusions.
+  Reason: Do not count on including paths passed at compile time.   
+  Static analysis tools like clang-tidy were not finding the proper sources.
+
+- Board code: replaced include guards with widely supported #pragma once directive.
+  Reason: Simple, cleaner code and no risk of name clashes. Moreover, according to the ISO C99 standard, macro names with double underscores are reserved.
+
+- Fixed "unused parameter" and "case fallthrough" warnings are shown when compiling with GCC -Wextra.
+  Reason: I follow a policy of enabling all warnings. In my experience, this leads to more robust code.
+
+- Fixed comparisons between signed and unsigned integers.
+  Opportunity for improvement: An appropriate data type may give free, partial protection from unwanted or unforeseen input.
+  Why allow signed quantities if the intended input was unsigned only?

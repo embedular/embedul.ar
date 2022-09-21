@@ -1,0 +1,4 @@
+# Black Magic Probe
+# there are two connections, one for GDB and one for uart debugging
+SUBSYSTEM=="tty", ATTRS{interface}=="Black Magic GDB Server", SYMLINK+="ttyBlackMagicGdb"
+SUBSYSTEM=="tty", ATTRS{interface}=="Black Magic UART Port", SYMLINK+="ttyBlackMagicUart"
