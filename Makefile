@@ -1,4 +1,4 @@
-include $(LIB_EMBEDULAR_PATH)/embedul.ar/makefiles/system.mk
+include $(realpath ./makefiles/system.mk)
 
 # To build a default example from the command-line with default parameters
 EXAMPLE ?= log_hello_world
@@ -8,6 +8,7 @@ $(call emb_need_var,EXAMPLE)
 $(call emb_need_dir,./examples/$(EXAMPLE),'$(EXAMPLE)' example)
 $(call emb_info,Compiling example '$(EXAMPLE)')
 
+# Optional example Makefile params
 -include ./examples/$(EXAMPLE)/config.mk
 
 APP_OBJS += \
