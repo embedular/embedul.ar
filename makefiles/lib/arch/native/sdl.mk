@@ -23,15 +23,30 @@
 # 3. This notice may not be removed or altered from any source distribution.
 #
 
-SDL_CONFIG ?= sdl-config
-SDL_CFLAGS ?= $(shell $(SDL_CONFIG) --cflags)
-SDL_LDFLAGS ?= $(shell $(SDL_CONFIG) --static-libs)
+# ------------------------------------------------------------------------------
+# Library config options (LIB_SDL_CONFIG_*)
+# ------------------------------------------------------------------------------
+# No options.
+# ------------------------------------------------------------------------------
 
-$(call emb_info,SDL CFLAGS = '$(SDL_CFLAGS)')
-$(call emb_info,SDL LDFLAGS = '$(SDL_LDFLAGS)')
+$(call emb_declare_lib,$\
+    Simple DirectMedia Layer,$\
+    LIB_SDL,$\
+    ,$\
+    )
 
-CFLAGS += $(SDL_CFLAGS)
+LIB_SDL_CONFIG_EXE ?= sdl2-config
+LIB_SDL_VERSION := $(shell $(LIB_SDL_CONFIG_EXE) --version)
+LIB_SDL_CFLAGS ?= $(shell $(LIB_SDL_CONFIG_EXE) --cflags)
+LIB_SDL_LDFLAGS ?= $(shell $(LIB_SDL_CONFIG_EXE) --libs)
+
+$(call emb_info,Version '$(LIB_SDL_VERSION)')
+$(call emb_info,Using CFLAGS '$(LIB_SDL_CFLAGS)')
+$(call emb_info,Using LDFLAGS '$(LIB_SDL_LDFLAGS)')
+
+CFLAGS += $(LIB_SDL_CFLAGS)
+CFLAGS += -D'LIB_SDL_VERSION="$(LIB_SDL_VERSION)"'
 
 LDFLAGS += -lm
-LDFLAGS += $(SDL_LDFLAGS)
-LDFLAGS += -lSDL_mixer
+LDFLAGS += $(LIB_SDL_LDFLAGS)
+LDFLAGS += -lSDL2_mixer

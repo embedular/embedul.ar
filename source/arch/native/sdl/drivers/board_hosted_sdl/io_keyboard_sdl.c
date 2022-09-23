@@ -72,36 +72,36 @@ void IO_KEYBOARD_SDL_Attach (struct IO_KEYBOARD_SDL *const K)
     INPUT_SetDevice ((struct IO *) K, 0);
 
     // Default keymappings
-    INPUT_MapBit (INPUT_Bit_BoardA, SDLK_0);
-    INPUT_MapBit (INPUT_Bit_BoardB, SDLK_1);
-    INPUT_MapBit (INPUT_Bit_BoardC, SDLK_2);
-    INPUT_MapBit (INPUT_Bit_BoardD, SDLK_3);
+    INPUT_MapBit (INPUT_Bit_BoardA, SDL_SCANCODE_0);
+    INPUT_MapBit (INPUT_Bit_BoardB, SDL_SCANCODE_1);
+    INPUT_MapBit (INPUT_Bit_BoardC, SDL_SCANCODE_2);
+    INPUT_MapBit (INPUT_Bit_BoardD, SDL_SCANCODE_3);
 
-    INPUT_MapBit (INPUT_Bit_P1Right, SDLK_RIGHT);
-    INPUT_MapBit (INPUT_Bit_P1Left, SDLK_LEFT);
-    INPUT_MapBit (INPUT_Bit_P1Down, SDLK_DOWN);
-    INPUT_MapBit (INPUT_Bit_P1Up, SDLK_UP);
-    INPUT_MapBit (INPUT_Bit_P1Start, SDLK_KP_ENTER);
-    INPUT_MapBit (INPUT_Bit_P1Select, SDLK_KP_PLUS);
-    INPUT_MapBit (INPUT_Bit_P1A, SDLK_KP1);
-    INPUT_MapBit (INPUT_Bit_P1B, SDLK_KP2);
-    INPUT_MapBit (INPUT_Bit_P1C, SDLK_KP3);
-    INPUT_MapBit (INPUT_Bit_P1X, SDLK_KP4);
-    INPUT_MapBit (INPUT_Bit_P1Y, SDLK_KP5);
-    INPUT_MapBit (INPUT_Bit_P1Z, SDLK_KP6);
+    INPUT_MapBit (INPUT_Bit_P1Right, SDL_SCANCODE_RIGHT);
+    INPUT_MapBit (INPUT_Bit_P1Left, SDL_SCANCODE_LEFT);
+    INPUT_MapBit (INPUT_Bit_P1Down, SDL_SCANCODE_DOWN);
+    INPUT_MapBit (INPUT_Bit_P1Up, SDL_SCANCODE_UP);
+    INPUT_MapBit (INPUT_Bit_P1Start, SDL_SCANCODE_KP_ENTER);
+    INPUT_MapBit (INPUT_Bit_P1Select, SDL_SCANCODE_KP_PLUS);
+    INPUT_MapBit (INPUT_Bit_P1A, SDL_SCANCODE_KP_1);
+    INPUT_MapBit (INPUT_Bit_P1B, SDL_SCANCODE_KP_2);
+    INPUT_MapBit (INPUT_Bit_P1C, SDL_SCANCODE_KP_3);
+    INPUT_MapBit (INPUT_Bit_P1X, SDL_SCANCODE_KP_4);
+    INPUT_MapBit (INPUT_Bit_P1Y, SDL_SCANCODE_KP_5);
+    INPUT_MapBit (INPUT_Bit_P1Z, SDL_SCANCODE_KP_6);
 
-    INPUT_MapBit (INPUT_Bit_P2Right, SDLK_d);
-    INPUT_MapBit (INPUT_Bit_P2Left, SDLK_a);
-    INPUT_MapBit (INPUT_Bit_P2Down, SDLK_s);
-    INPUT_MapBit (INPUT_Bit_P2Up, SDLK_w);
-    INPUT_MapBit (INPUT_Bit_P2Start, SDLK_RETURN);
-    INPUT_MapBit (INPUT_Bit_P2Select, SDLK_BACKSLASH);
-    INPUT_MapBit (INPUT_Bit_P2A, SDLK_j);
-    INPUT_MapBit (INPUT_Bit_P2B, SDLK_k);
-    INPUT_MapBit (INPUT_Bit_P2C, SDLK_l);
-    INPUT_MapBit (INPUT_Bit_P2X, SDLK_u);
-    INPUT_MapBit (INPUT_Bit_P2Y, SDLK_i);
-    INPUT_MapBit (INPUT_Bit_P2Z, SDLK_o);
+    INPUT_MapBit (INPUT_Bit_P2Right, SDL_SCANCODE_D);
+    INPUT_MapBit (INPUT_Bit_P2Left, SDL_SCANCODE_A);
+    INPUT_MapBit (INPUT_Bit_P2Down, SDL_SCANCODE_S);
+    INPUT_MapBit (INPUT_Bit_P2Up, SDL_SCANCODE_W);
+    INPUT_MapBit (INPUT_Bit_P2Start, SDL_SCANCODE_RETURN);
+    INPUT_MapBit (INPUT_Bit_P2Select, SDL_SCANCODE_BACKSLASH);
+    INPUT_MapBit (INPUT_Bit_P2A, SDL_SCANCODE_J);
+    INPUT_MapBit (INPUT_Bit_P2B, SDL_SCANCODE_K);
+    INPUT_MapBit (INPUT_Bit_P2C, SDL_SCANCODE_L);
+    INPUT_MapBit (INPUT_Bit_P2X, SDL_SCANCODE_U);
+    INPUT_MapBit (INPUT_Bit_P2Y, SDL_SCANCODE_I);
+    INPUT_MapBit (INPUT_Bit_P2Z, SDL_SCANCODE_O);
 }
 
 
@@ -111,13 +111,14 @@ void update (struct IO *const Io)
 
     SDL_PumpEvents ();
 
-    const Uint8 * Keys = SDL_GetKeyState (NULL);
+    int numKeys = 0;
+    const Uint8 *const KeyStates = SDL_GetKeyboardState (&numKeys);
 
     memset (K->inputStatus, 0, sizeof(K->inputStatus));
 
-    for (uint32_t i = 0; i < SDLK_LAST; ++i)
+    for (int i = 0; i < numKeys; ++i)
     {
-        BITFIELD_SetBit (&K->inputBf, i, Keys[i]);
+        BITFIELD_SetBit (&K->inputBf, i, KeyStates[i]);
     }
 }
 
@@ -134,14 +135,17 @@ IO_Count availableInputs (struct IO *const Io, const enum IO_Type IoType,
         return 0;
     }
 
-    return SDLK_LAST;
+    // In reality it depends on the keyboard. Besides, SDL_NUM_SCANCODES is a
+    // reserved, maximum amount. There are like 200 undefined scancodes on the
+    // higher side. Nevertheless, the driver supports them all.
+    return SDL_NUM_SCANCODES;
 }
 
 
 uint32_t getInput (struct IO *const Io, const enum IO_Type IoType,
                    const uint16_t Index, const uint32_t InputSource)
 {
-    BOARD_AssertParams (IoType == IO_Type_Bit && Index < SDLK_LAST);
+    BOARD_AssertParams (IoType == IO_Type_Bit && Index < SDL_NUM_SCANCODES);
     
     (void) InputSource;
 
@@ -155,9 +159,11 @@ const char * inputName (struct IO *const Io,
                         const enum IO_Type IoType,
                         const uint16_t Index)
 {
-    BOARD_AssertParams (IoType == IO_Type_Bit && Index < SDLK_LAST);
+    BOARD_AssertParams (IoType == IO_Type_Bit && Index < SDL_NUM_SCANCODES);
 
     (void) Io;
 
-    return SDL_GetKeyName (Index);
+    const SDL_Keycode Keycode = SDL_GetKeyFromScancode (Index);
+
+    return SDL_GetKeyName (Keycode);
 }

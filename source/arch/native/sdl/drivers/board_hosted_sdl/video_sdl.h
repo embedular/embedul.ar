@@ -33,8 +33,9 @@
 struct VIDEO_SDL
 {
     struct VIDEO    device;
-    SDL_Surface     * screen;
-    SDL_Surface     * screenBuffer;
+    SDL_Window      * displayWindow;
+    SDL_Surface     * displaySurface;
+    SDL_Surface     * displayBuffer;
     uint32_t        vbiStartedTicks;
 };
 

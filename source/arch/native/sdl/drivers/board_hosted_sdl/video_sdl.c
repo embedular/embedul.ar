@@ -29,9 +29,9 @@
 #include <assert.h>
 
 
-#define SET_VIDEO_MODE_FAILED_STR       "SDL_SetVideoMode() failed"
+#define CREATE_WINDOW_FAILED_STR        "SDL_CreateWindow() failed"
 #define CREATE_SURFACE_FAILED_STR       "SDL_CreateRGBSurface() failed"
-#define LANG_ERROR                  "error"
+#define SET_SURFACE_COLORS_FAILED_STR   "SDL_SetPaletteColors() failed"
 #define DRIVER_SIGNAL_STR               "desktop window"
 
 
@@ -44,9 +44,10 @@ static uint8_t  s_FramebufferA[256 * 144];
 static uint8_t  s_FramebufferB[256 * 144];
 
 
-bool    hardwareInit    (struct VIDEO *const V);
-bool    reachedVBICount (struct VIDEO *const V);
-void    waitForVBI      (struct VIDEO *const V);
+static bool     hardwareInit    (struct VIDEO *const V);
+static bool     reachedVBICount (struct VIDEO *const V);
+static void     waitForVBI      (struct VIDEO *const V);
+static void     shutdown        (struct VIDEO *const V);
 
 
 static const struct VIDEO_IFACE VIDEO_IFACE_SDL =
@@ -57,7 +58,8 @@ static const struct VIDEO_IFACE VIDEO_IFACE_SDL =
     .WaitForVBI         = waitForVBI,
     .FrameEnd           = UNSUPPORTED,
     .FrameTransition    = UNSUPPORTED,
-    .FrameBegin         = UNSUPPORTED
+    .FrameBegin         = UNSUPPORTED,
+    .Shutdown           = shutdown
 };
 
 
@@ -67,7 +69,7 @@ bool VIDEO_SDL_Init (struct VIDEO_SDL *const S)
 }
 
 
-bool hardwareInit (struct VIDEO *const V)
+static bool hardwareInit (struct VIDEO *const V)
 {
     struct VIDEO_SDL *const S = (struct VIDEO_SDL *) V;
 
@@ -79,21 +81,34 @@ bool hardwareInit (struct VIDEO *const V)
     V->bufferA  = s_FramebufferA;
     V->bufferB  = s_FramebufferB;
 
-    const SDL_VideoInfo *vidInfo = SDL_GetVideoInfo ();
-
-    S->screen = SDL_SetVideoMode (1280, 720, vidInfo->vfmt->BitsPerPixel,
-                                SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_HWPALETTE);
-    if (!S->screen)
     {
-        LOG_WarnDebug (V, SET_VIDEO_MODE_FAILED_STR);
+        char windowName[64];
+
+        snprintf (windowName, sizeof(windowName),
+                                        "embedul.ar - %s%s%s",
+                                        OBJECT_Type(V),
+                                        OBJECT_TYPE_SEPARATOR,
+                                        VIDEO_Description());
+
+        S->displayWindow = SDL_CreateWindow (windowName,
+                                        SDL_WINDOWPOS_UNDEFINED,
+                                        SDL_WINDOWPOS_UNDEFINED,
+                                        1280, 720, 0);
+    }
+
+    S->displaySurface = SDL_GetWindowSurface (S->displayWindow);
+
+    if (!S->displayWindow || !S->displaySurface)
+    {
+        LOG_WarnDebug (V, CREATE_WINDOW_FAILED_STR);
         LOG_Items (1, LANG_ERROR, SDL_GetError());
 
         return false;
     }
 
-    S->screenBuffer = SDL_CreateRGBSurface (SDL_SWSURFACE,
-                                            1280, 720, 8, 0, 0, 0, 0);
-    if (!S->screenBuffer)
+    S->displayBuffer = SDL_CreateRGBSurface (SDL_SWSURFACE,
+                                             1280, 720, 8, 0, 0, 0, 0);
+    if (!S->displayBuffer)
     {
         LOG_WarnDebug (V, CREATE_SURFACE_FAILED_STR);
         LOG_Items (1, LANG_ERROR, SDL_GetError());
@@ -101,15 +116,22 @@ bool hardwareInit (struct VIDEO *const V)
         return false;
     }
 
+    SDL_Color rgb332[256];
+
     for (int i = 0; i < 256; ++i)
     {
-        SDL_Color rgb332;
+        rgb332[i].r = (uint8_t) (((i >> 5) / 7.0) * 255.0);
+        rgb332[i].g = (uint8_t) ((((i >> 2) & 0x7) / 7.0) * 255.0);
+        rgb332[i].b = (uint8_t) (((i & 0x3) / 3.0) * 255.0);
+    }
 
-        rgb332.r = (uint8_t) (((i >> 5) / 7.0) * 255.0);
-        rgb332.g = (uint8_t) ((((i >> 2) & 0x7) / 7.0) * 255.0);
-        rgb332.b = (uint8_t) (((i & 0x3) / 3.0) * 255.0);
+    if (SDL_SetPaletteColors (S->displayBuffer->format->palette,
+                              rgb332, 0, 256))
+    {
+        LOG_WarnDebug (V, SET_SURFACE_COLORS_FAILED_STR);
+        LOG_Items (1, LANG_ERROR, SDL_GetError());
 
-        SDL_SetColors (S->screenBuffer, &rgb332, i, 1);
+        return false;    
     }
 
     V->adapterDescription   = NULL;
@@ -150,7 +172,7 @@ static void updateScreen (struct VIDEO *const V)
     // Invalid display width and/or height
     BOARD_AssertState (V->width == 256 && V->height == 144);
 
-    uint8_t *s = lockSurface (S->screenBuffer);
+    uint8_t *s = lockSurface (S->displayBuffer);
     // SDL_Surface lock failed
     BOARD_AssertState (s);
 
@@ -208,18 +230,19 @@ static void updateScreen (struct VIDEO *const V)
         for (int i = 0; i < 5; ++i)
         {
             memcpy (s, (i < Scanlines)? lineShow : lineScan, 1280);
-            s += S->screenBuffer->pitch;
+            s += S->displayBuffer->pitch;
         }
     }
 #endif
 
-    unlockSurface   (S->screenBuffer);
-    SDL_BlitSurface (S->screenBuffer, NULL, S->screen, NULL);
-    SDL_Flip        (S->screen);
+    unlockSurface (S->displayBuffer);
+
+    SDL_BlitSurface         (S->displayBuffer, NULL, S->displaySurface, NULL);
+    SDL_UpdateWindowSurface (S->displayWindow);
 }
 
 
-bool reachedVBICount (struct VIDEO *const V)
+static bool reachedVBICount (struct VIDEO *const V)
 {
     struct VIDEO_SDL *const S = (struct VIDEO_SDL *) V;
 
@@ -231,7 +254,7 @@ bool reachedVBICount (struct VIDEO *const V)
 }
 
 
-void waitForVBI (struct VIDEO *const V)
+static void waitForVBI (struct VIDEO *const V)
 {
     struct VIDEO_SDL *const S = (struct VIDEO_SDL *) V;
 
@@ -258,4 +281,15 @@ void waitForVBI (struct VIDEO *const V)
     }
 
     S->vbiStartedTicks = SDL_GetTicks ();
+}
+
+
+static void shutdown (struct VIDEO *const V)
+{
+    struct VIDEO_SDL *const S = (struct VIDEO_SDL *) V;
+
+    if (S->displayWindow)
+    {
+        SDL_DestroyWindow (S->displayWindow);
+    }
 }

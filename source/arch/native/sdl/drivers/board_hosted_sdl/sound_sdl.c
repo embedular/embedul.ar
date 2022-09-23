@@ -29,7 +29,6 @@
 
 
 #define OPENAUDIO_FAILED_STR        "Mix_OpenAudio() failed"
-#define LANG_ERROR                  "error"
 
 
 static void     hardwareInit    (struct SOUND *const S);

@@ -30,7 +30,7 @@
 #include "SDL.h"
 
 
-#define IO_KEYBOARD_SDL_STATUS_COUNT    ((SDLK_LAST >> 5) + 1)
+#define IO_KEYBOARD_SDL_STATUS_COUNT    ((SDL_NUM_SCANCODES >> 5) + 1)
 
 
 struct IO_KEYBOARD_SDL

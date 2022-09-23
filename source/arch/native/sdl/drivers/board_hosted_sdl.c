@@ -125,8 +125,7 @@ void * initComponent (struct BOARD *const B,
 
             atexit (SDL_Quit);
 
-            SDL_WM_SetCaption   ("embedul.ar", NULL);
-            SDL_EventState      (SDL_MOUSEMOTION, SDL_IGNORE);
+            SDL_EventState (SDL_MOUSEMOTION, SDL_IGNORE);
             break;
         }
 

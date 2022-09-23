@@ -55,6 +55,7 @@ typedef void (* VIDEO_WaitForVBIFunc)(struct VIDEO *const V);
 typedef void (* VIDEO_FrameEndFunc)(struct VIDEO *const V);
 typedef void (* VIDEO_FrameTransitionFunc)(struct VIDEO *const V);
 typedef void (* VIDEO_FrameBeginFunc)(struct VIDEO *const V);
+typedef void (* VIDEO_ShutdownFunc)(struct VIDEO *const V);
 
 
 struct VIDEO_IFACE
@@ -66,6 +67,7 @@ struct VIDEO_IFACE
     const VIDEO_FrameEndFunc            FrameEnd;
     const VIDEO_FrameTransitionFunc     FrameTransition;
     const VIDEO_FrameBeginFunc          FrameBegin;
+    const VIDEO_ShutdownFunc            Shutdown;
 };
 
 

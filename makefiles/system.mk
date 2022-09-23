@@ -144,7 +144,7 @@ endef
 define emb_declare_lib
 	$(call emb_info,Declaring library '$(1)')
     $(eval $(2) ?= $(3))
-    $(call emb_need_lib,$($(2)),$(1))
+    $(if $(3),$(call emb_need_lib,$($(2)),$(1)),$(call emb_info,'$(1)' is a system-wide library))
     $(eval $(foreach var,$(4),$(call emb_create_lib_list,$(2),DEFAULT,$(var))))
     $(eval $(foreach var,$($(2)_CONFIG),$(call emb_create_lib_list,$(2),USER,$(var))))	
 	$(eval $(2)_INVALID_CONFIG := $(filter-out $($(2)_DEFAULT_CONFIG),$($(2)_USER_CONFIG)))
