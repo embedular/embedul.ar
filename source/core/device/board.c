@@ -219,4 +219,9 @@ void BOARD__stage_shutdown (void)
     LOG_Warn (s_board, LANG_SHUTTING_DOWN);
 
     s_board->iface->StageChange (s_board, BOARD_Stage_Shutdown);
+
+    if (s_board->video && s_board->video->iface->Shutdown)
+    {
+        s_board->video->iface->Shutdown (s_board->video);
+    }
 }
