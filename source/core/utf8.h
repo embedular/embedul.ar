@@ -48,8 +48,8 @@
  * UTF-8 is part of the Unicode Standard. It is an octet-based,
  * variable-length character encoding used to encode Unicode code points.
  * UTF-8 is backwards compatible with 7-bit ASCII. The eighth, most
- * significant bit set implies that the code point data was
- * split into two to four octets depending on adjacent fixed bits, as
+ * significant bit set implies that the code point data splits
+ * into two to four octets depending on adjacent fixed bits, as
  * depicted in the following figure:
  *
  * .. image:: images/utf8_encoding.drawio.svg

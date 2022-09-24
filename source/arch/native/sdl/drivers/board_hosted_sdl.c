@@ -42,10 +42,7 @@
                                 "`M40`1`L2"
 
 #define BOARD_INFO_0_NAME       "simple directmedia layer"
-#define BOARD_INFO_1_VER        "version " \
-                                CC_ExpStr(SDL_MAJOR_VERSION) "." \
-                                CC_ExpStr(SDL_MINOR_VERSION) "." \
-                                CC_ExpStr(SDL_PATCHLEVEL)
+#define BOARD_INFO_1_VER        "version " LIB_SDL_VERSION_STR
 
 
 static struct BOARD_HOSTED_SDL   s_System_host;
