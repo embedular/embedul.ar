@@ -92,7 +92,7 @@ enum DEVICE_CommandResult DEVICE_Command (
 
 
 #define DEVICE_IMPLEMENTATION_Clear(_p) \
-    OBJECT_StaticCheck (&_p->device); \
+    OBJECT_AssertValid (&_p->device); \
     _Static_assert ((sizeof(*_p) - sizeof(_p->device)) > 0, \
                     LANG_INVALID_IMPLEMENTATION); \
     memset ((void *)((uintptr_t)_p + sizeof(_p->device)), 0, \

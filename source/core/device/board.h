@@ -71,7 +71,7 @@
 #define BOARD_AssertUnexpectedValue(_d,_v) \
     LOG_Warn (_d, LANG_UNEXPECTED_VALUE); \
     LOG_Items (1, LANG_VALUE, _v, LOG_ItemsBases(VARIANT_Base_Hex)); \
-    BOARD_AssertState (false);
+    BOARD_AssertState (false)
 
 
 enum BOARD_Stage

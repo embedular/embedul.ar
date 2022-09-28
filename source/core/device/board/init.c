@@ -156,8 +156,7 @@ static void * stageInitObj (struct BOARD *const B,
 
 #define BOARD_INIT_Component(_b,_stage,_obj) \
     _b->currentStage = _stage; \
-    _Generic( \
-        (_obj), \
+    _Generic((_obj), \
         struct NOBJ *   : stageInit(_b,_stage), \
         struct STREAM * : _obj = stageInitObj(_b,_stage), \
         struct RANDOM * : _obj = stageInitObj(_b,_stage), \

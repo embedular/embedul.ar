@@ -61,12 +61,14 @@
 
 
 #define LOG(_dp,_msg,...) \
+    OBJECT_AssertValid(_dp); \
     LOG_Args (NULL, NULL, NULL, LOG_LINE_TIMING_ONLY, \
               &OBJECT_INFO_Spawn(_dp), \
               NULL, LOG_SUFFIX_DOT_NEWLINE_STR, \
               _msg, VARIANT_AutoParams(__VA_ARGS__))
 
 #define LOG_ContextBegin(_dp,_msg,...) \
+    OBJECT_AssertValid(_dp); \
     LOG__contextBegin(); \
     LOG_Args ("┌", NULL, NULL, LOG_LINE_TIMING_ONLY, \
               &OBJECT_INFO_Spawn(_dp), \
@@ -79,24 +81,28 @@
     while (log_ac__) {}
 
 #define LOG_Debug(_dp,_msg,...) \
+    OBJECT_AssertValid(_dp); \
     LOG_Args (NULL, __func__, __FILE__, __LINE__, \
               &OBJECT_INFO_Spawn(_dp), \
               NULL, LOG_SUFFIX_DOT_NEWLINE_STR, \
               _msg, VARIANT_AutoParams(__VA_ARGS__))
 
 #define LOG_Warn(_dp,_msg,...) \
+    OBJECT_AssertValid(_dp); \
     LOG_Args (NULL, NULL, NULL, LOG_LINE_TIMING_ONLY, \
               &OBJECT_INFO_Spawn(_dp), \
               LOG_PREFIX_WARNING_STR, LOG_SUFFIX_DOT_NEWLINE_STR, \
               _msg, VARIANT_AutoParams(__VA_ARGS__))
 
 #define LOG_WarnDebug(_dp,_msg,...) \
+    OBJECT_AssertValid(_dp); \
     LOG_Args (NULL, __func__, __FILE__, __LINE__, \
               &OBJECT_INFO_Spawn(_dp), \
               LOG_PREFIX_WARNING_STR, LOG_SUFFIX_DOT_NEWLINE_STR, \
               _msg, VARIANT_AutoParams(__VA_ARGS__))
 
 #define LOG_Plain(_msg,...) \
+    OBJECT_AssertValid(_dp); \
     LOG_Args (NULL, NULL, NULL, LOG_LINE_NO_TIMING, \
               NULL, \
               NULL, LOG_SUFFIX_NEWLINE_STR, \
@@ -104,6 +110,7 @@
 
 
 #define LOG_PendingBegin(_dp,_msg,...) \
+    OBJECT_AssertValid(_dp); \
     LOG_Args (NULL, NULL, NULL, LOG_LINE_TIMING_ONLY, \
               &OBJECT_INFO_Spawn(_dp), \
               LOG_PREFIX_PENDING_STR, LOG_SUFFIX_PENDING_STR, \

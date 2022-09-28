@@ -57,7 +57,7 @@
             (_size & (_mul - 1))? false : true)
 
 
-#define CC_CheckType(_param,_type) \
+#define CC_AssertType(_param,_type) \
     _Static_assert(_Generic ((_param), _type: 1, default: 0), \
                    "_param has an invalid type")
 

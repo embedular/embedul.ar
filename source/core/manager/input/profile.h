@@ -37,7 +37,7 @@
                            INPUT_PROFILE_ ## _pname ## _RANGE_MAP)
 
 #define INPUT_PROFILE_ATTACH__BEGIN(_pname,_board,_profile) \
-    CC_CheckType(_profile,struct INPUT_PROFILE_ ## _pname); \
+    CC_AssertType(_profile,struct INPUT_PROFILE_ ## _pname); \
     INPUT_PROFILE__attach (_board->input.profiles, \
                     INPUT_PROFILE_Type_ ## _pname,
 

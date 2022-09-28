@@ -28,78 +28,59 @@
 #include <stdint.h>
 
 
-struct OBJECT_INFO
-{
-    const char *const Type;
-    const char *const Description;
-    const void *const Ptr;
-};
-
-
-#define OBJECT_INFO_Spawn(_p) \
-    (struct OBJECT_INFO) { \
-        .Type           = OBJECT_Type(_p), \
-        .Description    = OBJECT_Description(_p), \
-        .Ptr            = OBJECT_Ptr(_p) \
-    }
-
-
-const char * OBJECT_INFO_Type           (struct OBJECT_INFO *O);
-const char * OBJECT_INFO_Description    (struct OBJECT_INFO *O);
-const void * OBJECT_INFO_Ptr            (struct OBJECT_INFO *O);
-
-
 #define OBJECT_TYPE_SEPARATOR   ":"
 
 
-extern struct NOBJ * NOBJ;
-
-
-#define OBJECT_StaticCheck(_p) \
-    _Generic( \
-        (_p), \
-        struct IO *             : (void)0, \
-        struct RAWSTOR *        : (void)0, \
-        struct STREAM *         : (void)0, \
-        struct PACKET *         : (void)0, \
-        struct RANDOM *         : (void)0, \
-        struct SOUND *          : (void)0, \
-        struct VIDEO *          : (void)0, \
-        struct BOARD *          : (void)0, \
-        struct LOG *            : (void)0, \
-        struct OUTPUT *         : (void)0, \
-        struct INPUT *          : (void)0, \
-        struct COMM *           : (void)0, \
-        struct STORAGE *        : (void)0, \
-        struct ANIM *           : (void)0, \
-        struct ARRAY *          : (void)0, \
-        struct BITFIELD *       : (void)0, \
-        struct CYCLIC *         : (void)0, \
-        struct FSM *            : (void)0, \
-        struct MEMPOOL *        : (void)0, \
-        struct QUEUE *          : (void)0, \
-        struct QUEUE_TRV *      : (void)0, \
-        struct SEQUENCE *       : (void)0, \
-        struct VARIANT *        : (void)0, \
-        struct INPUT_ACTION *   : (void)0, \
-        struct VIDEO_DOTMAP *   : (void)0, \
-        struct VIDEO_FADE *     : (void)0, \
-        struct VIDEO_FONT *     : (void)0, \
+#define OBJECT_IsValid(_p) \
+    _Generic((_p), \
+        struct IO *             : 1, \
+        struct RAWSTOR *        : 1, \
+        struct STREAM *         : 1, \
+        struct PACKET *         : 1, \
+        struct RANDOM *         : 1, \
+        struct SOUND *          : 1, \
+        struct VIDEO *          : 1, \
+        struct BOARD *          : 1, \
+        struct LOG *            : 1, \
+        struct OUTPUT *         : 1, \
+        struct INPUT *          : 1, \
+        struct COMM *           : 1, \
+        struct STORAGE *        : 1, \
+        struct ANIM *           : 1, \
+        struct ARRAY *          : 1, \
+        struct BITFIELD *       : 1, \
+        struct CYCLIC *         : 1, \
+        struct FSM *            : 1, \
+        struct MEMPOOL *        : 1, \
+        struct QUEUE *          : 1, \
+        struct QUEUE_TRV *      : 1, \
+        struct SEQUENCE *       : 1, \
+        struct VARIANT *        : 1, \
+        struct INPUT_ACTION *   : 1, \
+        struct VIDEO_DOTMAP *   : 1, \
+        struct VIDEO_FADE *     : 1, \
+        struct VIDEO_FONT *     : 1, \
         struct VIDEO_RGB332_Gradient * \
-                                : (void)0, \
-        struct VIDEO_SPRITE *   : (void)0, \
-        struct VIDEO_TILEMAP *  : (void)0 \
+                                : 1, \
+        struct VIDEO_SPRITE *   : 1, \
+        struct VIDEO_TILEMAP *  : 1, \
+        struct NOBJ *           : 1, \
+        struct OBJECT_INFO *    : 1, \
+        default                 : 0 \
     )
 
 
+#define OBJECT_AssertValid(_p) \
+    { _Static_assert(OBJECT_IsValid(_p), "invalid object"); }
+
+
 #define OBJECT_Clear(_p) \
-    OBJECT_StaticCheck (_p); \
+    OBJECT_AssertValid (_p); \
     if (_p) { memset (_p, 0, sizeof(*_p)); }
 
 
 #define OBJECT_Type(_p) \
-    _Generic( \
-        (_p), \
+    _Generic((_p), \
         struct IO *             : "dev" OBJECT_TYPE_SEPARATOR "io", \
         struct RAWSTOR *        : "dev" OBJECT_TYPE_SEPARATOR "rawstor", \
         struct STREAM *         : "dev" OBJECT_TYPE_SEPARATOR "stream", \
@@ -138,8 +119,7 @@ extern struct NOBJ * NOBJ;
 
 
 #define OBJECT_Description(_p) \
-    _Generic( \
-        (_p), \
+    _Generic((_p), \
         struct IO *             : IO_Description((struct IO *)_p), \
         struct RAWSTOR *        : RAWSTOR_Description((struct RAWSTOR *)_p), \
         struct STREAM *         : STREAM_Description((struct STREAM *)_p), \
@@ -178,8 +158,7 @@ extern struct NOBJ * NOBJ;
 
 
 #define OBJECT_Ptr(_p) \
-    _Generic( \
-        (_p), \
+    _Generic((_p), \
         struct IO *             : _p, \
         struct RAWSTOR *        : _p, \
         struct STREAM *         : _p, \
@@ -215,3 +194,27 @@ extern struct NOBJ * NOBJ;
         struct OBJECT_INFO *    : OBJECT_INFO_Ptr( \
                                     (struct OBJECT_INFO *)(uintptr_t)_p) \
     )
+
+
+extern struct NOBJ * NOBJ;
+
+
+struct OBJECT_INFO
+{
+    const char *const Type;
+    const char *const Description;
+    const void *const Ptr;
+};
+
+
+#define OBJECT_INFO_Spawn(_p) \
+    (struct OBJECT_INFO) { \
+        .Type           = OBJECT_Type(_p), \
+        .Description    = OBJECT_Description(_p), \
+        .Ptr            = OBJECT_Ptr(_p) \
+    }
+
+
+const char * OBJECT_INFO_Type           (struct OBJECT_INFO *O);
+const char * OBJECT_INFO_Description    (struct OBJECT_INFO *O);
+const void * OBJECT_INFO_Ptr            (struct OBJECT_INFO *O);
