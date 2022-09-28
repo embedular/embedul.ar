@@ -82,10 +82,11 @@ static bool hardwareInit (struct VIDEO *const V)
     V->bufferB  = s_FramebufferB;
 
     {
-        char windowName[64];
+        char windowName[80];
 
         snprintf (windowName, sizeof(windowName),
-                                        "embedul.ar - %s%s%s",
+                                        "%s [embedul.ar] - %s%s%s",
+                                        CC_AppNameStr,
                                         OBJECT_Type(V),
                                         OBJECT_TYPE_SEPARATOR,
                                         VIDEO_Description());
