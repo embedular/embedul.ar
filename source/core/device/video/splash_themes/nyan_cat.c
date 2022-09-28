@@ -368,7 +368,7 @@ static const struct SEQUENCE_Stage s_SplashTheme[] =
     },
     {
         .func       = nyancat,
-        .input      = SEQUENCE_INPUT_ANY
+        .input      = SEQUENCE_INPUT_ANY_BIT(INPUT_PROFILE_SelectFlag__BUTTONS)
     }
 };
 

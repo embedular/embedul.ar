@@ -24,12 +24,13 @@
 */
 
 #include "embedul.ar/source/core/mempool.h"
+#include "embedul.ar/source/core/cc.h"
 #include "embedul.ar/source/core/device/board.h"
 
 
 #define MEMPOOL_BLOCK_SIGNATURE         0xACA1B10C
 #define MEMPOOL_ALIGN_TO                8
-#define MEMPOOL_BLOCK_SIZE              MISC_RoundTo(MEMPOOL_ALIGN_TO, \
+#define MEMPOOL_BLOCK_SIZE              CC_RoundTo(MEMPOOL_ALIGN_TO, \
                                             sizeof(struct MEMPOOL_Block))
 
 // Opaque structure
@@ -94,7 +95,7 @@ void * MEMPOOL_Block (struct MEMPOOL *const M, const uint32_t ReqSize,
     // Reserved memory, including the aligned MEMPOOL_Block structure.
     const uint64_t BlockSize = (ReqSize == MEMPOOL_BLOCKSIZE_REMAINS)? 
                     Available : MEMPOOL_BLOCK_SIZE +
-                                    MISC_RoundTo(MEMPOOL_ALIGN_TO, ReqSize);
+                                    CC_RoundTo(MEMPOOL_ALIGN_TO, ReqSize);
 
     // blockSize must be a multiple of eight. This is assured if m->size
     // and m->used are multiple of eight, MEMPOOL_Block takes a multiple of 8
@@ -125,7 +126,7 @@ void * MEMPOOL_Block (struct MEMPOOL *const M, const uint32_t ReqSize,
     uintptr_t Result = ((uintptr_t)Block) + MEMPOOL_BLOCK_SIZE;
 
     // Make sure the resulting address is aligned according to MEMPOOL_ALIGN_TO.
-    BOARD_AssertState (MISC_IsAlignedTo(MEMPOOL_ALIGN_TO, Result));
+    BOARD_AssertState (CC_IsAlignedTo(MEMPOOL_ALIGN_TO, Result));
 
     return (void *) Result;
 }

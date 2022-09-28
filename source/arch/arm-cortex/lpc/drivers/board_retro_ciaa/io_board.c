@@ -122,13 +122,12 @@ void IO_BOARD_Attach (struct IO_BOARD *const B)
 
     INPUT_SetDevice ((struct IO *)B, 0);
 
-    INPUT_MapBit (INPUT_Bit_Backlight, IO_BOARD_INB_BOARD_BACKLIGHT);
-    INPUT_MapBit (INPUT_Bit_StoragePower, IO_BOARD_INB_SD_POW);
-    INPUT_MapBit (INPUT_Bit_WirelessEnable, IO_BOARD_INB_WIFI_EN);
-    INPUT_MapBit (INPUT_Bit_SoundMute, IO_BOARD_INB_SOUND_MUTE);
-    // Default keymappings
-    INPUT_MapBit (INPUT_Bit_BoardA, IO_BOARD_INB_ISP);
-    INPUT_MapBit (INPUT_Bit_BoardB, IO_BOARD_INB_WAKEUP);
+    INPUT_MAP_BIT (MAIN, A, IO_BOARD_INB_ISP);
+    INPUT_MAP_BIT (MAIN, B, IO_BOARD_INB_WAKEUP);
+    INPUT_MAP_BIT (CONTROL, Backlight, IO_BOARD_INB_BOARD_BACKLIGHT);
+    INPUT_MAP_BIT (CONTROL, StoragePower, IO_BOARD_INB_SD_POW);
+    INPUT_MAP_BIT (CONTROL, WirelessEnable, IO_BOARD_INB_WIFI_EN);
+    INPUT_MAP_BIT (CONTROL, SoundMute, IO_BOARD_INB_SOUND_MUTE);
 }
 
 

@@ -28,14 +28,15 @@
 #include <stdint.h>
 
 
-#define CC_Paste(x,y)       x ## y
-#define CC_ExpPaste(x,y)    CC_Paste(x,y)
-#define CC_Str(x)           #x
-#define CC_Exp(x)           x
-#define CC_ExpStr(x)        CC_Str(x)
+#define CC_Paste(x,y)           x ## y
+#define CC_ExpPaste(x,y)        CC_Paste(x,y)
+#define CC_Str(x)               #x
+#define CC_Exp(x)               x
+#define CC_ExpStr(x)            CC_Str(x)
+
+
 // https://renenyffenegger.ch/notes/development/languages/C-C-plus-plus/
 // preprocessor/macros/__VA_ARGS__/count-arguments
-
 #define CC_18thElement(a1, a2, a3, a4, a5, a6, a7, a8, \
                        a9, a10, a11, a12, a13, a14, a15, a16, \
                        a17, a18, ...) a18
@@ -43,6 +44,22 @@
                                     16, 15, 14, 13, 12, 11, 10, 9, \
                                     8, 7, 6, 5, 4, 3, 2, 1, \
                                     0)
+
+#define CC_RoundTo(_mul,_size) \
+    (({_Static_assert((_mul & (_mul - 1)) == 0, \
+        "_mul must be power of 2"); }), \
+            (_size + ((~_size + 1) & (_mul - 1))))
+
+
+#define CC_IsAlignedTo(_mul,_size) \
+    (({_Static_assert((_mul & (_mul - 1)) == 0, \
+        "_mul must be power of 2"); }), \
+            (_size & (_mul - 1))? false : true)
+
+
+#define CC_CheckType(_param,_type) \
+    _Static_assert(_Generic ((_param), _type: 1, default: 0), \
+                   "_param has an invalid type")
 
 // -----------------------------------------------------------------------------
 // The corresponding compiler makefile defines the following macros
@@ -106,10 +123,4 @@
     CC_DateStr " " CC_CompilerStr " " CC_OptLevelStr \
     CC_BuildInfoDebugStrSpaced
 
-#define CC_EnumForce32(s)           s ## __FORCE32 = INT32_MAX
-
-
-uint32_t    CC_RoundTo4     (const uint32_t Size);
-uint64_t    CC_RoundTo4_64  (const uint64_t Size);
-uint32_t    CC_RoundTo8     (const uint32_t Size);
-uint64_t    CC_RoundTo8_64  (const uint64_t Size);
+#define CC_EnumForce32(s) s ## __FORCE32 = INT32_MAX

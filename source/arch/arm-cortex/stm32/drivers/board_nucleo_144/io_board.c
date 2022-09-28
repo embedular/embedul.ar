@@ -106,9 +106,25 @@ void IO_BOARD_Attach (struct IO_BOARD *const B)
     OUTPUT_MapBit (OUTPUT_Bit_GreenSign, IO_BOARD_OUTB_LED_GREEN);
     OUTPUT_MapBit (OUTPUT_Bit_BlueSign, IO_BOARD_OUTB_LED_BLUE);
 
+
     INPUT_SetDevice ((struct IO *)B, 0);
 
-    INPUT_MapBit (INPUT_Bit_BoardA, IO_BOARD_INB_USER);
+    INPUT_MAP_BIT (MAIN, A, IO_BOARD_INB_USER);
+}
+
+
+inline static void bspButtonIn (struct IO_BOARD *const B,
+                                const enum IO_BOARD_INB Inb,
+                                const uint32_t Button)
+{
+    B->inbData |= BSP_PB_GetState(Button)? 1 << Inb : 0;
+}
+
+
+inline static void ledOut (struct IO_BOARD *const B,
+                           const enum IO_BOARD_OUTB Outb, const uint32_t Led)
+{
+    (B->outbData & (1 << Outb))? BSP_LED_On(Led) : BSP_LED_Off(Led);
 }
 
 
@@ -116,20 +132,14 @@ void update (struct IO *const Io)
 {
     struct IO_BOARD *const B = (struct IO_BOARD *) Io;
 
-    #define SET_LED_STATE(n) B->outbData & (1 << IO_BOARD_OUTB_LED_ ## n)? \
-                                BSP_LED_On(LED_ ## n) : BSP_LED_Off(LED_ ## n)
-
-    B->inbData = 0;
-
     // Input
-    B->inbData |= BSP_PB_GetState(BUTTON_USER)? 1 << IO_BOARD_INB_USER : 0;
+    B->inbData = 0;
+    bspButtonIn (B, IO_BOARD_INB_USER, BUTTON_USER);
 
     // Output
-    SET_LED_STATE(GREEN);
-    SET_LED_STATE(BLUE);
-    SET_LED_STATE(RED);
-
-    #undef SET_LED_STATE
+    ledOut (B, IO_BOARD_OUTB_LED_GREEN, LED_GREEN);
+    ledOut (B, IO_BOARD_OUTB_LED_BLUE, LED_BLUE);
+    ledOut (B, IO_BOARD_OUTB_LED_RED, LED_RED);
 }
 
 

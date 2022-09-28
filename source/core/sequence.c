@@ -72,39 +72,46 @@ bool SEQUENCE_Update (struct SEQUENCE *const S)
     // will execute an Action_Exit on this same iteration.
     if (S->currentStageAction == SEQUENCE_Action_Run)
     {
+        bool exitStage = false;
+
         // Running stage timeout, 
         if (Stage->timeout && S->currentStageStarted + Stage->timeout <= Now)
         {
-            SEQUENCE_ExitStage (S);
+            exitStage = true;
+        }
+        else
+        {
+            switch (Stage->input.type)
+            {
+                case SEQUENCE_InputType_None:
+                    break;
+
+                case SEQUENCE_InputType_Bit:
+                    exitStage = INPUT_GetBitBuffer (Stage->input.profileType,
+                                                 Stage->input.inx);
+                    break;
+
+                case SEQUENCE_InputType_AnyBit:
+                    exitStage = INPUT_AnyBit (Stage->input.profileSelectFlags);
+                    break;
+
+            #if (LIB_EMBEDULAR_CONFIG_INPUT_ACTION == 1)
+                case SEQUENCE_InputType_BitAction:
+                    exitStage = (INPUT_GetBitAction(Stage->input.profileType,
+                                     Stage->input.inx) == Stage->input.action);
+                    break;
+            #endif
+
+                case SEQUENCE_InputType_Range:
+                    exitStage = INPUT_GetRangeBuffer (Stage->input.profileType,
+                                                   Stage->input.inx);
+                    break;
+            }
         }
 
-        if (Stage->input)
+        if (exitStage)
         {
-            const uint32_t Type = SEQUENCE_INPUT__GT (Stage->input);
-            const uint8_t  G1   = SEQUENCE_INPUT__G1 (Stage->input);
-            const uint8_t  G2   = SEQUENCE_INPUT__G2 (Stage->input);
-
-            const bool AnyBit   = Type == SEQUENCE_INPUT__TYPE_ANY && 
-                                  INPUT_AnyBit();
-            const bool Bit      = Type == SEQUENCE_INPUT__TYPE_BIT &&
-                                  INPUT_BitBuffer(G1);
-            const bool Range    = Type == SEQUENCE_INPUT__TYPE_RANGE &&
-                                  INPUT_AnyBitByRange(G1, G2);
-            const bool Role     = Type == SEQUENCE_INPUT__TYPE_ROLE &&
-                                  INPUT_AnyBitByRole(G1);
-        #if (LIB_EMBEDULAR_CONFIG_INPUT_SWITCH_ACTION == 1)
-            const bool Action   = Type == SEQUENCE_INPUT__TYPE_BIT_ACTION &&
-                                  INPUT_BitAsSwitchAction(G1) == G2;
-            if (AnyBit || Bit || Range || Role || Action)
-            {
-                SEQUENCE_ExitStage (S);
-            }
-        #else
-            if (AnyBit || Bit || Range || Role)
-            {
-                SEQUENCE_ExitStage (S);
-            }
-        #endif
+            SEQUENCE_ExitStage (S);
         }
     }
 

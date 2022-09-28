@@ -138,6 +138,16 @@ void * initComponent (struct BOARD *const B,
             break;
         }
 
+        case BOARD_Stage_InitIOProfiles:
+        {
+            INPUT_PROFILE_ATTACH (CONTROL, B, H->inputProfileControl);
+            INPUT_PROFILE_ATTACH (GP1, B, H->inputProfileGp1);
+            INPUT_PROFILE_ATTACH (GP2, B, H->inputProfileGp2);
+            INPUT_PROFILE_ATTACH (LIGHTDEV, B, H->inputprofileLightdev);
+            INPUT_PROFILE_ATTACH (MAIN, B, H->inputProfileMain);
+            break;
+        }
+
         case BOARD_Stage_InitRandomDriver:
         {
             RANDOM_SFMT_Init (&H->randomSfmt, 0xCACACACACACACACA);

@@ -113,13 +113,13 @@ void LOG_Init (struct LOG *const L, struct BOARD *const Board,
 
     LOG_ContextBegin (Board, LANG_BOARD_INIT_SEQUENCE);
 
-    LOG_ContextBegin (L, LANG_INIT);
     {
+        LOG_AutoContext (L, LANG_INIT);
+
         LOG_Items (2,
                     LANG_DEBUG_STREAM,      STREAM_Description(DebugStream),
                     LANG_MAX_LOG_ITEMS,     (uint32_t)LOG_ITEMS_MAX);
     }
-    LOG_ContextEnd ();
 }
 
 

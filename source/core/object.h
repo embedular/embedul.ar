@@ -81,7 +81,7 @@ extern struct NOBJ * NOBJ;
         struct QUEUE_TRV *      : (void)0, \
         struct SEQUENCE *       : (void)0, \
         struct VARIANT *        : (void)0, \
-        struct SWITCH_ACTION *  : (void)0, \
+        struct INPUT_ACTION *   : (void)0, \
         struct VIDEO_DOTMAP *   : (void)0, \
         struct VIDEO_FADE *     : (void)0, \
         struct VIDEO_FONT *     : (void)0, \
@@ -123,7 +123,7 @@ extern struct NOBJ * NOBJ;
         struct QUEUE_TRV *      : "base", \
         struct SEQUENCE *       : "base", \
         struct VARIANT *        : "base", \
-        struct SWITCH_ACTION *  : "base", \
+        struct INPUT_ACTION *   : "base", \
         struct VIDEO_DOTMAP *   : "base" OBJECT_TYPE_SEPARATOR "video", \
         struct VIDEO_FADE *     : "base" OBJECT_TYPE_SEPARATOR "video", \
         struct VIDEO_FONT *     : "base" OBJECT_TYPE_SEPARATOR "video", \
@@ -163,7 +163,7 @@ extern struct NOBJ * NOBJ;
         struct QUEUE_TRV *      : "queue trv", \
         struct SEQUENCE *       : "sequence", \
         struct VARIANT *        : "variant", \
-        struct SWITCH_ACTION *  : "switch action", \
+        struct INPUT_ACTION *   : "input action", \
         struct VIDEO_DOTMAP *   : "dotmap", \
         struct VIDEO_FADE *     : "fade", \
         struct VIDEO_FONT *     : "font", \
@@ -203,7 +203,7 @@ extern struct NOBJ * NOBJ;
         struct QUEUE_TRV *      : _p, \
         struct SEQUENCE *       : _p, \
         struct VARIANT *        : _p, \
-        struct SWITCH_ACTION *  : _p, \
+        struct INPUT_ACTION *   : _p, \
         struct VIDEO_DOTMAP *   : _p, \
         struct VIDEO_FADE *     : _p, \
         struct VIDEO_FONT *     : _p, \

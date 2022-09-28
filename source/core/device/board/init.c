@@ -26,6 +26,7 @@
 #include "embedul.ar/source/core/device/board.h"
 #include "embedul.ar/source/core/manager/log.h"
 #include "embedul.ar/source/core/manager/storage/cache.h"
+#include <stdint.h>
 
 
 #define GREET_LOGO_1        "`F36_________`L"
@@ -79,7 +80,8 @@
 #define LOG_ITEM_FAILED_STR                 LOG_PENDING_FAILED_STR
 #define LOG_ITEM_UNTESTED_STR               " "
 
-#define CHECK_EDATA_OVERRIDE_INB            INPUT_Bit_BoardA
+#define CHECK_EDATA_OVERRIDE_PROFILE        INPUT_PROFILE_Type_MAIN
+#define CHECK_EDATA_OVERRIDE_INB            INPUT_PROFILE_MAIN_Bit_A
 #define CHECK_EDATA_OVERRIDE_TIMEOUT        5000
 
 
@@ -103,16 +105,17 @@ static void stageInit (struct BOARD *const B,
 {
 /*
     Initializes the board first, then the rig.
-    The rig can set new IO drivers or reassign already set Comm drivers in
-    the following init steps:
+    The rig can set IO profiles, new IO drivers or reassign already set Comm
+    drivers in the following init steps:
 
-    BOARD_Init_Hardware
-    BOARD_Init_Greetings
-    BOARD_Init_IOLevel1Drivers
-    BOARD_Init_CommDrivers
-    BOARD_Init_StorageDrivers
-    BOARD_Init_IOLevel2Drivers
-    BOARD_Init_Ready
+    BOARD_Stage_InitHardware
+    BOARD_Stage_InitGreetings
+    BOARD_Stage_InitIOProfiles
+    BOARD_Stage_InitIOLevel1Drivers
+    BOARD_Stage_InitCommDrivers
+    BOARD_Stage_InitStorageDrivers
+    BOARD_Stage_InitIOLevel2Drivers
+    BOARD_Stage_InitReady
 */
     B->iface->StageChange (B, Stage);
 
@@ -130,10 +133,10 @@ static void * stageInitObj (struct BOARD *const B,
     Returns the rig object, if available, or the board object instead in
     the following init steps:
 
-    BOARD_Init_DebugStreamDriver
-    BOARD_Init_RandomDriver
-    BOARD_Init_VideoDriver
-    BOARD_Init_SoundDriver
+    BOARD_Stage_InitDebugStreamDriver
+    BOARD_Stage_InitRandomDriver
+    BOARD_Stage_InitVideoDriver
+    BOARD_Stage_InitSoundDriver
 */
     void * ret = NULL;
 
@@ -216,6 +219,26 @@ static void boardGreetings (struct BOARD *const B)
 
     BOARD_INIT_Component (B, BOARD_Stage_Greetings, NOBJ);
 }
+
+
+static const struct LOG_Table s_IOProfilesTable =
+{
+    LANG_IO_PROFILES, 4,
+    {
+        {
+            LANG_NAME, 32, 0
+        },
+        {
+            LANG_AVAILABLE, 47, 0
+        },
+        {
+            "bits", 62, 0
+        },
+        {
+            "ranges", 0, 0
+        }
+    }
+};
 
 
 static const struct LOG_Table s_CommMgrTable =
@@ -356,16 +379,23 @@ static const struct LOG_Table s_CheckSector0Table =
 };
 
 
-bool BOARD_INIT_InputCountdown (const enum INPUT_Bit Inb,
-                                 const TIMER_Ticks Countdown,
-                                 const char *const Msg)
+bool BOARD_INIT_InputCountdown (const enum INPUT_PROFILE_Type ProfileType,
+                                const uint32_t ProfileInb,
+                                const TIMER_Ticks Countdown,
+                                const char *const Msg)
 {
-    LOG (NOBJ, Msg, INPUT_BitName(Inb));
+    if (!INPUT_IsBitMapped(ProfileType, ProfileInb))
+    {
+        return true;
+    }
+
+    LOG (NOBJ, Msg, INPUT_MappedBitName(ProfileType, ProfileInb));
 
     const TIMER_Ticks   Timeout = BOARD_TicksNow () + Countdown;
     const uint32_t      LPM     = LOG_ProgressMax ();
 
     uint32_t lastOutColumn = LOG_ProgressBegin (LOG_ProgressType_Timeout);
+    uint32_t lastBitBuffer;
 
     do
     {
@@ -384,9 +414,10 @@ bool BOARD_INIT_InputCountdown (const enum INPUT_Bit Inb,
         {
             LOG_ProgressUpdate (lastOutColumn, LPM);
         }
+
+        lastBitBuffer = INPUT_GetBitBuffer(ProfileType, ProfileInb);
     }
-    while (!INPUT_AnyBitByRole(INPUT_BitRole_Switch) && 
-                                    Timeout > BOARD_TicksNow());
+    while (!lastBitBuffer && Timeout > BOARD_TicksNow());
 
     LOG_ProgressEnd ();
 
@@ -396,7 +427,7 @@ bool BOARD_INIT_InputCountdown (const enum INPUT_Bit Inb,
         return true;
     }
 
-    return INPUT_BitBuffer(Inb)? false : true;
+    return lastBitBuffer? false : true;
 }
 
 
@@ -429,6 +460,61 @@ static void initManagers (struct BOARD *const B)
     INPUT_Init      (&B->input);
     COMM_Init       (&B->comm);
     STORAGE_Init    (&B->storage);
+}
+
+
+typedef const char * (* PROFILE_GetTypeNameFunc)(const uint32_t);
+
+
+static void showProfilesSummary (const char *const ProfilesGroup,
+                                 const struct INPUT_PROFILE *const Profiles,
+                                 const uint32_t ProfilesCount,
+                                 const PROFILE_GetTypeNameFunc GetTypeName)
+{
+    LOG_AutoContext (NOBJ, ProfilesGroup);
+
+    LOG_TableBegin (&s_IOProfilesTable);
+
+    uint32_t enabledProfilesCount = 0;
+
+    for (enum INPUT_PROFILE_Type t = 0; t < ProfilesCount; ++t)
+    {
+        const struct INPUT_PROFILE *const P = &Profiles[t];
+        const bool EnabledProfile = (P->bitMap || P->rangeMap);
+
+        LOG_TableEntry (&s_IOProfilesTable, GetTypeName(t),
+                        (EnabledProfile)? LOG_ITEM_OK_STR : LOG_ITEM_FAILED_STR,
+                        P->bitCount, P->rangeCount);
+
+        if (EnabledProfile)
+        {
+            ++ enabledProfilesCount;
+        }
+    }
+
+    LOG_TableEnd (&s_IOProfilesTable);
+
+    if (!enabledProfilesCount)
+    {
+        LOG_Warn (NOBJ, LANG_NO_PROFILES_SET);
+    }
+}
+
+
+static void initIoProfiles (struct BOARD *const B)
+{
+    LOG_AutoContext (NOBJ, LANG_IO_PROFILES);
+
+    BOARD_INIT_Component (B, BOARD_Stage_InitIOProfiles, NOBJ);
+
+    showProfilesSummary (LANG_INPUT_MGR_SUMMARY, B->input.profiles,
+                         INPUT_PROFILE_Type__COUNT,
+                         INPUT_PROFILE_GetTypeName);
+/*
+    showProfilesSummary (LANG_OUTPUT_MGR_SUMMARY, B->output.profiles,
+                         OUTPUT_PROFILE_Type__COUNT, 
+                         OUTPUT_PROFILE_GetTypeName);
+*/
 }
 
 
@@ -593,52 +679,63 @@ static void showInputManagerSummary (struct BOARD *const B)
 
     LOG_Newline ();
 
-    // List bit and range mappings
-    LOG_TableBegin (&s_InputMappingTable);
-    for (uint32_t inb = 0; inb < INPUT_Bit__COUNT; ++inb)
+    for (enum INPUT_PROFILE_Type t = 0; t < INPUT_PROFILE_Type__COUNT; ++t)
     {
-        struct INPUT_Mapping * map = &B->input.bitMapping[inb];
+        {
+            LOG_AutoContext (NOBJ, INPUT_PROFILE_GetTypeName(t));
 
-        if (map->driverIndex != IO_INVALID_INDEX)
-        {
-            LOG_TableEntry (&s_InputMappingTable,
-                                    "bit", inb,
-                                    map->deviceId, map->driverIndex,
-                                    INPUT_BitName(inb));
+            // List bit and range mappings
+            LOG_TableBegin (&s_InputMappingTable);
+
+            const struct INPUT_PROFILE *const P = &B->input.profiles[t];
+
+            for (uint32_t inb = 0; inb < P->bitCount; ++inb)
+            {
+                const struct INPUT_PROFILE_Map *const Map = &P->bitMap[inb];
+
+                if (Map->driverIndex != IO_INVALID_INDEX)
+                {
+                    LOG_TableEntry (&s_InputMappingTable,
+                                            "bit", inb,
+                                            Map->deviceId, Map->driverIndex,
+                                            INPUT_MappedBitName(t, inb));
+                }
+                #ifdef BOARD_INIT_SHOW_NOT_SET
+                else 
+                {
+                    LOG_TableEntry (&s_InputMappingTable,
+                                            "bit", inb,
+                                            "", "",
+                                            "");
+                }
+                #endif
+            }
+
+            for (uint32_t inr = 0; inr < P->rangeCount; ++inr)
+            {
+                const struct INPUT_PROFILE_Map *const Map = &P->bitMap[inr];
+
+                if (Map->driverIndex != IO_INVALID_INDEX)
+                {
+                    LOG_TableEntry (&s_InputMappingTable,
+                                            "range", inr,
+                                            Map->deviceId, Map->driverIndex,
+                                            INPUT_MappedRangeName(t, inr));
+                }
+                #ifdef BOARD_INIT_SHOW_NOT_SET
+                else 
+                {
+                    LOG_TableEntry (&s_InputMappingTable,
+                                            "range", inr,
+                                            "", "",
+                                            "");
+                }
+                #endif
+            }
+
+            LOG_TableEnd (&s_InputMappingTable);
         }
-        #ifdef BOARD_INIT_SHOW_NOT_SET
-        else 
-        {
-            LOG_TableEntry (&s_InputMappingTable,
-                                    "bit", inb,
-                                    "", "",
-                                    "");
-        }
-        #endif
     }
-
-    for (uint32_t inr = 0; inr < INPUT_Range__COUNT; ++inr)
-    {
-        struct INPUT_Mapping * map = &B->input.rangeMapping[inr];
-
-        if (map->driverIndex != IO_INVALID_INDEX)
-        {
-            LOG_TableEntry (&s_InputMappingTable,
-                                    "range", inr,
-                                    map->deviceId, map->driverIndex,
-                                    INPUT_RangeName(inr));
-        }
-        #ifdef BOARD_INIT_SHOW_NOT_SET
-        else 
-        {
-            LOG_TableEntry (&s_InputMappingTable,
-                                    "range", inb,
-                                    "", "",
-                                    "");
-        }
-        #endif
-    }
-    LOG_TableEnd (&s_InputMappingTable);
 }
 
 
@@ -781,7 +878,8 @@ static void checkCache (const uint32_t ReadWriteRetries)
 {
     bool skipElementDataCheck = false;
 
-    if (!BOARD_INIT_InputCountdown (CHECK_EDATA_OVERRIDE_INB,
+    if (!BOARD_INIT_InputCountdown (CHECK_EDATA_OVERRIDE_PROFILE,
+                                    CHECK_EDATA_OVERRIDE_INB,
                                     CHECK_EDATA_OVERRIDE_TIMEOUT,
                                     LANG_SKIP_CACHE_ELEMENT_DATA_FMT))
     {
@@ -1036,6 +1134,7 @@ void BOARD_INIT_Sequence (struct BOARD *const B)
     // Log messages available.
     // -------------------------------------------------------------------------
     initManagers            (B);
+    initIoProfiles          (B);
     initRandomDriver        (B);
     initIoLevel1Drivers     (B);
     initCommDrivers         (B);

@@ -235,12 +235,13 @@ static bool powerStatus (struct RAWSTOR_SD_1BIT *const S)
 {
     (void) S;
 
-    if (!INPUT_BitIsMapped (INPUT_Bit_StoragePower))
+    if (!INPUT_BIT_IS_MAPPED(CONTROL,StoragePower))
     {
         return true;
     }
 
-    const bool PowerStatus = INPUT_BitNow(INPUT_Bit_StoragePower)? true : false;
+    const bool PowerStatus = 
+                    INPUT_GET_BIT_NOW(CONTROL,StoragePower)? true : false;
 
     return PowerStatus;
 }
@@ -371,7 +372,7 @@ static bool detectCard (struct RAWSTOR *const R)
 {
     (void) R;
 
-    return INPUT_BitNow(INPUT_Bit_StorageDetect)? true : false;
+    return INPUT_GET_BIT_NOW(CONTROL,StorageDetect)? true : false;
 }
 
 

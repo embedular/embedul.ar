@@ -157,16 +157,20 @@ void IO_PCA9956B_Attach (struct IO_PCA9956B *const P,
 
     INPUT_SetDevice ((struct IO *)P, 0);
 
-    INPUT_MapRange (INPUT_Range_LightChShortedBitfield0 + DeviceOffset,
+    INPUT_MapRange (INPUT_PROFILE_Type_LIGHTDEV,
+                    INPUT_PROFILE_LIGHTDEV_Range_ChannelsShorted(DeviceOffset),
                     IO_PCA9956B_INR_CHANNELS_SHORTED_BITFIELD);
 
-    INPUT_MapRange (INPUT_Range_LightChOpenBitfield0 + DeviceOffset,
+    INPUT_MapRange (INPUT_PROFILE_Type_LIGHTDEV,
+                    INPUT_PROFILE_LIGHTDEV_Range_ChannelsOpen(DeviceOffset),
                     IO_PCA9956B_INR_CHANNELS_OPEN_BITFIELD);
 
-    INPUT_MapBit (INPUT_Bit_LightDevice0Overtemp + DeviceOffset,
+    INPUT_MapBit (INPUT_PROFILE_Type_LIGHTDEV,
+                  INPUT_PROFILE_LIGHTDEV_Bit_Overtemp(DeviceOffset),
                   IO_PCA9956B_INB_OVERTEMP);
 
-    INPUT_MapBit (INPUT_Bit_LightDevice0ChError + DeviceOffset,
+    INPUT_MapBit (INPUT_PROFILE_Type_LIGHTDEV,
+                  INPUT_PROFILE_LIGHTDEV_Bit_ChannelError(DeviceOffset),
                   IO_PCA9956B_INB_CHANNEL_ERROR);
 }
 

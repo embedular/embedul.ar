@@ -23,18 +23,18 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "embedul.ar/source/core/manager/input/switch_action.h"
+#include "embedul.ar/source/core/manager/input/action.h"
 #include "embedul.ar/source/core/device/board.h"
 
 
-void SWITCH_ACTION_Reset (struct SWITCH_ACTION *const S)
+void INPUT_ACTION_Reset (struct INPUT_ACTION *const S)
 {
     BOARD_AssertParams (S);
     OBJECT_Clear (S);
 }
 
 
-enum SWITCH_ACTION_Type SWITCH_ACTION_Update (struct SWITCH_ACTION *const S,
+enum INPUT_ACTION_Type INPUT_ACTION_Update (struct INPUT_ACTION *const S,
                                               const bool NewStatus)
 {
     BOARD_AssertParams (S);
@@ -52,11 +52,11 @@ enum SWITCH_ACTION_Type SWITCH_ACTION_Update (struct SWITCH_ACTION *const S,
 		{
 			S->lastClicked = 0;
 			++ S->clickedCount;
-			return (S->lastAction = SWITCH_ACTION_Type_Clicked);
+			return (S->lastAction = INPUT_ACTION_Type_Clicked);
 		}
 
-		//return SWITCH_ACTION_Type_None;
-        return (S->lastAction = SWITCH_ACTION_Type_None);
+		//return INPUT_ACTION_Type_None;
+        return (S->lastAction = INPUT_ACTION_Type_None);
 	}
 
 	// Estaba suelto y se presiono (2)
@@ -64,16 +64,16 @@ enum SWITCH_ACTION_Type SWITCH_ACTION_Update (struct SWITCH_ACTION *const S,
 	{
 		S->holdStarted  = Now;
 		S->lastHold     = Now;
-		return (S->lastAction = SWITCH_ACTION_Type_None);
+		return (S->lastAction = INPUT_ACTION_Type_None);
 	}
 
 	// Estaba presionado y se solto (3)
 	if (LastStatus && !NewStatus)
 	{
 		// Debounce
-		if (S->lastAction == SWITCH_ACTION_Type_None)
+		if (S->lastAction == INPUT_ACTION_Type_None)
 		{
-			return SWITCH_ACTION_Type_None;
+			return INPUT_ACTION_Type_None;
 		}
 
 		// Timeout para detectar Clicked
@@ -84,50 +84,50 @@ enum SWITCH_ACTION_Type SWITCH_ACTION_Update (struct SWITCH_ACTION *const S,
 			{
 				S->lastClicked = 0;
 				++ S->doubleClickedCount;
-				return (S->lastAction = SWITCH_ACTION_Type_DoubleClicked);
+				return (S->lastAction = INPUT_ACTION_Type_DoubleClicked);
 			}
 			else {
 				S->lastClicked = Now;
 			}
 		}
 		// Se solto un Hold
-		else if (S->lastAction == SWITCH_ACTION_Type_OnHold)
+		else if (S->lastAction == INPUT_ACTION_Type_OnHold)
 		{
 			++ S->releasedCount;
-			return (S->lastAction = SWITCH_ACTION_Type_Released);
+			return (S->lastAction = INPUT_ACTION_Type_Released);
 		}
 
-        return SWITCH_ACTION_Type_None;
-        // return (b->lastAction = SWITCH_ACTION_Type_None);
+        return INPUT_ACTION_Type_None;
+        // return (b->lastAction = INPUT_ACTION_Type_None);
 	}
 
 	// Sigue presionado (4) (LastStatus && NewStatus)
 	// Pressed con debounce
-	if (S->lastAction == SWITCH_ACTION_Type_None
+	if (S->lastAction == INPUT_ACTION_Type_None
                 && Now > S->holdStarted + 50)
 	{
 		++ S->pressedCount;
-		return (S->lastAction = SWITCH_ACTION_Type_Pressed);
+		return (S->lastAction = INPUT_ACTION_Type_Pressed);
 	}
-	else if (S->lastAction == SWITCH_ACTION_Type_Pressed
+	else if (S->lastAction == INPUT_ACTION_Type_Pressed
                 && Now > S->holdStarted + 1000)
 	{
 		++ S->onHoldCount;
-		return (S->lastAction = SWITCH_ACTION_Type_OnHold);
+		return (S->lastAction = INPUT_ACTION_Type_OnHold);
 	}
-	else if (S->lastAction == SWITCH_ACTION_Type_OnHold)
+	else if (S->lastAction == INPUT_ACTION_Type_OnHold)
 	{
 		// Devuelve OnHold cada vez que se actualiza lastHold
 		S->lastHold = Now;
-		return SWITCH_ACTION_Type_OnHold;
+		return INPUT_ACTION_Type_OnHold;
 	}
 
-	return SWITCH_ACTION_Type_None;
-   //return (b->lastAction = SWITCH_ACTION_Type_None);
+	return INPUT_ACTION_Type_None;
+   //return (b->lastAction = INPUT_ACTION_Type_None);
 }
 
 
-enum SWITCH_ACTION_Type SWITCH_ACTION_Last (struct SWITCH_ACTION *const S)
+enum INPUT_ACTION_Type INPUT_ACTION_Last (struct INPUT_ACTION *const S)
 {
     BOARD_AssertParams (S);
     return S->lastAction;

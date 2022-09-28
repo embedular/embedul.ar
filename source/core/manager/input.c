@@ -37,19 +37,14 @@ void INPUT_Init (struct INPUT *const I)
 
     OBJECT_Clear (I);
 
-    LOG_ContextBegin (I, LANG_INIT);
     {
-        memset (I->bitMapping, IO_INVALID_INDEX, sizeof(I->bitMapping));
-        memset (I->rangeMapping, IO_INVALID_INDEX, sizeof(I->rangeMapping));
+        LOG_AutoContext (I, LANG_INIT);
 
         s_i = I;
 
-        LOG_Items (3,
-                    LANG_MAX_DEVICES,   (uint32_t)INPUT_MAX_DEVICES,
-                    LANG_BIT_COUNT,     (uint32_t)INPUT_Bit__COUNT,
-                    LANG_RANGE_COUNT,   (uint32_t)INPUT_Range__COUNT);
+        LOG_Items (1,
+                    LANG_MAX_DEVICES,   (uint32_t)INPUT_MAX_DEVICES);
     }
-    LOG_ContextEnd ();
 }
 
 
@@ -64,7 +59,7 @@ void INPUT_SetDevice (struct IO *const Driver, const uint32_t DriverSource)
 }
 
 
-static void inputMapByDeviceId (struct INPUT_Mapping *const Mapping,
+static void inputMapByDeviceId (struct INPUT_PROFILE_Map *const Mapping,
                                 const uint16_t DeviceId,
                                 const uint16_t DriverIndex)
 {
@@ -76,7 +71,7 @@ static void inputMapByDeviceId (struct INPUT_Mapping *const Mapping,
 }
 
 
-static void inputMapLast (struct INPUT_Mapping *const Mapping,
+static void inputMapCurrent (struct INPUT_PROFILE_Map *const Mapping,
                           const uint16_t DriverIndex)
 {
     BOARD_AssertState (s_i->nextDeviceId);
@@ -87,37 +82,107 @@ static void inputMapLast (struct INPUT_Mapping *const Mapping,
 }
 
 
-void INPUT_MapBit (const enum INPUT_Bit Inb, const uint16_t DriverIndex)
+inline static struct INPUT_PROFILE * 
+getProfile (const enum INPUT_PROFILE_Type ProfileType)
 {
-    BOARD_AssertParams (Inb < INPUT_Bit__COUNT);
-    inputMapLast (&s_i->bitMapping[Inb], DriverIndex);
+    BOARD_AssertParams (ProfileType < INPUT_PROFILE_Type__COUNT);
+
+    struct INPUT_PROFILE *const P = &s_i->profiles[ProfileType];
+    return P;
 }
 
 
-void INPUT_MapRange (const enum INPUT_Range Inr, const uint16_t DriverIndex)
+// BitMap must exist in ProfileType
+static struct INPUT_PROFILE_Map *
+getBitMapping (const enum INPUT_PROFILE_Type ProfileType,
+               const uint32_t Inb)
 {
-    BOARD_AssertParams (Inr < INPUT_Range__COUNT);
-    inputMapLast (&s_i->rangeMapping[Inr], DriverIndex);
+    struct INPUT_PROFILE *const P = getProfile (ProfileType);
+    if (Inb >= P->bitCount || !P->bitMap)
+    {
+        LOG_Warn (s_i, LANG_INVALID_IMPLEMENTATION);
+        LOG_Items (3,
+                    "inb",          Inb,
+                    "bitMap",       (void *)P->bitMap,
+                    "bitCount",     P->bitCount);
+
+        BOARD_AssertState (false);
+    }
+    return &P->bitMap[Inb];
 }
 
 
-bool INPUT_MapBitByOnState (const enum INPUT_Bit Inb)
+// RangeMap must exist in ProfileType
+static struct INPUT_PROFILE_Map *
+getRangeMapping (const enum INPUT_PROFILE_Type ProfileType,
+                 const uint32_t Inr)
 {
-    BOARD_AssertParams (Inb < INPUT_Bit__COUNT);
+    struct INPUT_PROFILE *const P = getProfile (ProfileType);
+    if (Inr >= P->rangeCount || !P->rangeMap)
+    {
+        LOG_Warn (s_i, LANG_INVALID_IMPLEMENTATION);
+        LOG_Items (3,
+                    "inr",          Inr,
+                    "rangeMap",     (void *)P->rangeMap,
+                    "rangeCount",   P->rangeCount);
 
+        BOARD_AssertState (false);
+    }
+    return &P->rangeMap[Inr];
+}
+
+
+bool INPUT_HasProfile (const enum INPUT_PROFILE_Type ProfileType)
+{
+    struct INPUT_PROFILE *const P = getProfile (ProfileType);
+    return (P->bitCount || P->rangeCount)? true : false;
+}
+
+
+uint32_t INPUT_ProfileBits (const enum INPUT_PROFILE_Type ProfileType)
+{
+    return getProfile(ProfileType)->bitCount;
+}
+
+
+uint32_t INPUT_ProfileRanges (const enum INPUT_PROFILE_Type ProfileType)
+{
+    return getProfile(ProfileType)->rangeCount;
+}
+
+
+void INPUT_MapBit (const enum INPUT_PROFILE_Type ProfileType,
+                   const uint32_t Inb, const uint16_t DriverIndex)
+{
+    inputMapCurrent (getBitMapping(ProfileType, Inb), DriverIndex);
+}
+
+
+void INPUT_MapRange (const enum INPUT_PROFILE_Type ProfileType,
+                     const uint32_t Inr, const uint16_t DriverIndex)
+{
+    inputMapCurrent (getRangeMapping(ProfileType, Inr), DriverIndex);
+}
+
+
+bool INPUT_MapBitByOnState (const enum INPUT_PROFILE_Type ProfileType,
+                            const uint32_t Inb)
+{
+    struct INPUT_PROFILE_Map *const Map = getBitMapping (ProfileType, Inb);
+
+    // Check registered drivers for one that has any input bit in 1 
     for (uint8_t deviceId = 0; deviceId < INPUT_MAX_DEVICES; ++deviceId)
     {
         struct INPUT_Device * dev = &s_i->device[deviceId];
         if (dev->driver)
         {
-            const uint16_t DriverIndex = IO_FirstOnIndex (
-                                                    dev->driver,
-                                                    IO_Type_Bit,
-                                                    dev->driverSource);
+            const uint16_t DriverIndex =
+                            IO_FirstOnIndex (dev->driver, IO_Type_Bit,
+                                             dev->driverSource);
+
             if (DriverIndex != IO_INVALID_INDEX)
             {
-                inputMapByDeviceId (&s_i->bitMapping[Inb], deviceId, 
-                                    DriverIndex);
+                inputMapByDeviceId (Map, deviceId, DriverIndex);
                 return true;
             }
         }
@@ -127,24 +192,24 @@ bool INPUT_MapBitByOnState (const enum INPUT_Bit Inb)
 }
 
 
-static bool isMapped (const struct INPUT_Mapping *const Mapping)
+static bool isMapped (const struct INPUT_PROFILE_Map *const Mapping)
 {
     const uint16_t DriverIndex = Mapping->driverIndex;
-    return (DriverIndex != IO_INVALID_INDEX);    
+    return (DriverIndex != IO_INVALID_INDEX)? true : false;
 }
 
 
 static uint32_t input (const enum IO_Type IoType,
-                       const struct INPUT_Mapping *const Mapping,
+                       const struct INPUT_PROFILE_Map *const Map,
                        const enum INPUT_UpdateValue When)
 {
-    if (!isMapped (Mapping))
+    if (!isMapped (Map))
     {
         return 0;
     }
 
-    const uint16_t DriverIndex  = Mapping->driverIndex;
-    const uint16_t DeviceId     = Mapping->deviceId;
+    const uint16_t DriverIndex  = Map->driverIndex;
+    const uint16_t DeviceId     = Map->deviceId;
 
     const enum IO_UpdateValue WhenIo = (When == INPUT_UpdateValue_Now)?
                                                         IO_UpdateValue_Now :
@@ -162,150 +227,161 @@ static uint32_t input (const enum IO_Type IoType,
 }
 
 
-uint32_t INPUT_Bit (const enum INPUT_Bit Inb, 
-                    const enum INPUT_UpdateValue When)
+uint32_t INPUT_GetBit (const enum INPUT_PROFILE_Type ProfileType,
+                       const uint32_t Inb, const enum INPUT_UpdateValue When)
 {
-    BOARD_AssertParams (Inb < INPUT_Bit__COUNT);
-    return input (IO_Type_Bit, &s_i->bitMapping[Inb], When);
+    struct INPUT_PROFILE *const P = getProfile (ProfileType);
+
+    if (!P->bitMap)
+    {
+        return 0;
+    }
+
+    BOARD_AssertParams (Inb < P->bitCount);
+
+    return input (IO_Type_Bit, &P->bitMap[Inb], When);
 }
 
 
-uint32_t INPUT_BitNow (const enum INPUT_Bit Inb)
+uint32_t INPUT_GetBitNow (const enum INPUT_PROFILE_Type ProfileType,
+                          const uint32_t Inb)
 {
-    return INPUT_Bit (Inb, INPUT_UpdateValue_Now);
+    return INPUT_GetBit (ProfileType, Inb, INPUT_UpdateValue_Now);
 }
 
 
-uint32_t INPUT_BitBuffer (const enum INPUT_Bit Inb)
+uint32_t INPUT_GetBitBuffer (const enum INPUT_PROFILE_Type ProfileType,
+                             const uint32_t Inb)
 {
-    return INPUT_Bit (Inb, INPUT_UpdateValue_Buffer);
+    return INPUT_GetBit (ProfileType, Inb, INPUT_UpdateValue_Buffer);
 }
 
 
-uint32_t INPUT_Range (const enum INPUT_Range Inr,
-                      const enum INPUT_UpdateValue When)
+uint32_t INPUT_GetRange (const enum INPUT_PROFILE_Type ProfileType,
+                         const uint32_t Inr, const enum INPUT_UpdateValue When)
 {
-    BOARD_AssertParams (Inr < INPUT_Range__COUNT);
-    return input (IO_Type_Range, &s_i->rangeMapping[Inr], When);
+    struct INPUT_PROFILE *const P = getProfile (ProfileType);
+
+    if (!P->rangeMap)
+    {
+        return 0;
+    }
+
+    BOARD_AssertParams (Inr < P->rangeCount);
+
+    return input (IO_Type_Range, &P->rangeMap[Inr], When);
 }
 
 
-uint32_t INPUT_RangeNow (const enum INPUT_Range Inr)
+#if (LIB_EMBEDULAR_CONFIG_INPUT_ACTION == 1)
+enum INPUT_ACTION_Type
+INPUT_GetBitAction (const enum INPUT_PROFILE_Type ProfileType,
+                    const uint32_t Inb)
 {
-    return INPUT_Range (Inr, INPUT_UpdateValue_Now);
+    struct INPUT_PROFILE *const P = getProfile (ProfileType);
+
+    if (!P->bitAction)
+    {
+        return INPUT_ACTION_Type_None;
+    }
+
+    BOARD_AssertParams (Inb < P->bitCount);
+
+    return INPUT_ACTION_Last (&P->bitAction[Inb]);
+}
+#endif
+
+
+uint32_t INPUT_GetRangeNow (const enum INPUT_PROFILE_Type ProfileType,
+                            const uint32_t Inr)
+{
+    return INPUT_GetRange (ProfileType, Inr, INPUT_UpdateValue_Now);
 }
 
 
-uint32_t INPUT_RangeBuffer (const enum INPUT_Range Inr)
+uint32_t INPUT_GetRangeBuffer (const enum INPUT_PROFILE_Type ProfileType,
+                               const uint32_t Inr)
 {
-    return INPUT_Range (Inr, INPUT_UpdateValue_Buffer);
+    return INPUT_GetRange (ProfileType, Inr, INPUT_UpdateValue_Buffer);
 }
 
 
-static const char * inputName (const enum IO_Type IoType,
-                               const uint32_t Inx)
+static const char * mappedInputName (const enum INPUT_PROFILE_Type ProfileType,
+                                     const enum IO_Type IoType,
+                                     const uint32_t Inx)
 {
-    struct INPUT_Mapping *const Map = (IoType == IO_Type_Bit)?
-                                            &s_i->bitMapping[Inx] :
-                                            &s_i->rangeMapping[Inx];
+    struct INPUT_PROFILE_Map *const Map = (IoType == IO_Type_Bit)?
+                                            getBitMapping(ProfileType, Inx) :
+                                            getRangeMapping(ProfileType, Inx);
 
     BOARD_AssertParams (Map->driverIndex != IO_INVALID_INDEX);
 
-    struct INPUT_Device *dev = &s_i->device[Map->deviceId];
+    struct INPUT_Device *const Dev = &s_i->device[Map->deviceId];
 
-    return IO_InputName (dev->driver, IoType, Map->driverIndex);
+    return IO_InputName (Dev->driver, IoType, Map->driverIndex);
 }
 
 
-const char * INPUT_BitName (const enum INPUT_Bit Inb)
+const char * INPUT_MappedBitName (const enum INPUT_PROFILE_Type ProfileType,
+                                  const uint32_t Inb)
 {
-    BOARD_AssertParams (Inb < INPUT_Bit__COUNT);
-    return inputName (IO_Type_Bit, Inb);
+    return mappedInputName (ProfileType, IO_Type_Bit, Inb);
 }
 
 
-const char * INPUT_RangeName (const enum INPUT_Range Inr)
+const char * INPUT_MappedRangeName (const enum INPUT_PROFILE_Type ProfileType,
+                                    const uint32_t Inr)
 {
-    BOARD_AssertParams (Inr < INPUT_Range__COUNT);
-    return inputName (IO_Type_Range, Inr);
+    return mappedInputName (ProfileType, IO_Type_Range, Inr);
 }
 
 
-bool INPUT_BitIsMapped (const enum INPUT_Bit Inb)
+bool INPUT_IsBitMapped (const enum INPUT_PROFILE_Type ProfileType,
+                        const uint32_t Inb)
 {
-    BOARD_AssertParams (Inb < INPUT_Bit__COUNT);
-    return isMapped (&s_i->bitMapping[Inb]);
+    return isMapped (getBitMapping(ProfileType, Inb));
 }
 
 
-bool INPUT_RangeIsMapped (const enum INPUT_Range Inr)
+bool INPUT_IsRangeMapped (const enum INPUT_PROFILE_Type ProfileType,
+                          const uint32_t Inr)
 {
-    BOARD_AssertParams (Inr < INPUT_Range__COUNT);
-    return isMapped (&s_i->rangeMapping[Inr]);
+    return isMapped (getRangeMapping(ProfileType, Inr));
 }
 
 
-static bool bitByRange (enum INPUT_Bit begin, enum INPUT_Bit end)
+bool INPUT_AnyBit (const enum INPUT_PROFILE_SelectFlag Profiles)
 {
-    for (uint32_t n = begin; n <= end; ++n)
+    if (!Profiles)
     {
-        if (INPUT_BitBuffer (n))
+        return false;
+    }
+
+    for (uint32_t i = 0; i < Profiles; ++i)
+    {
+        const enum INPUT_PROFILE_SelectFlag SelectFlag = (1 << i);
+
+        if (Profiles & SelectFlag)
         {
-            return true;
+            enum INPUT_PROFILE_Type ProfileType = (enum INPUT_PROFILE_Type) i;
+            struct INPUT_PROFILE *const P = getProfile (ProfileType);
+
+            if (P->bitCount)
+            {
+                for (uint32_t inb = 0; inb < P->bitCount; ++inb)
+                {
+                    if (input (IO_Type_Bit, &P->bitMap[inb],
+                                                INPUT_UpdateValue_Buffer))
+                    {
+                        return true;
+                    }
+                }
+            }
         }
     }
 
     return false;
 }
-
-
-bool INPUT_AnyBit (void)
-{
-    return bitByRange (0, INPUT_Bit__COUNT - 1);
-}
-
-
-bool INPUT_AnyBitByRange (const enum INPUT_Bit Begin,
-                          const enum INPUT_Bit End)
-{
-    BOARD_AssertParams (Begin <= End);
-    return bitByRange (Begin, End);
-}
-
-
-bool INPUT_AnyBitByRole (const enum INPUT_BitRole BitRole)
-{
-    switch (BitRole)
-    {
-        case INPUT_BitRole_Any:
-            return INPUT_AnyBit ();
-            
-        case INPUT_BitRole_Board:
-            return bitByRange (INPUT_Bit_Board__BEGIN, INPUT_Bit_Board__END);
-
-        case INPUT_BitRole_P1:
-            return bitByRange (INPUT_Bit_P1__BEGIN, INPUT_Bit_P1__END);
-
-        case INPUT_BitRole_P2:
-            return bitByRange (INPUT_Bit_P2__BEGIN, INPUT_Bit_P2__END);
-
-        case INPUT_BitRole_Switch:
-            return bitByRange (INPUT_Bit_Switch__BEGIN, INPUT_Bit_Switch__END);
-    }
-
-    BOARD_AssertUnexpectedValue (s_i, (uint32_t)BitRole);
-    return false;
-}
-
-
-#if (LIB_EMBEDULAR_CONFIG_INPUT_SWITCH_ACTION == 1)
-enum SWITCH_ACTION_Type INPUT_BitAsSwitchAction (const enum INPUT_Bit Inb)
-{
-    BOARD_AssertParams (Inb < INPUT_Bit__COUNT);
-
-    return SWITCH_ACTION_Last (&s_i->switchAction[Inb]);
-}
-#endif
 
 
 void INPUT_Update (void)
@@ -320,12 +396,18 @@ void INPUT_Update (void)
         }
     }
 
-#if (LIB_EMBEDULAR_CONFIG_INPUT_SWITCH_ACTION == 1)
-    for (uint32_t n = 0; n < INPUT_Bit__COUNT; ++n)
+#if (LIB_EMBEDULAR_CONFIG_INPUT_ACTION == 1)
+    for (enum INPUT_PROFILE_Type t = 0; t < INPUT_PROFILE_Type__COUNT; ++t)
     {
-        const bool Status = INPUT_BitBuffer(n)? true : false;
-
-        SWITCH_ACTION_Update (&s_i->switchAction[n], Status);
+        struct INPUT_PROFILE *const P = getProfile (t);
+        if (P->bitAction)
+        {
+            for (uint32_t inb = 0; inb < P->bitCount; ++inb)
+            {
+                const bool Status = INPUT_GetBitBuffer(t, inb)? true : false;
+                INPUT_ACTION_Update (&P->bitAction[inb], Status);
+            }
+        }
     }
 #endif
 }

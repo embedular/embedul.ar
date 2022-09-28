@@ -80,7 +80,8 @@ native_hosted.parse: \
 ../source/core/main.c \
 ../source/core/manager/comm.c \
 ../source/core/manager/input.c \
-../source/core/manager/input/switch_action.c \
+../source/core/manager/input/action.c \
+../source/core/manager/input/profile.c \
 ../source/core/manager/log.c \
 ../source/core/manager/output.c \
 ../source/core/manager/storage.c \

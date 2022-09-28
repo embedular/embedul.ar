@@ -29,20 +29,20 @@
 #include <stdbool.h>
 
 
-enum SWITCH_ACTION_Type
+enum INPUT_ACTION_Type
 {
-    SWITCH_ACTION_Type_None = 0,
-    SWITCH_ACTION_Type_Pressed,
-    SWITCH_ACTION_Type_Clicked,
-    SWITCH_ACTION_Type_DoubleClicked,
-    SWITCH_ACTION_Type_OnHold,
-    SWITCH_ACTION_Type_Released
+    INPUT_ACTION_Type_None = 0,
+    INPUT_ACTION_Type_Pressed,
+    INPUT_ACTION_Type_Clicked,
+    INPUT_ACTION_Type_DoubleClicked,
+    INPUT_ACTION_Type_OnHold,
+    INPUT_ACTION_Type_Released
 };
 
 
-struct SWITCH_ACTION
+struct INPUT_ACTION
 {
-    enum SWITCH_ACTION_Type
+    enum INPUT_ACTION_Type
                     lastAction;
     TIMER_Ticks     holdStarted;
     TIMER_Ticks     lastClicked;
@@ -56,7 +56,7 @@ struct SWITCH_ACTION
 };
 
 
-void                    SWITCH_ACTION_Reset     (struct SWITCH_ACTION *const S);
-enum SWITCH_ACTION_Type SWITCH_ACTION_Update    (struct SWITCH_ACTION *const S,
+void                    INPUT_ACTION_Reset      (struct INPUT_ACTION *const A);
+enum INPUT_ACTION_Type  INPUT_ACTION_Update     (struct INPUT_ACTION *const A,
                                                  const bool NewStatus);
-enum SWITCH_ACTION_Type SWITCH_ACTION_Last      (struct SWITCH_ACTION *const S);
+enum INPUT_ACTION_Type  INPUT_ACTION_Last       (struct INPUT_ACTION *const A);

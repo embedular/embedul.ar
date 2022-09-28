@@ -74,23 +74,12 @@
     BOARD_AssertState (false);
 
 
-#define MISC_RoundTo(_mul,_size) \
-    (({_Static_assert((_mul & (_mul - 1)) == 0, \
-        "_mul must be power of 2"); }), \
-            (_size + ((~_size + 1) & (_mul - 1))))
-
-
-#define MISC_IsAlignedTo(_mul,_size) \
-    (({_Static_assert((_mul & (_mul - 1)) == 0, \
-        "_mul must be power of 2"); }), \
-            (_size & (_mul - 1))? false : true)
-
-
 enum BOARD_Stage
 {
     BOARD_Stage_InitHardware,
     BOARD_Stage_InitDebugStreamDriver,      // STREAM
     BOARD_Stage_Greetings,
+    BOARD_Stage_InitIOProfiles,
     BOARD_Stage_InitRandomDriver,           // RANDOM
     BOARD_Stage_InitIOLevel1Drivers,        // IO(s) with no dependencies
     BOARD_Stage_InitCommDrivers,            // STREAM(s)

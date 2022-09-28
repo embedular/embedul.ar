@@ -406,8 +406,7 @@ struct VARIANT_DF
  * :param _v: Generic unsigned or string types.
  */
 #define VARIANT_SpawnBaseAuto(_b,_v) \
-    _Generic( \
-        (_v), \
+    _Generic((_v), \
         uint64_t        : VARIANT_SpawnBaseUint(_b, (uint64_t)(uintptr_t)_v), \
         uint32_t        : VARIANT_SpawnBaseUint(_b, (uint64_t)(uintptr_t)_v), \
         uint16_t        : VARIANT_SpawnBaseUint(_b, (uint64_t)(uintptr_t)_v), \
@@ -426,8 +425,7 @@ struct VARIANT_DF
  * :param _v: Any generic supported type.
  */
 #define VARIANT_SpawnAuto(_v) \
-    _Generic( \
-        (_v), \
+    _Generic((_v), \
         uint64_t        : VARIANT_SpawnUint((uint64_t)(uintptr_t)_v), \
         uint32_t        : VARIANT_SpawnUint((uint64_t)(uintptr_t)_v), \
         uint16_t        : VARIANT_SpawnUint((uint64_t)(uintptr_t)_v), \

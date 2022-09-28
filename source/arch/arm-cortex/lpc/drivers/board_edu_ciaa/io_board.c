@@ -109,15 +109,15 @@ void IO_BOARD_Attach (struct IO_BOARD *const B)
 
     INPUT_SetDevice ((struct IO *)B, 0);
 
-    INPUT_MapBit (INPUT_Bit_BoardA, IO_BOARD_INB_TEC_1);
-    INPUT_MapBit (INPUT_Bit_BoardB, IO_BOARD_INB_TEC_2);
-    INPUT_MapBit (INPUT_Bit_BoardC, IO_BOARD_INB_TEC_3);
-    INPUT_MapBit (INPUT_Bit_BoardD, IO_BOARD_INB_TEC_4);
-    #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
-    INPUT_MapBit (INPUT_Bit_StorageDetect, IO_BOARD_INB_SD_DETECT);
-    INPUT_MapBit (INPUT_Bit_WirelessEnable, IO_BOARD_INB_WIFI_EN);
-    INPUT_MapBit (INPUT_Bit_SoundMute, IO_BOARD_INB_SOUND_MUTE);
-    #endif
+    INPUT_MAP_BIT (MAIN, A, IO_BOARD_INB_TEC_1);
+    INPUT_MAP_BIT (MAIN, B, IO_BOARD_INB_TEC_2);
+    INPUT_MAP_BIT (MAIN, C, IO_BOARD_INB_TEC_3);
+    INPUT_MAP_BIT (MAIN, D, IO_BOARD_INB_TEC_4);
+#ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
+    INPUT_MAP_BIT (CONTROL, StorageDetect, IO_BOARD_INB_SD_DETECT);
+    INPUT_MAP_BIT (CONTROL, WirelessEnable, IO_BOARD_INB_WIFI_EN);
+    INPUT_MAP_BIT (CONTROL, SoundMute, IO_BOARD_INB_SOUND_MUTE);
+#endif
 
     OUTPUT_SetDevice ((struct IO *)B, 0);
 
@@ -125,12 +125,12 @@ void IO_BOARD_Attach (struct IO_BOARD *const B)
     OUTPUT_MapBit (OUTPUT_Bit_RedSign, IO_BOARD_OUTB_LED_RGB_RED);
     OUTPUT_MapBit (OUTPUT_Bit_GreenSign, IO_BOARD_OUTB_LED_RGB_GREEN);
     OUTPUT_MapBit (OUTPUT_Bit_BlueSign, IO_BOARD_OUTB_LED_RGB_BLUE);
-    #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
+#ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
     OUTPUT_MapBit (OUTPUT_Bit_Backlight, IO_BOARD_OUTB_BOARD_BACKLIGHT);
     OUTPUT_MapBit (OUTPUT_Bit_StorageEnable, IO_BOARD_OUTB_SD_SELECT);
     OUTPUT_MapBit (OUTPUT_Bit_WirelessEnable, IO_BOARD_OUTB_WIFI_EN);
     OUTPUT_MapBit (OUTPUT_Bit_SoundMute, IO_BOARD_OUTB_SOUND_MUTE);
-    #endif
+#endif
 }
 
 

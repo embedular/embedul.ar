@@ -39,7 +39,7 @@ $(call emb_need_var,LIB_EMBEDULAR_ROOT)
 # SPLASH_THEME_L1,L2,L3	: first, second and third splash screens. Names must
 #                         exactly match available source files (without 
 #                         extension) in source/core/misc/splash_themes/.
-# INPUT_SWITCH_ACTION	: enables(1) or disables(0) the processing capability of
+# INPUT_ACTION			: enables(1) or disables(0) the processing capability of
 #                         detecting and storing clicks, double clicks, holds and
 #                         releases on INPUT manager digital inputs.
 # ------------------------------------------------------------------------------
@@ -54,7 +54,7 @@ $(call emb_declare_lib,$\
 	SPLASH_THEME_L1=lock_glyph \
 	SPLASH_THEME_L2=none \
 	SPLASH_THEME_L3=c64 \
-	INPUT_SWITCH_ACTION=1 \
+	INPUT_ACTION=1 \
 	INPUT_MAX_DEVICES=10U \
 	INPUT_MAX_LIGHTING_DEVICES=2U \
 	OUTPUT_MAX_DEVICES=10U \
@@ -73,7 +73,8 @@ OBJS += $(LIB_EMBEDULAR)/device/board.o \
 	    $(LIB_EMBEDULAR)/device/board/init.o \
 		$(LIB_EMBEDULAR)/manager/log.o \
         $(LIB_EMBEDULAR)/manager/input.o \
-	    $(LIB_EMBEDULAR)/manager/input/switch_action.o \
+	    $(LIB_EMBEDULAR)/manager/input/action.o \
+	    $(LIB_EMBEDULAR)/manager/input/profile.o \
         $(LIB_EMBEDULAR)/manager/output.o \
         $(LIB_EMBEDULAR)/manager/storage.o \
         $(LIB_EMBEDULAR)/manager/storage/cache.o \

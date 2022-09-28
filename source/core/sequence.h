@@ -26,41 +26,19 @@
 #pragma once
 
 #include "embedul.ar/source/core/timer.h"
-#include <stdbool.h>
+#include "embedul.ar/source/core/manager/input/profile.h"
 
 
-// uint32 segmented as four 8-bit octets: 0xTT332211
-// where TT is the sequence input type and 33, 22 and 11 are type parameters.
-#define SEQUENCE_INPUT__TYPE_MASK           0xFF000000
-#define SEQUENCE_INPUT__TYPE_ANY            0x01000000
-#define SEQUENCE_INPUT__TYPE_BIT            0x02000000
-#define SEQUENCE_INPUT__TYPE_RANGE          0x03000000
-#define SEQUENCE_INPUT__TYPE_ROLE           0x04000000
-#if (LIB_EMBEDULAR_CONFIG_INPUT_SWITCH_ACTION == 1)
-#define SEQUENCE_INPUT__TYPE_BIT_ACTION     0x05000000
+enum SEQUENCE_InputType
+{
+    SEQUENCE_InputType_None = 0,
+    SEQUENCE_InputType_Bit,
+    SEQUENCE_InputType_AnyBit,
+#if (LIB_EMBEDULAR_CONFIG_INPUT_ACTION == 1)
+    SEQUENCE_InputType_BitAction,
 #endif
-
-#define SEQUENCE_INPUT__S1(_1)              (_1 & 0xFF)
-#define SEQUENCE_INPUT__S2(_1,_2)           (SEQUENCE_INPUT__S1(_2) << 8) | \
-                                            (SEQUENCE_INPUT__S1(_1)
-#define SEQUENCE_INPUT__GT(_input)          (_input & SEQUENCE_INPUT__TYPE_MASK)
-#define SEQUENCE_INPUT__G1(_input)          (_input & 0xFF)
-#define SEQUENCE_INPUT__G2(_input)          ((_input >> 8) & 0xFF)
-
-
-#define SEQUENCE_INPUT_ANY                  (SEQUENCE_INPUT__TYPE_ANY)
-#define SEQUENCE_INPUT_BIT(_bit)            (SEQUENCE_INPUT__TYPE_BIT | \
-                                             (_bit & 0xFF))
-#define SEQUENCE_INPUT_RANGE(_begin,_end)   (SEQUENCE_INPUT__TYPE_RANGE | \
-                                             ((_end & 0xFF) << 8) | \
-                                             (_begin & 0xFF))
-#define SEQUENCE_INPUT_ROLE(_role)          (SEQUENCE_INPUT__TYPE_ROLE | \
-                                             (_role & 0xFF))
-#if (LIB_EMBEDULAR_CONFIG_INPUT_SWITCH_ACTION == 1)
-#define SEQUENCE_INPUT_BIT_ACTION(_bit,_action) \
-                                            (SEQUENCE_INPUT__TYPE_BIT_ACTION | \
-                                             (_action << 8) | _bit)
-#endif
+    SEQUENCE_InputType_Range
+};
 
 
 enum SEQUENCE_Action
@@ -71,7 +49,68 @@ enum SEQUENCE_Action
 };
 
 
-struct SEQUENCE_Stage;
+struct SEQUENCE;
+
+
+typedef void (* SEQUENCE_StageFunc) (struct SEQUENCE *const S, 
+                                     void *const Param,
+                                     const enum SEQUENCE_Action Action,
+                                     const TIMER_Ticks Elapsed);
+
+
+struct SEQUENCE_StageInput
+{
+    enum SEQUENCE_InputType         type;
+    union 
+    {
+    enum INPUT_PROFILE_Type         profileType;
+    enum INPUT_PROFILE_SelectFlag   profileSelectFlags;
+    };
+    uint32_t                        inx;
+#if (LIB_EMBEDULAR_CONFIG_INPUT_ACTION == 1)
+    enum INPUT_ACTION_Type          action;
+#endif
+};
+
+
+#define SEQUENCE_INPUT_BIT(_ptype,_inb) \
+    (struct SEQUENCE_StageInput) { \
+        .type           = SEQUENCE_InputType_Bit, \
+        .profileType    = _ptype, \
+        .inx            = _inb \
+    }
+
+#define SEQUENCE_INPUT_ANY_BIT(_pflags) \
+    (struct SEQUENCE_StageInput) { \
+        .type               = SEQUENCE_InputType_AnyBit, \
+        .profileSelectFlags = _pflags \
+    }
+
+#if (LIB_EMBEDULAR_CONFIG_INPUT_ACTION == 1)
+    #define SEQUENCE_INPUT_BIT_ACTION(_ptype,_inb,_action) \
+        (struct SEQUENCE_StageInput) { \
+            .type           = SEQUENCE_InputType_BitAction, \
+            .profileType    = _ptype, \
+            .inx            = _inb, \
+            .action         = _action \
+        }
+#endif
+
+#define SEQUENCE_INPUT_RANGE(_ptype,_inr) \
+    (struct SEQUENCE_StageInput) { \
+        .type           = SEQUENCE_InputType_Range, \
+        .profileType    = _ptype, \
+        .inx            = _inr \
+    }
+
+
+struct SEQUENCE_Stage
+{
+    SEQUENCE_StageFunc              func;
+    uint32_t                        period;
+    uint32_t                        timeout;
+    struct SEQUENCE_StageInput      input;
+};
 
 
 struct SEQUENCE
@@ -85,21 +124,6 @@ struct SEQUENCE
     TIMER_Ticks                     currentStageTimeout;
     enum SEQUENCE_Action            currentStageAction;
     bool                            exitRequested;
-};
-
-
-typedef void (* SEQUENCE_StageFunc) (struct SEQUENCE *const S, 
-                                     void *const Param,
-                                     const enum SEQUENCE_Action Action,
-                                     const TIMER_Ticks Elapsed);
-
-
-struct SEQUENCE_Stage
-{
-    SEQUENCE_StageFunc              func;
-    uint32_t                        period;
-    uint32_t                        timeout;
-    uint32_t                        input;
 };
 
 

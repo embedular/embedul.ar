@@ -36,12 +36,17 @@
 
 struct BOARD_HOSTED_SDL
 {
-    struct BOARD                device;
-    struct RANDOM_SFMT          randomSfmt;
-    struct VIDEO_SDL            videoSdl;
-    struct SOUND_SDL            soundSdl;
-    struct IO_KEYBOARD_SDL      ioKbSdl;
-    struct STREAM_FILE          streamDebugFile;
-    struct RAWSTOR_FILE         rsImageFile;
+    struct BOARD                    device;
+    struct INPUT_PROFILE_CONTROL    inputProfileControl;
+    struct INPUT_PROFILE_GP1        inputProfileGp1;
+    struct INPUT_PROFILE_GP2        inputProfileGp2;
+    struct INPUT_PROFILE_LIGHTDEV   inputprofileLightdev;
+    struct INPUT_PROFILE_MAIN       inputProfileMain;
+    struct RANDOM_SFMT              randomSfmt;
+    struct VIDEO_SDL                videoSdl;
+    struct SOUND_SDL                soundSdl;
+    struct IO_KEYBOARD_SDL          ioKbSdl;
+    struct STREAM_FILE              streamDebugFile;
+    struct RAWSTOR_FILE             rsImageFile;
 };
 

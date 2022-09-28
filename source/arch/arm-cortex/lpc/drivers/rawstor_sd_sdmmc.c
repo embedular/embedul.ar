@@ -194,7 +194,7 @@ static bool powerCheck (struct RAWSTOR_SD_SDMMC *const M)
 {
     (void) M;
 
-    return INPUT_BitNow(INPUT_Bit_StoragePower)? true : false;
+    return INPUT_GET_BIT_NOW(CONTROL,StoragePower)? true : false;
 }
 
 
