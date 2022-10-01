@@ -44,8 +44,15 @@
                                     "`M40`1`L1"
 
 
+#ifdef BSS_SECTION_BOARD
+BSS_SECTION_BOARD
+#endif
+static struct BOARD_NUCLEO_144 s_board_nucleo_144;
 
-static struct BOARD_NUCLEO_144 s_System_nucleo_144;
+#ifdef BSS_SECTION_IO_PROFILES
+BSS_SECTION_IO_PROFILES
+#endif
+static struct BOARD_IO_PROFILES s_io_profiles;
 
 
 static void *               stageChange     (struct BOARD *const B,
@@ -124,7 +131,7 @@ static void panic (const char *const ErrorMsg)
 void BOARD_Boot (struct BOARD_RIG *const R)
 {
     const char *const ErrorMsg = BOARD_Init (
-                                    (struct BOARD *)&s_System_nucleo_144,
+                                    (struct BOARD *)&s_board_nucleo_144,
                                     &BOARD_NUCLEO_144_IFACE, R);
     if (ErrorMsg)
     {
@@ -192,6 +199,13 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
         case BOARD_Stage_Greetings:
         {
             greetings ((struct STREAM *)&N->streamDebugUsart);
+            break;
+        }
+
+        case BOARD_Stage_InitIOProfiles:
+        {
+            INPUT_PROFILE_ATTACH    (MAIN, B, s_io_profiles.inMain);
+            OUTPUT_PROFILE_ATTACH   (SIGN, B, s_io_profiles.outSign);
             break;
         }
 

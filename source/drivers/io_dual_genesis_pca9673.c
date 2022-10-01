@@ -28,18 +28,6 @@
 #include "embedul.ar/source/core/device/packet/error_log.h"
 
 
-#define I2C_XFER_STATUS_ITEM_STR        "i2c transfer status"
-#define HW_STATE_ITEM_STR               "hardware state"
-
-
-static const char *
-s_InputNamesBit[IO_DUAL_GENESIS_INB__6Buttons_COUNT] =
-{
-    "→", "←", "↓", "↑", "start", "a", "b", "c",
-    "mode", "x", "y", "z"
-};
-
-
 // PCA9673 register position mask for each connected genesis signal + presence
 // led. One register for each gamepad: gamepad 1 (P00/P07), gamepad 2 (P10/P17)
 #define CHCFG_1TH   0x10
@@ -61,19 +49,44 @@ s_InputNamesBit[IO_DUAL_GENESIS_INB__6Buttons_COUNT] =
 #define CHCFG_2OK   0x80
 
 
+#define CH1(_ch,_btn)   ((G->rxData[0] & CHCFG_1 ## _ch)? \
+                                0 : 1 << IO_DUAL_GENESIS_INB_ ## _btn)
+
+#define CH2(_ch,_btn)   ((G->rxData[1] & CHCFG_2 ## _ch)? \
+                                0 : 1 << IO_DUAL_GENESIS_INB_ ## _btn)
+
+
+static const char *
+s_InputNamesBit[IO_DUAL_GENESIS_INB__6Buttons_COUNT] =
+{
+    [IO_DUAL_GENESIS_INB_Right]     = "right",
+    [IO_DUAL_GENESIS_INB_Left]      = "left",
+    [IO_DUAL_GENESIS_INB_Down]      = "down",
+    [IO_DUAL_GENESIS_INB_Up]        = "up",
+    [IO_DUAL_GENESIS_INB_Start]     = "start",
+    [IO_DUAL_GENESIS_INB_A]         = "a",
+    [IO_DUAL_GENESIS_INB_B]         = "b",
+    [IO_DUAL_GENESIS_INB_C]         = "c",
+    [IO_DUAL_GENESIS_INB_Mode]      = "mode",
+    [IO_DUAL_GENESIS_INB_X]         = "x",
+    [IO_DUAL_GENESIS_INB_Y]         = "y",
+    [IO_DUAL_GENESIS_INB_Z]         = "z"
+};
+
+
 static void         hardwareInit        (struct IO *const Io);
 static void         update              (struct IO *const Io);
 static IO_Count
                     availableInputs     (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint32_t InputSource);
+                                         const IO_Port InPort);
 static uint32_t     getInput            (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index,
-                                         const uint32_t InputSource);
+                                         const IO_Code Inx,
+                                         const IO_Port InPort);
 static const char * inputName           (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index);
+                                         const IO_Code Inx);
 
 
 static const struct IO_IFACE IO_DUAL_GENESIS_PCA9673_IFACE =
@@ -106,12 +119,11 @@ void IO_DUAL_GENESIS_PCA9673_Init (struct IO_DUAL_GENESIS_PCA9673 *const G,
 }
 
 
-void IO_DUAL_GENESIS_PCA9673_Attach (
-                            struct IO_DUAL_GENESIS_PCA9673 *const G)
+void IO_DUAL_GENESIS_PCA9673_Attach (struct IO_DUAL_GENESIS_PCA9673 *const G)
 {
     BOARD_AssertParams (G);
 
-    INPUT_SetDevice ((struct IO *)G, 0);
+    INPUT_SetGateway ((struct IO *)G, 0);
 
     INPUT_MAP_BIT (GP1, Right, IO_DUAL_GENESIS_INB_Right);
     INPUT_MAP_BIT (GP1, Left, IO_DUAL_GENESIS_INB_Left);
@@ -127,7 +139,7 @@ void IO_DUAL_GENESIS_PCA9673_Attach (
     INPUT_MAP_BIT (GP1, Z, IO_DUAL_GENESIS_INB_Z);
 
 
-    INPUT_SetDevice ((struct IO *)G, 1);
+    INPUT_SetGateway ((struct IO *)G, 1);
 
     INPUT_MAP_BIT (GP2, Right, IO_DUAL_GENESIS_INB_Right);
     INPUT_MAP_BIT (GP2, Left, IO_DUAL_GENESIS_INB_Left);
@@ -202,16 +214,6 @@ void hardwareInit (struct IO *const Io)
     State 4, D3,D2,D1,D0: new 6-button status (Mode,X,Y,Z).
     State 5 will set TH LOW, right to the end of a Cycle.
 */
-
-#define CH1(_ch,_btn) \
-                ((G->rxData[0] & CHCFG_1 ## _ch)? \
-                    0 : 1 << IO_DUAL_GENESIS_INB_ ## _btn)
-
-#define CH2(_ch,_btn) \
-                ((G->rxData[1] & CHCFG_2 ## _ch)? \
-                    0 : 1 << IO_DUAL_GENESIS_INB_ ## _btn)
-
-
 static bool processHardwareState (struct IO_DUAL_GENESIS_PCA9673 *const G,
                                   const uint32_t State)
 {
@@ -334,9 +336,9 @@ void update (struct IO *const Io)
 
 
 IO_Count availableInputs (struct IO *const Io, const enum IO_Type IoType,
-                          const uint32_t InputSource)
+                          const IO_Port InPort)
 {
-    BOARD_AssertParams (InputSource < 2);
+    BOARD_AssertParams (InPort < 2);
 
     struct IO_DUAL_GENESIS_PCA9673 *const G =
                             (struct IO_DUAL_GENESIS_PCA9673 *) Io;
@@ -347,32 +349,31 @@ IO_Count availableInputs (struct IO *const Io, const enum IO_Type IoType,
         return 0;
     }
 
-    return (InputSource == 0)? G->gp1AvailIn : G->gp2AvailIn;
+    return (InPort == 0)? G->gp1AvailIn : G->gp2AvailIn;
 }
 
 
 uint32_t getInput (struct IO *const Io, const enum IO_Type IoType,
-                   const uint16_t Index, const uint32_t InputSource)
+                   const IO_Code Inx, const IO_Port InPort)
 {
     BOARD_AssertParams (IoType == IO_Type_Bit &&
-                         Index < IO_DUAL_GENESIS_INB__6Buttons_COUNT &&
-                         InputSource < 2);
+                        Inx < IO_DUAL_GENESIS_INB__6Buttons_COUNT &&
+                        InPort < 2);
     
     struct IO_DUAL_GENESIS_PCA9673 *const G =
                             (struct IO_DUAL_GENESIS_PCA9673 *) Io;
 
-    return (InputSource == 0)? G->gp1Data & (1 << Index) :
-                               G->gp2Data & (1 << Index);
+    return (InPort == 0)? G->gp1Data & (1 << Inx) : G->gp2Data & (1 << Inx);
 }
 
 
 const char * inputName (struct IO *const Io, const enum IO_Type IoType,
-                        const uint16_t Index)
+                        const IO_Code Inx)
 {
     BOARD_AssertParams (IoType == IO_Type_Bit &&
-                         Index < IO_DUAL_GENESIS_INB__6Buttons_COUNT);
+                        Inx < IO_DUAL_GENESIS_INB__6Buttons_COUNT);
 
     (void) Io;
 
-    return s_InputNamesBit[Index];
+    return s_InputNamesBit[Inx];
 }

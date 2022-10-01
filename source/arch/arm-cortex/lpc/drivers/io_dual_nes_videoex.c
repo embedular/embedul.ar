@@ -30,7 +30,14 @@
 
 static const char * s_InputNames[] =
 {
-    "→", "←", "↓", "↑", "start", "select", "b", "a"
+    [IO_DUAL_NES_VIDEOEX_INB_Right]     = "right",
+    [IO_DUAL_NES_VIDEOEX_INB_Left]      = "left",
+    [IO_DUAL_NES_VIDEOEX_INB_Down]      = "down",
+    [IO_DUAL_NES_VIDEOEX_INB_Up]        = "up",
+    [IO_DUAL_NES_VIDEOEX_INB_Start]     = "start",
+    [IO_DUAL_NES_VIDEOEX_INB_Select]    = "select",
+    [IO_DUAL_NES_VIDEOEX_INB_B]         = "b",
+    [IO_DUAL_NES_VIDEOEX_INB_A]         = "a"
 };
 
 
@@ -38,14 +45,14 @@ static void         update              (struct IO *const Io);
 static IO_Count
                     availableInputs     (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint32_t InputSource);
+                                         const IO_Port InPort);
 static uint32_t     getInput            (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index,
-                                         const uint32_t InputSource);
+                                         const IO_Code Code,
+                                         const IO_Port InPort);
 static const char * inputName           (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index);
+                                         const IO_Code Code);
 
 
 static const struct IO_IFACE IO_DUAL_NES_VIDEOEX_IFACE =
@@ -74,7 +81,7 @@ void IO_DUAL_NES_VIDEOEX_Init (struct IO_DUAL_NES_VIDEOEX *const N)
 
 void IO_DUAL_NES_VIDEOEX_Attach (struct IO_DUAL_NES_VIDEOEX *const N)
 {
-    INPUT_SetDevice ((struct IO *)N, 0);
+    INPUT_SetGateway ((struct IO *)N, 0);
 
     INPUT_MAP_BIT (GP1, Right, IO_DUAL_NES_VIDEOEX_INB_Right);
     INPUT_MAP_BIT (GP1, Left, IO_DUAL_NES_VIDEOEX_INB_Left);
@@ -86,7 +93,7 @@ void IO_DUAL_NES_VIDEOEX_Attach (struct IO_DUAL_NES_VIDEOEX *const N)
     INPUT_MAP_BIT (GP1, B, IO_DUAL_NES_VIDEOEX_INB_B);
 
 
-    INPUT_SetDevice ((struct IO *)N, 1);
+    INPUT_SetGateway ((struct IO *)N, 1);
 
     INPUT_MAP_BIT (GP2, Right, IO_DUAL_NES_VIDEOEX_INB_Right);
     INPUT_MAP_BIT (GP2, Left, IO_DUAL_NES_VIDEOEX_INB_Left);
@@ -110,10 +117,10 @@ void update (struct IO *const Io)
 
 
 IO_Count availableInputs (struct IO *const Io, const enum IO_Type IoType,
-                          const uint32_t InputSource)
+                          const IO_Port InPort)
 {
     (void) Io;
-    (void) InputSource;
+    (void) InPort;
 
     // NES controllers have no analog inputs
     if (IoType == IO_Type_Range)
@@ -126,27 +133,26 @@ IO_Count availableInputs (struct IO *const Io, const enum IO_Type IoType,
 
 
 uint32_t getInput (struct IO *const Io, const enum IO_Type IoType,
-                   const uint16_t Index, const uint32_t InputSource)
+                   const IO_Code Code, const IO_Port InPort)
 {
     BOARD_AssertParams (IoType == IO_Type_Bit &&
-                         Index < IO_DUAL_NES_VIDEOEX_INB__COUNT &&
-                         InputSource < 2);
+                        Code < IO_DUAL_NES_VIDEOEX_INB__COUNT &&
+                        InPort < 2);
     
     struct IO_DUAL_NES_VIDEOEX *const N = (struct IO_DUAL_NES_VIDEOEX *) Io;
 
-    return (InputSource == 0)? N->gp1Data & (1 << Index) :
-                               N->gp2Data & (1 << Index);
+    return (InPort == 0)? N->gp1Data & (1 << Code) : N->gp2Data & (1 << Code);
 }
 
 
 const char * inputName (struct IO *const Io,
                         const enum IO_Type IoType,
-                        const uint16_t Index)
+                        const IO_Code Code)
 {
     BOARD_AssertParams (IoType == IO_Type_Bit &&
-                         Index < IO_DUAL_NES_VIDEOEX_INB__COUNT);
+                        Code < IO_DUAL_NES_VIDEOEX_INB__COUNT);
 
     (void) Io;
 
-    return s_InputNames[Index];
+    return s_InputNames[Code];
 }

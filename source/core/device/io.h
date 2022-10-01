@@ -29,49 +29,53 @@
 #include "embedul.ar/source/core/timer.h"
 
 
-#define IO_INVALID_INDEX        ((uint16_t) -1)
-
-
-struct IO;
+#define IO_INVALID_CODE     ((IO_Code) -1)
 
 
 typedef uint16_t    IO_Count;
+typedef uint16_t    IO_Code;
+typedef uint16_t    IO_GatewayId;
+typedef uint32_t    IO_Port;
 
 
 enum IO_Type
 {
     IO_Type_Bit = 0,
-    IO_Type_Range
+    IO_Type_Range,
+    IO_Type__COUNT
 };
 
 
 enum IO_UpdateValue
 {
     IO_UpdateValue_Now = 0,
-    IO_UpdateValue_Async, // Output: deferred update, Input: buffered value
+    // Output: deferred update, Input: buffered value
+    IO_UpdateValue_Async,
 };
 
+
+struct IO;
 
 typedef void            (* IO_HardwareInitFunc)(struct IO *const Io);
 typedef void            (* IO_UpdateFunc)(struct IO *const Io);
 // May change any time on hotplugged devices
 typedef IO_Count        (* IO_AvailableInputsFunc)(struct IO *const Io,
-                         const enum IO_Type IoType, const uint32_t InputSource);
+                         const enum IO_Type IoType, const IO_Port InPort);
 typedef IO_Count        (* IO_AvailableOutputsFunc)(struct IO *const Io,
                          const enum IO_Type IoType,
-                         const uint32_t OutputSource);
+                         const IO_Port OutPort);
 typedef uint32_t        (* IO_GetInputFunc)(struct IO *const Io,
-                         const enum IO_Type IoType, const uint16_t Index,
-                         const uint32_t InputSource);
+                         const enum IO_Type IoType, const IO_Code Inx,
+                         const IO_Port InPort);
 typedef void            (* IO_SetOutputFunc)(struct IO *const Io,
-                         const enum IO_Type IoType, const uint16_t Index,
-                         const uint32_t OutputSource, const uint32_t Value);
-typedef uint16_t        (* IO_FirstOnIndexFunc)(struct IO *const Io,
-                         const enum IO_Type IoType, const uint32_t InputSource);
+                         const enum IO_Type IoType, const IO_Code Inx,
+                         const IO_Port OutPort, const uint32_t Value);
+typedef IO_Code         (* IO_GetAnyInputFunc)(struct IO *const Io,
+                         const enum IO_Type IoType, const IO_Port InPort);
 typedef const char *    (* IO_InputNameFunc)(struct IO *const Io,
-                         const enum IO_Type IoType, const uint16_t Index);
+                         const enum IO_Type IoType, const IO_Code Inx);
 typedef const char *    (* IO_OutputNameFunc)(struct IO *const Io,
-                         const enum IO_Type IoType, const uint16_t Index);
+                         const enum IO_Type IoType, const IO_Code Inx);
 
 
 struct IO_IFACE
@@ -82,8 +86,8 @@ struct IO_IFACE
     const IO_AvailableInputsFunc    AvailableInputs;
     const IO_AvailableOutputsFunc   AvailableOutputs;
     const IO_GetInputFunc           GetInput;
+    const IO_GetAnyInputFunc        GetAnyInput;
     const IO_SetOutputFunc          SetOutput;
-    const IO_FirstOnIndexFunc       FirstOnIndex;
     const IO_InputNameFunc          InputName;
     const IO_OutputNameFunc         OutputName;
 };
@@ -91,9 +95,16 @@ struct IO_IFACE
 
 struct IO
 {
-    const struct IO_IFACE           * iface;
-    TIMER_Ticks                     deferredUpdatePeriod;
-    TIMER_Ticks                     lastDeferredUpdate;
+    const struct IO_IFACE   * iface;
+    TIMER_Ticks             deferredUpdatePeriod;
+    TIMER_Ticks             lastDeferredUpdate;
+};
+
+
+struct IO_Gateway
+{
+    struct IO               * driver;
+    IO_Port                 driverPort;
 };
 
 
@@ -105,28 +116,28 @@ bool            IO_Initialized          (struct IO *const Io);
 void            IO_Update               (struct IO *const Io);
 IO_Count        IO_AvailableInputs      (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint32_t InputSource);
+                                         const IO_Port InPort);
 IO_Count        IO_AvailableOutputs     (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint32_t OutputSource);
+                                         const IO_Port OutPort);
 uint32_t        IO_GetInput             (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index,
-                                         const uint32_t InputSource,
+                                         const IO_Code Inx,
+                                         const IO_Port InPort,
                                          const enum IO_UpdateValue When);
 void            IO_SetOutput            (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index,
-                                         const uint32_t OutputSource,
+                                         const IO_Code Inx,
+                                         const IO_Port OutPort,
                                          const uint32_t Value,
                                          const enum IO_UpdateValue When);
-uint16_t        IO_FirstOnIndex         (struct IO *const Io,
+IO_Code         IO_GetAnyInput          (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint32_t InputSource);
+                                         const IO_Port InPort);
 const char *    IO_Description          (struct IO *const Io);
 const char *    IO_InputName            (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index);
+                                         const IO_Code Inx);
 const char *    IO_OutputName           (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index);
+                                         const IO_Code Inx);

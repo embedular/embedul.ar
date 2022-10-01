@@ -1,27 +1,21 @@
 #pragma once
 
-
-#include "embedul.ar/source/core/manager/input/action.h"
 #include "embedul.ar/source/core/cc.h"
+#include "embedul.ar/source/core/manager/input/action.h"
+#include "embedul.ar/source/core/manager/io_profile.h"
 
 
 #define INPUT_PROFILE_BIT_MAP_0(_pname)
-#define INPUT_PROFILE_BIT_MAP_1(_pname) struct INPUT_PROFILE_Map \
+#define INPUT_PROFILE_BIT_MAP_1(_pname) struct IO_PROFILE_Map \
                         bitMap[INPUT_PROFILE_ ## _pname ## _Bit__COUNT]
-
 
 #define INPUT_PROFILE_BIT_ACTION_0(_pname)
 #define INPUT_PROFILE_BIT_ACTION_1(_pname) struct INPUT_ACTION \
                         bitAction[INPUT_PROFILE_ ## _pname ## _Bit__COUNT]
 
-
 #define INPUT_PROFILE_RANGE_MAP_0(_pname)
-#define INPUT_PROFILE_RANGE_MAP_1(_pname) struct INPUT_PROFILE_Map \
+#define INPUT_PROFILE_RANGE_MAP_1(_pname) struct IO_PROFILE_Map \
                         rangeMap[INPUT_PROFILE_ ## _pname ## _Range__COUNT]
-
-
-#define INPUT_PROFILE_STRUCT_MEMBER(_name,_pname,_bm,_ba,_rm) \
-    CC_ExpPaste(INPUT_PROFILE_ ## _name ## _,_bm)(_pname)
 
 #define INPUT_PROFILE_STRUCT__(_pname,_bm,_ba,_rm) \
     struct INPUT_PROFILE_ ## _pname { \
@@ -91,19 +85,25 @@
                     INPUT_PROFILE_ATTACH_BIT_00(_pname,_board,_profile) \
                     INPUT_PROFILE_ATTACH_RANGE_1(_pname,_profile)
 
-
 #if (LIB_EMBEDULAR_CONFIG_INPUT_ACTION == 1)
     #define INPUT_PROFILE__CODE(_pname) \
-        CC_ExpPaste(CC_ExpPaste(CC_Exp(INPUT_PROFILE_ ## _pname ## _BIT_MAP), \
-            CC_Exp(INPUT_PROFILE_ ## _pname ## _BIT_ACTION)), \
-                CC_Exp(INPUT_PROFILE_ ## _pname ## _RANGE_MAP))
+        CC_ExpPaste( \
+            CC_ExpPaste( \
+                CC_Exp(INPUT_PROFILE_ ## _pname ## _BIT_MAP), \
+                CC_Exp(INPUT_PROFILE_ ## _pname ## _BIT_ACTION) \
+            ), \
+            CC_Exp(INPUT_PROFILE_ ## _pname ## _RANGE_MAP) \
+        )
 #else
     #define INPUT_PROFILE__CODE(_pname) \
-        CC_ExpPaste(CC_ExpPaste(CC_Exp(INPUT_PROFILE_ ## _pname ## _BIT_MAP), \
-            0), \
-                CC_Exp(INPUT_PROFILE_ ## _pname ## _RANGE_MAP))
+        CC_ExpPaste( \
+            CC_ExpPaste( \
+                CC_Exp(INPUT_PROFILE_ ## _pname ## _BIT_MAP), \
+                0 \
+            ), \
+            CC_Exp(INPUT_PROFILE_ ## _pname ## _RANGE_MAP) \
+        )
 #endif
-
 
 #define INPUT_PROFILE_ATTACH(_pname,_board,_profile) \
     CC_ExpPaste(INPUT_PROFILE_ATTACH__,CC_Exp(INPUT_PROFILE__CODE(_pname))) \
@@ -138,20 +138,13 @@ enum INPUT_PROFILE_Type
 extern const char * INPUT_PROFILE_TypeString[INPUT_PROFILE_Type__COUNT];
 
 
-struct INPUT_PROFILE_Map
-{
-    uint16_t        deviceId;
-    uint16_t        driverIndex;
-};
-
-
 struct INPUT_PROFILE
 {
-    struct INPUT_PROFILE_Map    * bitMap;
-    struct INPUT_ACTION         * bitAction;
-    struct INPUT_PROFILE_Map    * rangeMap;
-    uint16_t                    bitCount;
-    uint16_t                    rangeCount;
+    struct IO_PROFILE_Map   * bitMap;
+    struct INPUT_ACTION     * bitAction;
+    struct IO_PROFILE_Map   * rangeMap;
+    uint16_t                bitCount;
+    uint16_t                rangeCount;
 };
 
 
@@ -161,8 +154,8 @@ const char * INPUT_PROFILE_GetTypeName (enum INPUT_PROFILE_Type ProfileType);
 void INPUT_PROFILE__attach (
     struct INPUT_PROFILE ProfilesArray[static const INPUT_PROFILE_Type__COUNT],
     const enum INPUT_PROFILE_Type ProfileType,
-    struct INPUT_PROFILE_Map *const BitMap,
+    struct IO_PROFILE_Map *const BitMap,
     struct INPUT_ACTION *const BitAction,
     const uint32_t BitCount,
-    struct INPUT_PROFILE_Map *const RangeMap,
+    struct IO_PROFILE_Map *const RangeMap,
     const uint32_t RangeCount);

@@ -698,11 +698,11 @@ static bool connect (struct PACKET *const P, struct STREAM *const Esp32AT,
     {
         LOG_ContextBegin (P, LANG_MODULE_RESTART);
         {
-            OUTPUT_BitNow  (OUTPUT_Bit_WirelessEnable, 0);
-            BOARD_Delay    (ESP32AT_POWERCYCLE_OFF_DELAY);
+            OUTPUT_SET_BIT_NOW (CONTROL, WirelessEnable, 0);
+            BOARD_Delay (ESP32AT_POWERCYCLE_OFF_DELAY);
 
-            OUTPUT_BitNow  (OUTPUT_Bit_WirelessEnable, 1);
-            BOARD_Delay    (ESP32AT_POWERCYCLE_ON_DELAY);
+            OUTPUT_SET_BIT_NOW (CONTROL, WirelessEnable, 1);
+            BOARD_Delay (ESP32AT_POWERCYCLE_ON_DELAY);
 
             LOG (P, LANG_DEFAULT_SPEED_NO_FLOW_CTRL);
 
@@ -986,7 +986,7 @@ static enum DEVICE_CommandResult command (struct PACKET *const P,
     }
     else if (DEVICE_COMMAND_CHECK(EXE_POWEROFF))
     {
-        OUTPUT_BitNow (OUTPUT_Bit_WirelessEnable, 0);
+        OUTPUT_SET_BIT_NOW (CONTROL, WirelessEnable, 0);
     }
     else
     {

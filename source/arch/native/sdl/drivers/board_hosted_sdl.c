@@ -45,7 +45,15 @@
 #define BOARD_INFO_1_VER        "version " LIB_SDL_VERSION_STR
 
 
-static struct BOARD_HOSTED_SDL   s_System_host;
+#ifdef BSS_SECTION_BOARD
+BSS_SECTION_BOARD
+#endif
+static struct BOARD_HOSTED_SDL s_board_host;
+
+#ifdef BSS_SECTION_IO_PROFILES
+BSS_SECTION_IO_PROFILES
+#endif
+static struct BOARD_IO_PROFILES s_io_profiles;
 
 
 static void *       initComponent   (struct BOARD *const B,
@@ -74,7 +82,7 @@ static const struct BOARD_IFACE BOARD_HOSTED_SDL_IFACE =
 
 void BOARD_Boot (struct BOARD_RIG *const R)
 {
-    const char * ErrorMsg = BOARD_Init ((struct BOARD *)&s_System_host,
+    const char * ErrorMsg = BOARD_Init ((struct BOARD *)&s_board_host,
                                         &BOARD_HOSTED_SDL_IFACE, R);
     if (ErrorMsg)
     {
@@ -140,11 +148,16 @@ void * initComponent (struct BOARD *const B,
 
         case BOARD_Stage_InitIOProfiles:
         {
-            INPUT_PROFILE_ATTACH (CONTROL, B, H->inputProfileControl);
-            INPUT_PROFILE_ATTACH (GP1, B, H->inputProfileGp1);
-            INPUT_PROFILE_ATTACH (GP2, B, H->inputProfileGp2);
-            INPUT_PROFILE_ATTACH (LIGHTDEV, B, H->inputprofileLightdev);
-            INPUT_PROFILE_ATTACH (MAIN, B, H->inputProfileMain);
+            INPUT_PROFILE_ATTACH    (CONTROL, B, s_io_profiles.inControl);
+            INPUT_PROFILE_ATTACH    (GP1, B, s_io_profiles.inGp1);
+            INPUT_PROFILE_ATTACH    (GP2, B, s_io_profiles.inGp2);
+            INPUT_PROFILE_ATTACH    (LIGHTDEV, B, s_io_profiles.inLightdev);
+            INPUT_PROFILE_ATTACH    (MAIN, B, s_io_profiles.inMain);
+
+            OUTPUT_PROFILE_ATTACH   (CONTROL, B, s_io_profiles.outControl);
+            OUTPUT_PROFILE_ATTACH   (LIGHTDEV, B, s_io_profiles.outLightdev);
+            OUTPUT_PROFILE_ATTACH   (MARQUEE, B, s_io_profiles.outMarquee);
+            OUTPUT_PROFILE_ATTACH   (SIGN, B, s_io_profiles.outSign);
             break;
         }
 

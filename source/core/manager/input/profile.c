@@ -22,10 +22,10 @@ const char * INPUT_PROFILE_GetTypeName (enum INPUT_PROFILE_Type ProfileType)
 void INPUT_PROFILE__attach (
     struct INPUT_PROFILE ProfilesArray[static const INPUT_PROFILE_Type__COUNT],
     const enum INPUT_PROFILE_Type ProfileType,
-    struct INPUT_PROFILE_Map *const BitMap,
+    struct IO_PROFILE_Map *const BitMap,
     struct INPUT_ACTION *const BitAction,
     const uint32_t BitCount,
-    struct INPUT_PROFILE_Map *const RangeMap,
+    struct IO_PROFILE_Map *const RangeMap,
     const uint32_t RangeCount)
 {
     BOARD_AssertParams (ProfilesArray &&
@@ -41,7 +41,7 @@ void INPUT_PROFILE__attach (
 
     if (BitMap)
     {
-        memset (BitMap, IO_INVALID_INDEX, sizeof(*BitMap) * BitCount);
+        memset (BitMap, IO_INVALID_CODE, sizeof(*BitMap) * BitCount);
         P->bitMap       = BitMap;
         P->bitCount     = BitCount;
     }
@@ -54,7 +54,7 @@ void INPUT_PROFILE__attach (
 
     if (RangeMap)
     {
-        memset (RangeMap, IO_INVALID_INDEX, sizeof(*RangeMap) * RangeCount);
+        memset (RangeMap, IO_INVALID_CODE, sizeof(*RangeMap) * RangeCount);
         P->rangeMap     = RangeMap;
         P->rangeCount   = RangeCount;
     }

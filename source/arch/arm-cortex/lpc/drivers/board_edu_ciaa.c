@@ -64,10 +64,15 @@
 #endif
 
 
-#ifdef BSS_SECTION_RETROCIAA_SYSTEM
-BSS_SECTION_RETROCIAA_SYSTEM
+#ifdef BSS_SECTION_BOARD
+BSS_SECTION_BOARD
 #endif
 static struct BOARD_EDU_CIAA s_board_edu_ciaa;
+
+#ifdef BSS_SECTION_IO_PROFILES
+BSS_SECTION_IO_PROFILES
+#endif
+static struct BOARD_IO_PROFILES s_io_profiles;
 
 
 static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage);
@@ -154,6 +159,19 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
             break;
         }
 
+        case BOARD_Stage_InitIOProfiles:
+        {
+            INPUT_PROFILE_ATTACH    (MAIN, B, s_io_profiles.inMain);
+            OUTPUT_PROFILE_ATTACH   (SIGN, B, s_io_profiles.outSign);
+        #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
+            INPUT_PROFILE_ATTACH    (GP1, B, s_io_profiles.inGp1);
+            INPUT_PROFILE_ATTACH    (GP2, B, s_io_profiles.inGp2);
+            INPUT_PROFILE_ATTACH    (CONTROL, B, s_io_profiles.inControl);
+            OUTPUT_PROFILE_ATTACH   (CONTROL, B, s_io_profiles.outControl);
+        #endif
+            break;
+        }
+
         case BOARD_Stage_InitRandomDriver:
         {
             RANDOM_SFMT_Init (&E->randomSfmt, Board_GetSeed());
@@ -164,10 +182,10 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
         {
             IO_BOARD_Init   (&E->ioBoard);
             IO_BOARD_Attach (&E->ioBoard);
-            #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
+        #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
             IO_DUAL_NES_VIDEOEX_Init    (&E->ioDualNes);
             IO_DUAL_NES_VIDEOEX_Attach  (&E->ioDualNes);
-            #endif
+        #endif
             break;
         }
 
@@ -182,7 +200,7 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
             COMM_SetPacket (COMM_Packet_HighSpeedDeviceExpansion,
                             (struct PACKET *)&E->packetSsp);
 
-            #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
+        #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
             BOARD_AssertState (BOARD_EXT_USART_INTERFACE == LPC_USART3);
 
             STREAM_USART3_Init (&E->streamExtUsart,
@@ -198,17 +216,17 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
 
             COMM_SetPacket (COMM_Packet_IPNetwork,
                             (struct PACKET *)&E->packetEsp32Tcp);
-            #endif
+        #endif
             break;
         }
 
         case BOARD_Stage_InitStorageDrivers:
         {
-            #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
+        #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
             RAWSTOR_SD_1BIT_Init (&E->rawstorSd1Bit,
                                   COMM_Packet_HighSpeedDeviceExpansion);
             STORAGE_SetDevice ((struct RAWSTOR *)&E->rawstorSd1Bit);
-            #endif
+        #endif
             break;
         }
 
@@ -219,25 +237,25 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
 
         case BOARD_Stage_InitVideoDriver:
         {
-            #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
+        #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
             if (VIDEO_DUALCORE_Init (&E->videoDualcore))
             {
                 return &E->videoDualcore;
             }
-            #endif
+        #endif
             break;
         }
 
         case BOARD_Stage_InitSoundDriver:
         {
-            #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
+        #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
             SOUND_PCM5100_Init (&E->soundPcm5100,
                                 BOARD_I2S_INTERFACE,
                                 BOARD_I2S_GPDMA_CONN_TX);
             return &E->soundPcm5100;
-            #else
+        #else
             break;
-            #endif
+        #endif
         }
 
         case BOARD_Stage_Ready:

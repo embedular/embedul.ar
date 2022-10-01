@@ -30,13 +30,15 @@
 
 static const char * s_InputNames[IO_BOARD_INB__COUNT] =
 {
-    "user"
+    [IO_BOARD_INB_USER] = "user"
 };
 
 
 static const char * s_OutputNames[IO_BOARD_OUTB__COUNT] =
 {
-    "led 1", "led 2", "led 3"
+    [IO_BOARD_OUTB_LED_GREEN] = "green led",
+    [IO_BOARD_OUTB_LED_BLUE] = "blue led",
+    [IO_BOARD_OUTB_LED_RED] = "red led"
 };
 
 
@@ -44,26 +46,26 @@ static void         update              (struct IO *const Io);
 static IO_Count
                     availableInputs     (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint32_t InputSource);
+                                         const IO_Port InPort);
 static IO_Count
                     availableOutputs    (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint32_t OutputSource);
+                                         const IO_Port OutPort);
 static uint32_t     getInput            (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index,
-                                         const uint32_t InputSource);
+                                         const IO_Code Code,
+                                         const IO_Port InPort);
 static void         setOutput           (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index,
-                                         const uint32_t OutputSource,
+                                         const IO_Code Code,
+                                         const IO_Port OutPort,
                                          const uint32_t Value);
 static const char * inputName           (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index);
+                                         const IO_Code Code);
 static const char * outputName          (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index);
+                                         const IO_Code Code);
 
 
 static const struct IO_IFACE IO_BOARD_IFACE =
@@ -100,16 +102,16 @@ void IO_BOARD_Attach (struct IO_BOARD *const B)
 {
     BOARD_AssertParams (B);
 
-    OUTPUT_SetDevice ((struct IO *)B, 0);
-
-    OUTPUT_MapBit (OUTPUT_Bit_Warning, IO_BOARD_OUTB_LED_RED);
-    OUTPUT_MapBit (OUTPUT_Bit_GreenSign, IO_BOARD_OUTB_LED_GREEN);
-    OUTPUT_MapBit (OUTPUT_Bit_BlueSign, IO_BOARD_OUTB_LED_BLUE);
-
-
-    INPUT_SetDevice ((struct IO *)B, 0);
+    INPUT_SetGateway ((struct IO *)B, 0);
 
     INPUT_MAP_BIT (MAIN, A, IO_BOARD_INB_USER);
+
+
+    OUTPUT_SetGateway ((struct IO *)B, 0);
+
+    OUTPUT_MAP_BIT (SIGN, Warning, IO_BOARD_OUTB_LED_RED);
+    OUTPUT_MAP_BIT (SIGN, Green, IO_BOARD_OUTB_LED_GREEN);
+    OUTPUT_MAP_BIT (SIGN, Blue, IO_BOARD_OUTB_LED_BLUE);
 }
 
 
@@ -134,6 +136,7 @@ void update (struct IO *const Io)
 
     // Input
     B->inbData = 0;
+
     bspButtonIn (B, IO_BOARD_INB_USER, BUTTON_USER);
 
     // Output
@@ -144,10 +147,10 @@ void update (struct IO *const Io)
 
 
 IO_Count availableInputs (struct IO *const Io, const enum IO_Type IoType,
-                          const uint32_t InputSource)
+                          const IO_Port InPort)
 {
     (void) Io;
-    (void) InputSource;
+    (void) InPort;
 
     // This driver handles no analog inputs
     if (IoType == IO_Type_Range)
@@ -160,10 +163,10 @@ IO_Count availableInputs (struct IO *const Io, const enum IO_Type IoType,
 
 
 IO_Count availableOutputs (struct IO *const Io, const enum IO_Type IoType,
-                           const uint32_t OutputSource)
+                           const IO_Port OutPort)
 {
     (void) Io;
-    (void) OutputSource;
+    (void) OutPort;
 
     // This driver handles no analog outputs
     if (IoType == IO_Type_Range)
@@ -176,60 +179,60 @@ IO_Count availableOutputs (struct IO *const Io, const enum IO_Type IoType,
 
 
 uint32_t getInput (struct IO *const Io, const enum IO_Type IoType,
-                   const uint16_t Index, const uint32_t InputSource)
+                   const IO_Code Code, const IO_Port InPort)
 {
     BOARD_AssertParams (IoType == IO_Type_Bit &&
-                         Index < IO_BOARD_INB__COUNT);
+                        Code < IO_BOARD_INB__COUNT);
 
-    (void) InputSource;
+    (void) InPort;
 
     struct IO_BOARD *const B = (struct IO_BOARD *) Io;
 
-    return (B->inbData & (1 << Index));
+    return (B->inbData & (1 << Code));
 }
 
 
 void setOutput (struct IO *const Io, const enum IO_Type IoType,
-                const uint16_t Index, const uint32_t OutputSource,
+                const IO_Code Code, const IO_Port OutPort,
                 const uint32_t Value)
 {
     BOARD_AssertParams (IoType == IO_Type_Bit &&
-                         Index < IO_BOARD_OUTB__COUNT);
+                        Code < IO_BOARD_OUTB__COUNT);
 
-    (void) OutputSource;
+    (void) OutPort;
 
     struct IO_BOARD *const B = (struct IO_BOARD *) Io;
 
     if (Value)
     {
-        B->outbData |= (1 << Index);
+        B->outbData |= (1 << Code);
     }
     else
     {
-        B->outbData &= ~(1 << Index);
+        B->outbData &= ~(1 << Code);
     }
 }
 
 
 const char * inputName (struct IO *const Io, const enum IO_Type IoType,
-                        const uint16_t Index)
+                        const IO_Code Code)
 {
     BOARD_AssertParams (IoType == IO_Type_Bit &&
-                         Index < IO_BOARD_INB__COUNT);
+                        Code < IO_BOARD_INB__COUNT);
 
     (void) Io;
 
-    return s_InputNames[Index];
+    return s_InputNames[Code];
 }
 
 
 const char * outputName (struct IO *const Io, const enum IO_Type IoType,
-                         const uint16_t Index)
+                         const IO_Code Code)
 {
     BOARD_AssertParams (IoType == IO_Type_Bit &&
-                         Index < IO_BOARD_OUTB__COUNT);
+                        Code < IO_BOARD_OUTB__COUNT);
 
     (void) Io;
 
-    return s_OutputNames[Index];
+    return s_OutputNames[Code];
 }

@@ -29,9 +29,9 @@
 
 struct HUEWHEEL_PolarPlacement
 {
-    const uint8_t       OutputIndexRed;
-    const uint8_t       OutputIndexGreen;
-    const uint8_t       OutputIndexBlue;
+    const uint8_t       OutInxRed;
+    const uint8_t       OutInxGreen;
+    const uint8_t       OutInxBlue;
     const uint8_t       PolarPlacement;
 };
 
@@ -63,8 +63,7 @@ enum IO_HUEWHEEL_OUTR
 struct IO_HUEWHEEL
 {
     struct IO               device;
-    struct IO               * outputDriver;
-    uint32_t                outputDriverSource;
+    struct IO_Gateway       outGateway;
     const struct HUEWHEEL_PolarPlacement
                             * polarPlacement;
     uint32_t                polarPlacementElements;
@@ -80,8 +79,7 @@ struct IO_HUEWHEEL
 
 
 void IO_HUEWHEEL_Init   (struct IO_HUEWHEEL *const H,
-                         struct IO *const OutputDriver,
-                         const uint32_t OutputDriverSource,
+                         struct IO_Gateway OutGateway,
                          const struct HUEWHEEL_PolarPlacement
                          *const PolarPlacement,
                          const uint32_t PolarPlacementElements);

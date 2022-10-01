@@ -35,21 +35,46 @@
 #endif
 
 
-static const char * s_InputNames[] =
+#define GET_SWITCH_STATE(_n) \
+    B->inbData |= BOARD_SWITCH_GET_STATE(_n)? \
+                            (1 << IO_BOARD_INB_##_n) : 0;
+
+#define SET_GPIO_STATE(_n) \
+    (B->outbData & (1 << IO_BOARD_OUTB_##_n))? \
+                            BOARD_GPIO_SET_STATE(OUT_##_n, ENABLED) : \
+                            BOARD_GPIO_SET_STATE(OUT_##_n, DISABLED);
+
+
+static const char * s_InputNames[IO_BOARD_INB__COUNT] =
 {
-    "tec 1", "tec 2", "tec 3", "tec 4"
-    #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
-    , "sd_detect", "wifi on", "sound mute"
-    #endif
+    [IO_BOARD_INB_TEC_1]            = "tec 1",
+    [IO_BOARD_INB_TEC_2]            = "tec 2",
+    [IO_BOARD_INB_TEC_3]            = "tec 3",
+    [IO_BOARD_INB_TEC_4]            = "tec 4"
+#ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
+    , 
+    [IO_BOARD_INB_SD_DETECT]        = "sd_detect",
+    [IO_BOARD_INB_WIFI_EN]          = "wifi on",
+    [IO_BOARD_INB_SOUND_MUTE]       = "sound mute"
+#endif
 };
 
 
-static const char * s_OutputNames[] =
+static const char * s_OutputNames[IO_BOARD_OUTB__COUNT] =
 {
-    "rgb red", "rgb green", "rgb blue", "led 1", "led 2", "led 3" 
-    #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
-    , "backlight", "sd select", "wifi on", "sound mute"
-    #endif
+    [IO_BOARD_OUTB_LED_RGB_RED]     = "rgb red",
+    [IO_BOARD_OUTB_LED_RGB_GREEN]   = "rgb green",
+    [IO_BOARD_OUTB_LED_RGB_BLUE]    = "rgb blue",
+    [IO_BOARD_OUTB_LED_1]           = "led 1",
+    [IO_BOARD_OUTB_LED_2]           = "led 2",
+    [IO_BOARD_OUTB_LED_3]           = "led 3" 
+#ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
+    ,
+    [IO_BOARD_OUTB_BOARD_BACKLIGHT] = "backlight",
+    [IO_BOARD_OUTB_SD_SELECT]       = "sd select",
+    [IO_BOARD_OUTB_WIFI_EN]         = "wifi on",
+    [IO_BOARD_OUTB_SOUND_MUTE]      = "sound mute"
+#endif
 };
 
 
@@ -57,26 +82,26 @@ static void         update              (struct IO *const Io);
 static IO_Count
                     availableInputs     (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint32_t InputSource);
+                                         const IO_Port InPort);
 static IO_Count
                     availableOutputs    (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint32_t OutputSource);
+                                         const IO_Port OutPort);
 static uint32_t     getInput            (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index,
-                                         const uint32_t InputSource);
+                                         const IO_Code Code,
+                                         const IO_Port InPort);
 static void         setOutput           (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index,
-                                         const uint32_t OutputSource,
+                                         const IO_Code Code,
+                                         const IO_Port OutPort,
                                          const uint32_t Value);
 static const char * inputName           (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index);
+                                         const IO_Code Code);
 static const char * outputName          (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index);
+                                         const IO_Code Code);
 
 
 static const struct IO_IFACE IO_BOARD_IFACE =
@@ -107,7 +132,7 @@ void IO_BOARD_Attach (struct IO_BOARD *const B)
 {
     BOARD_AssertParams (B);
 
-    INPUT_SetDevice ((struct IO *)B, 0);
+    INPUT_SetGateway ((struct IO *)B, 0);
 
     INPUT_MAP_BIT (MAIN, A, IO_BOARD_INB_TEC_1);
     INPUT_MAP_BIT (MAIN, B, IO_BOARD_INB_TEC_2);
@@ -119,17 +144,17 @@ void IO_BOARD_Attach (struct IO_BOARD *const B)
     INPUT_MAP_BIT (CONTROL, SoundMute, IO_BOARD_INB_SOUND_MUTE);
 #endif
 
-    OUTPUT_SetDevice ((struct IO *)B, 0);
+    OUTPUT_SetGateway ((struct IO *)B, 0);
 
-    OUTPUT_MapBit (OUTPUT_Bit_Warning, IO_BOARD_OUTB_LED_1);
-    OUTPUT_MapBit (OUTPUT_Bit_RedSign, IO_BOARD_OUTB_LED_RGB_RED);
-    OUTPUT_MapBit (OUTPUT_Bit_GreenSign, IO_BOARD_OUTB_LED_RGB_GREEN);
-    OUTPUT_MapBit (OUTPUT_Bit_BlueSign, IO_BOARD_OUTB_LED_RGB_BLUE);
+    OUTPUT_MAP_BIT (SIGN, Warning, IO_BOARD_OUTB_LED_1);
+    OUTPUT_MAP_BIT (SIGN, Red, IO_BOARD_OUTB_LED_RGB_RED);
+    OUTPUT_MAP_BIT (SIGN, Green, IO_BOARD_OUTB_LED_RGB_GREEN);
+    OUTPUT_MAP_BIT (SIGN, Blue, IO_BOARD_OUTB_LED_RGB_BLUE);
 #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
-    OUTPUT_MapBit (OUTPUT_Bit_Backlight, IO_BOARD_OUTB_BOARD_BACKLIGHT);
-    OUTPUT_MapBit (OUTPUT_Bit_StorageEnable, IO_BOARD_OUTB_SD_SELECT);
-    OUTPUT_MapBit (OUTPUT_Bit_WirelessEnable, IO_BOARD_OUTB_WIFI_EN);
-    OUTPUT_MapBit (OUTPUT_Bit_SoundMute, IO_BOARD_OUTB_SOUND_MUTE);
+    OUTPUT_MAP_BIT (CONTROL, Backlight, IO_BOARD_OUTB_BOARD_BACKLIGHT);
+    OUTPUT_MAP_BIT (CONTROL, StorageEnable, IO_BOARD_OUTB_SD_SELECT);
+    OUTPUT_MAP_BIT (CONTROL, WirelessEnable, IO_BOARD_OUTB_WIFI_EN);
+    OUTPUT_MAP_BIT (CONTROL, SoundMute, IO_BOARD_OUTB_SOUND_MUTE);
 #endif
 }
 
@@ -140,22 +165,13 @@ void update (struct IO *const Io)
 
     B->inbData = 0;
 
-    #define GET_SWITCH_STATE(_n) \
-                B->inbData |= BOARD_SWITCH_GET_STATE(_n)? \
-                        (1 << IO_BOARD_INB_##_n) : 0;
-
-    #define SET_GPIO_STATE(_n) \
-                (B->outbData & (1 << IO_BOARD_OUTB_##_n))? \
-                        BOARD_GPIO_SET_STATE(OUT_##_n, ENABLED) : \
-                        BOARD_GPIO_SET_STATE(OUT_##_n, DISABLED);
-
     GET_SWITCH_STATE(TEC_1);
     GET_SWITCH_STATE(TEC_2);
     GET_SWITCH_STATE(TEC_3);
     GET_SWITCH_STATE(TEC_4);
-    #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
+#ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
     GET_SWITCH_STATE(SD_DETECT);
-    #endif
+#endif
 
     SET_GPIO_STATE(LED_RGB_RED);
     SET_GPIO_STATE(LED_RGB_GREEN);
@@ -163,21 +179,18 @@ void update (struct IO *const Io)
     SET_GPIO_STATE(LED_1);
     SET_GPIO_STATE(LED_2);
     SET_GPIO_STATE(LED_3);
-    #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
+#ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
     Board_SetLCDBacklight (B->outbData & (1 << IO_BOARD_OUTB_BOARD_BACKLIGHT));
     SET_GPIO_STATE(SD_SELECT)
-    #endif
-    
-    #undef SET_GPIO_STATE
-    #undef GET_SWITCH_STATE
+#endif
 }
 
 
 IO_Count availableInputs (struct IO *const Io, const enum IO_Type IoType,
-                          const uint32_t InputSource)
+                          const IO_Port InPort)
 {
     (void) Io;
-    (void) InputSource;
+    (void) InPort;
 
     // This driver handles no analog inputs
     if (IoType == IO_Type_Range)
@@ -190,10 +203,10 @@ IO_Count availableInputs (struct IO *const Io, const enum IO_Type IoType,
 
 
 IO_Count availableOutputs (struct IO *const Io, const enum IO_Type IoType,
-                           const uint32_t OutputSource)
+                           const IO_Port OutPort)
 {
     (void) Io;
-    (void) OutputSource;
+    (void) OutPort;
 
     // This driver handles no analog outputs
     if (IoType == IO_Type_Range)
@@ -206,60 +219,56 @@ IO_Count availableOutputs (struct IO *const Io, const enum IO_Type IoType,
 
 
 uint32_t getInput (struct IO *const Io, const enum IO_Type IoType,
-                   const uint16_t Index, const uint32_t InputSource)
+                   const IO_Code Code, const IO_Port InPort)
 {
-    BOARD_AssertParams (IoType == IO_Type_Bit &&
-                         Index < IO_BOARD_INB__COUNT);
+    BOARD_AssertParams (IoType == IO_Type_Bit && Code < IO_BOARD_INB__COUNT);
     
-    (void) InputSource;
+    (void) InPort;
 
     struct IO_BOARD *const B = (struct IO_BOARD *) Io;
 
-    return (B->inbData & (1 << Index));
+    return (B->inbData & (1 << Code));
 }
 
 
 void setOutput (struct IO *const Io, const enum IO_Type IoType,
-                const uint16_t Index, const uint32_t OutputSource,
+                const IO_Code Code, const IO_Port OutPort,
                 const uint32_t Value)
 {
-    BOARD_AssertParams (IoType == IO_Type_Bit &&
-                         Index < IO_BOARD_OUTB__COUNT);
+    BOARD_AssertParams (IoType == IO_Type_Bit && Code < IO_BOARD_OUTB__COUNT);
 
     struct IO_BOARD *const B = (struct IO_BOARD *) Io;
 
-    (void) OutputSource;
+    (void) OutPort;
 
     if (Value)
     {
-        B->outbData |= (1 << Index);
+        B->outbData |= (1 << Code);
     }
     else
     {
-        B->outbData &= ~(1 << Index);
+        B->outbData &= ~(1 << Code);
     }
 }
 
 
 const char * inputName (struct IO *const Io, const enum IO_Type IoType,
-                        const uint16_t Index)
+                        const IO_Code Code)
 {
-    BOARD_AssertParams (IoType == IO_Type_Bit &&
-                         Index < IO_BOARD_INB__COUNT);
+    BOARD_AssertParams (IoType == IO_Type_Bit && Code < IO_BOARD_INB__COUNT);
 
     (void) Io;
 
-    return s_InputNames[Index];
+    return s_InputNames[Code];
 }
 
 
 const char * outputName (struct IO *const Io, const enum IO_Type IoType,
-                         const uint16_t Index)
+                         const IO_Code Code)
 {
-    BOARD_AssertParams (IoType == IO_Type_Bit &&
-                         Index < IO_BOARD_OUTB__COUNT);
+    BOARD_AssertParams (IoType == IO_Type_Bit && Code < IO_BOARD_OUTB__COUNT);
 
     (void) Io;
 
-    return s_OutputNames[Index];
+    return s_OutputNames[Code];
 }

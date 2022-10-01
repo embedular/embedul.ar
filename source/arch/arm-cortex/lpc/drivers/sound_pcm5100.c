@@ -138,7 +138,7 @@ void mute (struct SOUND *const S, const bool Enable)
 {
     (void) S;
 
-    OUTPUT_BitNow (OUTPUT_Bit_SoundMute, Enable? 1 : 0);
+    OUTPUT_SET_BIT_NOW (CONTROL, SoundMute, Enable? 1 : 0);
 }
 
 

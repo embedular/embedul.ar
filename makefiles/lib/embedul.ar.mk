@@ -55,9 +55,9 @@ $(call emb_declare_lib,$\
 	SPLASH_THEME_L2=none \
 	SPLASH_THEME_L3=c64 \
 	INPUT_ACTION=1 \
-	INPUT_MAX_DEVICES=10U \
+	INPUT_MAX_GATEWAYS=10U \
 	INPUT_MAX_LIGHTING_DEVICES=2U \
-	OUTPUT_MAX_DEVICES=10U \
+	OUTPUT_MAX_GATEWAYS=10U \
 	OUTPUT_MAX_LIGHT_CHANNELS=48U \
 	)
 
@@ -76,6 +76,7 @@ OBJS += $(LIB_EMBEDULAR)/device/board.o \
 	    $(LIB_EMBEDULAR)/manager/input/action.o \
 	    $(LIB_EMBEDULAR)/manager/input/profile.o \
         $(LIB_EMBEDULAR)/manager/output.o \
+        $(LIB_EMBEDULAR)/manager/output/profile.o \
         $(LIB_EMBEDULAR)/manager/storage.o \
         $(LIB_EMBEDULAR)/manager/storage/cache.o \
 		$(LIB_EMBEDULAR)/manager/comm.o \
@@ -126,8 +127,8 @@ else
     LIB_EMBEDULAR_CONFIG_SPLASH_SCREENS := 0
 
     ifeq ($(LIB_EMBEDULAR_CONFIG_NEED_VIDEO),1)
-		$(call emb_error,The application requires a board with video support.)
-	endif
+        $(call emb_error,The application requires a board with video support)
+    endif
 endif
 
 ifeq ($(LIB_EMBEDULAR_CONFIG_SPLASH_SCREENS),1)
@@ -149,8 +150,8 @@ ifneq ($(filter sound,$(LIB_EMBEDULAR_SUBSYSTEMS)),)
             $(LIB_EMBEDULAR)/device/sound/opl/fmopl.o
 else
     ifeq ($(LIB_EMBEDULAR_CONFIG_NEED_SOUND),1)
-		$(call emb_error,The application requires a board with sound support.)
-	endif
+        $(call emb_error,The application requires a board with sound support)
+    endif
 endif
 
 

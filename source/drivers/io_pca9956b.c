@@ -49,29 +49,69 @@
 static const char *
 s_InputNamesBit[IO_PCA9956B_INB__COUNT] =
 {
-    "overtemp", "channel error"
+    [IO_PCA9956B_INB_OVERTEMP]      = "overtemp",
+    [IO_PCA9956B_INB_CHANNEL_ERROR] = "channel error"
 };
 
 
 static const char *
 s_InputNamesRange[IO_PCA9956B_INR__COUNT] =
 {
-    "channels shorted", "channels open"
+    [IO_PCA9956B_INR_CHANNELS_SHORTED_BITFIELD] = "channels shorted",
+    [IO_PCA9956B_INR_CHANNELS_OPEN_BITFIELD]    = "channels open"
 };
 
 
 static const char * s_OutputNamesRange[IO_PCA9956B_OUTR__COUNT] =
 {
-    "ch0 iref", "ch1 iref", "ch2 iref", "ch3 iref", "ch4 iref",
-    "ch5 iref", "ch6 iref", "ch7 iref", "ch8 iref", "ch9 iref", 
-    "ch10 iref", "ch11 iref", "ch12 iref", "ch13 iref", "ch14 iref",
-    "ch15 iref", "ch16 iref", "ch17 iref", "ch18 iref", "ch19 iref", 
-    "ch20 iref", "ch21 iref", "ch22 iref", "ch23 iref",
-    "ch0 pwm", "ch1 pwm", "ch2 pwm", "ch3 pwm", "ch4 pwm",
-    "ch5 pwm", "ch6 pwm", "ch7 pwm", "ch8 pwm", "ch9 pwm", 
-    "ch10 pwm", "ch11 pwm", "ch12 pwm", "ch13 pwm", "ch14 pwm",
-    "ch15 pwm", "ch16 pwm", "ch17 pwm", "ch18 pwm", "ch19 pwm", 
-    "ch20 pwm", "ch21 pwm", "ch22 pwm", "ch23 pwm"
+    [IO_PCA9956B_OUTR_CH0_IREF]     = "ch0 iref",
+    [IO_PCA9956B_OUTR_CH1_IREF]     = "ch1 iref",
+    [IO_PCA9956B_OUTR_CH2_IREF]     = "ch2 iref",
+    [IO_PCA9956B_OUTR_CH3_IREF]     = "ch3 iref",
+    [IO_PCA9956B_OUTR_CH4_IREF]     = "ch4 iref",
+    [IO_PCA9956B_OUTR_CH5_IREF]     = "ch5 iref",
+    [IO_PCA9956B_OUTR_CH6_IREF]     = "ch6 iref",
+    [IO_PCA9956B_OUTR_CH7_IREF]     = "ch7 iref",
+    [IO_PCA9956B_OUTR_CH8_IREF]     = "ch8 iref",
+    [IO_PCA9956B_OUTR_CH9_IREF]     = "ch9 iref", 
+    [IO_PCA9956B_OUTR_CH10_IREF]    = "ch10 iref",
+    [IO_PCA9956B_OUTR_CH11_IREF]    = "ch11 iref",
+    [IO_PCA9956B_OUTR_CH12_IREF]    = "ch12 iref",
+    [IO_PCA9956B_OUTR_CH13_IREF]    = "ch13 iref",
+    [IO_PCA9956B_OUTR_CH14_IREF]    = "ch14 iref",
+    [IO_PCA9956B_OUTR_CH15_IREF]    = "ch15 iref",
+    [IO_PCA9956B_OUTR_CH16_IREF]    = "ch16 iref",
+    [IO_PCA9956B_OUTR_CH17_IREF]    = "ch17 iref",
+    [IO_PCA9956B_OUTR_CH18_IREF]    = "ch18 iref",
+    [IO_PCA9956B_OUTR_CH19_IREF]    = "ch19 iref", 
+    [IO_PCA9956B_OUTR_CH20_IREF]    = "ch20 iref",
+    [IO_PCA9956B_OUTR_CH21_IREF]    = "ch21 iref",
+    [IO_PCA9956B_OUTR_CH22_IREF]    = "ch22 iref",
+    [IO_PCA9956B_OUTR_CH23_IREF]    = "ch23 iref",
+    [IO_PCA9956B_OUTR_CH0_PWM]      = "ch0 pwm",
+    [IO_PCA9956B_OUTR_CH1_PWM]      = "ch1 pwm",
+    [IO_PCA9956B_OUTR_CH2_PWM]      = "ch2 pwm",
+    [IO_PCA9956B_OUTR_CH3_PWM]      = "ch3 pwm",
+    [IO_PCA9956B_OUTR_CH4_PWM]      = "ch4 pwm",
+    [IO_PCA9956B_OUTR_CH5_PWM]      = "ch5 pwm",
+    [IO_PCA9956B_OUTR_CH6_PWM]      = "ch6 pwm",
+    [IO_PCA9956B_OUTR_CH7_PWM]      = "ch7 pwm",
+    [IO_PCA9956B_OUTR_CH8_PWM]      = "ch8 pwm",
+    [IO_PCA9956B_OUTR_CH9_PWM]      = "ch9 pwm", 
+    [IO_PCA9956B_OUTR_CH10_PWM]     = "ch10 pwm",
+    [IO_PCA9956B_OUTR_CH11_PWM]     = "ch11 pwm",
+    [IO_PCA9956B_OUTR_CH12_PWM]     = "ch12 pwm",
+    [IO_PCA9956B_OUTR_CH13_PWM]     = "ch13 pwm",
+    [IO_PCA9956B_OUTR_CH14_PWM]     = "ch14 pwm",
+    [IO_PCA9956B_OUTR_CH15_PWM]     = "ch15 pwm",
+    [IO_PCA9956B_OUTR_CH16_PWM]     = "ch16 pwm",
+    [IO_PCA9956B_OUTR_CH17_PWM]     = "ch17 pwm",
+    [IO_PCA9956B_OUTR_CH18_PWM]     = "ch18 pwm",
+    [IO_PCA9956B_OUTR_CH19_PWM]     = "ch19 pwm", 
+    [IO_PCA9956B_OUTR_CH20_PWM]     = "ch20 pwm",
+    [IO_PCA9956B_OUTR_CH21_PWM]     = "ch21 pwm",
+    [IO_PCA9956B_OUTR_CH22_PWM]     = "ch22 pwm",
+    [IO_PCA9956B_OUTR_CH23_PWM]     = "ch23 pwm"
 };
 
 
@@ -80,26 +120,26 @@ static void         update              (struct IO *const Io);
 static IO_Count
                     availableInputs     (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint32_t InputSource);
+                                         const IO_Port InPort);
 static IO_Count
                     availableOutputs    (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint32_t OutputSource);
+                                         const IO_Port OutPort);
 static uint32_t     getInput            (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index,
-                                         const uint32_t InputSource);
+                                         const IO_Code Inx,
+                                         const IO_Port InPort);
 static void         setOutput           (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index,
-                                         const uint32_t OutputSource,
+                                         const IO_Code Inx,
+                                         const IO_Port OutPort,
                                          const uint32_t Value);
 static const char * inputName           (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index);
+                                         const IO_Code Inx);
 static const char * outputName          (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index);
+                                         const IO_Code Inx);
 
 
 static const struct IO_IFACE IO_PCA9956B_IFACE =
@@ -142,20 +182,7 @@ void IO_PCA9956B_Attach (struct IO_PCA9956B *const P,
                         LIB_EMBEDULAR_CONFIG_INPUT_MAX_LIGHTING_DEVICES);
 
 
-    OUTPUT_SetDevice ((struct IO *)P, 0);
-
-    const enum OUTPUT_Range IrefStart = OUTPUT_Range_LightCh0Iref +
-                                        ChannelOffset;
-    const enum OUTPUT_Range PwmStart = OUTPUT_Range_LightCh0Pwm +
-                                       ChannelOffset;
-
-    for (uint32_t i = 0; i < IO_PCA9956B_CHANNEL_COUNT; ++i)
-    {
-        OUTPUT_MapRange (IrefStart + i, IO_PCA9956B_OUTR_CH0_IREF + i);
-        OUTPUT_MapRange (PwmStart + i, IO_PCA9956B_OUTR_CH0_PWM + i);
-    }
-
-    INPUT_SetDevice ((struct IO *)P, 0);
+    INPUT_SetGateway ((struct IO *)P, 0);
 
     INPUT_MapRange (INPUT_PROFILE_Type_LIGHTDEV,
                     INPUT_PROFILE_LIGHTDEV_Range_ChannelsShorted(DeviceOffset),
@@ -172,6 +199,23 @@ void IO_PCA9956B_Attach (struct IO_PCA9956B *const P,
     INPUT_MapBit (INPUT_PROFILE_Type_LIGHTDEV,
                   INPUT_PROFILE_LIGHTDEV_Bit_ChannelError(DeviceOffset),
                   IO_PCA9956B_INB_CHANNEL_ERROR);
+
+
+    OUTPUT_SetGateway ((struct IO *)P, 0);
+
+    const enum OUTPUT_PROFILE_LIGHTDEV_Range IrefStart = 
+                    OUTPUT_PROFILE_LIGHTDEV_Range_Iref(ChannelOffset);
+
+    const enum OUTPUT_PROFILE_LIGHTDEV_Range PwmStart =
+                    OUTPUT_PROFILE_LIGHTDEV_Range_Pwm(ChannelOffset);
+
+    for (uint32_t i = 0; i < IO_PCA9956B_CHANNEL_COUNT; ++i)
+    {
+        OUTPUT_MapRange (OUTPUT_PROFILE_Type_LIGHTDEV,
+                         IrefStart + i, IO_PCA9956B_OUTR_CH0_IREF + i);
+        OUTPUT_MapRange (OUTPUT_PROFILE_Type_LIGHTDEV,
+                         PwmStart + i, IO_PCA9956B_OUTR_CH0_PWM + i);
+    }
 }
 
 
@@ -320,10 +364,10 @@ static void update (struct IO *const Io)
 
 static IO_Count availableInputs (struct IO *const Io,
                                  const enum IO_Type IoType,
-                                 const uint32_t InputSource)
+                                 const IO_Port InPort)
 {
     (void) Io;
-    (void) InputSource;
+    (void) InPort;
 
     // This driver handles no "analog" inputs
     if (IoType == IO_Type_Range)
@@ -337,10 +381,10 @@ static IO_Count availableInputs (struct IO *const Io,
 
 static IO_Count availableOutputs (struct IO *const Io,
                                   const enum IO_Type IoType,
-                                  const uint32_t OutputSource)
+                                  const IO_Port OutPort)
 {
     (void) Io;
-    (void) OutputSource;
+    (void) OutPort;
 
     // This driver handles no digital outputs
     if (IoType == IO_Type_Bit)
@@ -353,17 +397,17 @@ static IO_Count availableOutputs (struct IO *const Io,
 
 
 static uint32_t getInput (struct IO *const Io, const enum IO_Type IoType,
-                          const uint16_t Index, const uint32_t InputSource)
+                          const IO_Code Inx, const IO_Port InPort)
 {
-    (void) InputSource;
+    (void) InPort;
     
     struct IO_PCA9956B *const P = (struct IO_PCA9956B *) Io;
 
     if (IoType == IO_Type_Bit)
     {
-        BOARD_AssertParams (Index < IO_PCA9956B_INB__COUNT);
+        BOARD_AssertParams (Inx < IO_PCA9956B_INB__COUNT);
 
-        switch (Index)
+        switch (Inx)
         {
             case IO_PCA9956B_INB_OVERTEMP:
                 return P->overtemp;
@@ -372,15 +416,15 @@ static uint32_t getInput (struct IO *const Io, const enum IO_Type IoType,
                 return P->chError;
 
             default:
-                BOARD_AssertUnexpectedValue (Io, Index);
+                BOARD_AssertUnexpectedValue (Io, Inx);
                 break;
         }
     }
     else if (IoType == IO_Type_Range)
     {
-        BOARD_AssertParams (Index < IO_PCA9956B_INR__COUNT);
+        BOARD_AssertParams (Inx < IO_PCA9956B_INR__COUNT);
 
-        switch (Index)
+        switch (Inx)
         {
             case IO_PCA9956B_INR_CHANNELS_SHORTED_BITFIELD:
                 return P->channelsShorted;
@@ -389,7 +433,7 @@ static uint32_t getInput (struct IO *const Io, const enum IO_Type IoType,
                 return P->channelsOpen;
 
             default:
-                BOARD_AssertUnexpectedValue (Io, Index);
+                BOARD_AssertUnexpectedValue (Io, Inx);
                 break;
         }
     }
@@ -401,62 +445,62 @@ static uint32_t getInput (struct IO *const Io, const enum IO_Type IoType,
 
 static void setOutput (struct IO *const Io,
                        const enum IO_Type IoType,
-                       const uint16_t Index, const uint32_t OutputSource,
+                       const IO_Code Inx, const IO_Port OutPort,
                        const uint32_t Value)
 {
     BOARD_AssertParams (IoType == IO_Type_Range &&
-                         Index < IO_PCA9956B_OUTR__COUNT &&
-                         Value <= 0xFF);
+                        Inx < IO_PCA9956B_OUTR__COUNT &&
+                        Value <= 0xFF);
 
-    (void) OutputSource;
+    (void) OutPort;
 
     struct IO_PCA9956B *const P = (struct IO_PCA9956B *) Io;
 
-    if (Index <= IO_PCA9956B_OUTR__CH_IREF_END)
+    if (Inx <= IO_PCA9956B_OUTR__CH_IREF_END)
     {
         // chIref[0] is the i2c registry to write to.
-        P->chIref[Index + 1] = Value;
+        P->chIref[Inx + 1] = Value;
         P->update |= PCA9956B_UPDATE_IREF;
     }
-    else if (Index >= IO_PCA9956B_OUTR__CH_PWM_BEGIN &&
-             Index <= IO_PCA9956B_OUTR__CH_PWM_END)
+    else if (Inx >= IO_PCA9956B_OUTR__CH_PWM_BEGIN &&
+             Inx <= IO_PCA9956B_OUTR__CH_PWM_END)
     {
         // chPwm[0] is the i2c registry to write to.
-        P->chPwm[Index + 1 - IO_PCA9956B_OUTR__CH_PWM_BEGIN] = Value;
+        P->chPwm[Inx + 1 - IO_PCA9956B_OUTR__CH_PWM_BEGIN] = Value;
         P->update |= PCA9956B_UPDATE_PWM;
     }
     else
     {
-        BOARD_AssertUnexpectedValue (Io, Index);
+        BOARD_AssertUnexpectedValue (Io, Inx);
     }
 }
 
 
 static const char * inputName (struct IO *const Io,
                                const enum IO_Type IoType,
-                               const uint16_t Index)
+                               const IO_Code Inx)
 {
     (void) Io;
 
     if (IoType == IO_Type_Bit)
     {
-        BOARD_AssertParams (Index < IO_PCA9956B_INB__COUNT);
-        return s_InputNamesBit[Index];
+        BOARD_AssertParams (Inx < IO_PCA9956B_INB__COUNT);
+        return s_InputNamesBit[Inx];
     }
 
-    BOARD_AssertParams (Index < IO_PCA9956B_INR__COUNT);
-    return s_InputNamesRange[Index];
+    BOARD_AssertParams (Inx < IO_PCA9956B_INR__COUNT);
+    return s_InputNamesRange[Inx];
 }
 
 
 static const char * outputName (struct IO *const Io,
                                 const enum IO_Type IoType,
-                                const uint16_t Index)
+                                const IO_Code Inx)
 {
     BOARD_AssertParams (IoType == IO_Type_Range &&
-                        Index < IO_PCA9956B_OUTR__COUNT);
+                        Inx < IO_PCA9956B_OUTR__COUNT);
 
     (void) Io;
 
-    return s_OutputNamesRange[Index];
+    return s_OutputNamesRange[Inx];
 }

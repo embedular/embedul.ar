@@ -27,6 +27,24 @@
 #include "embedul.ar/source/arch/arm-cortex/lpc/18xx_43xx/lpcopen/boards/retro_ciaa/board.h"
 #include "embedul.ar/source/core/device/board.h"
 
+
+#define GET_SWITCH_STATE(_n) \
+    B->inbData |= BOARD_SWITCH_GET_STATE(_n)? \
+                        (1 << IO_BOARD_INB_##_n) : 0;
+
+#define GET_GPIO_STATE(_n) \
+    B->inbData |= BOARD_GPIO_GET_STATE(OUT_##_n)? \
+                        (1 << IO_BOARD_INB_##_n) : 0;
+
+#define SET_LED_STATE(_n) \
+    (B->outbData & (1 << IO_BOARD_OUTB_LED_##_n))? \
+                        BOARD_LED_ON(_n) : BOARD_LED_OFF(_n);
+
+#define SET_GPIO_STATE(_n) \
+    (B->outbData & (1 << IO_BOARD_OUTB_##_n))? \
+                        BOARD_GPIO_SET_STATE(OUT_##_n, ENABLED) : \
+                        BOARD_GPIO_SET_STATE(OUT_##_n, DISABLED);
+
 /*
 void EVRT_IRQHandler (void)
 {
@@ -35,13 +53,22 @@ void EVRT_IRQHandler (void)
 
 static const char * s_InputNames[IO_BOARD_INB__COUNT] =
 {
-    "isp", "wakeup", "backlight", "sd power", "wifi on", "sound mute"
+    [IO_BOARD_INB_ISP]              = "isp",
+    [IO_BOARD_INB_WAKEUP]           = "wakeup",
+    [IO_BOARD_INB_BOARD_BACKLIGHT]  = "backlight",
+    [IO_BOARD_INB_SD_POW]           = "sd power",
+    [IO_BOARD_INB_WIFI_EN]          = "wifi on",
+    [IO_BOARD_INB_SOUND_MUTE]       = "sound mute"
 };
 
 
 static const char * s_OutputNames[IO_BOARD_OUTB__COUNT] =
 {
-    "warning", "backlight", "sd power", "wifi on", "sound mute"
+    [IO_BOARD_OUTB_LED_WARN]        = "warning",
+    [IO_BOARD_OUTB_BOARD_BACKLIGHT] = "backlight",
+    [IO_BOARD_OUTB_SD_POW]          = "sd power",
+    [IO_BOARD_OUTB_WIFI_EN]         = "wifi on",
+    [IO_BOARD_OUTB_SOUND_MUTE]      = "sound mute"
 };
 
 
@@ -49,26 +76,26 @@ static void         update              (struct IO *const Io);
 static IO_Count
                     availableInputs     (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint32_t InputSource);
+                                         const IO_Port InPort);
 static IO_Count
                     availableOutputs    (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint32_t OutputSource);
+                                         const IO_Port OutPort);
 static uint32_t     getInput            (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index,
-                                         const uint32_t InputSource);
+                                         const IO_Code Code,
+                                         const IO_Port InPort);
 static void         setOutput           (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index,
-                                         const uint32_t OutputSource,
+                                         const IO_Code Code,
+                                         const IO_Port OutPort,
                                          const uint32_t Value);
 static const char * inputName           (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index);
+                                         const IO_Code Code);
 static const char * outputName          (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index);
+                                         const IO_Code Code);
 
 
 static const struct IO_IFACE IO_BOARD_IFACE =
@@ -110,17 +137,7 @@ void IO_BOARD_Attach (struct IO_BOARD *const B)
 {
     BOARD_AssertParams (B);
 
-    OUTPUT_SetDevice ((struct IO *)B, 0);
-
-    // It will command the board backlight on the SSL module, if present
-    OUTPUT_MapBit (OUTPUT_Bit_Backlight, IO_BOARD_OUTB_BOARD_BACKLIGHT);
-    OUTPUT_MapBit (OUTPUT_Bit_Warning, IO_BOARD_OUTB_LED_WARN);
-    OUTPUT_MapBit (OUTPUT_Bit_StoragePower, IO_BOARD_OUTB_SD_POW);
-    OUTPUT_MapBit (OUTPUT_Bit_WirelessEnable, IO_BOARD_OUTB_WIFI_EN);
-    OUTPUT_MapBit (OUTPUT_Bit_SoundMute, IO_BOARD_OUTB_SOUND_MUTE);
-
-
-    INPUT_SetDevice ((struct IO *)B, 0);
+    INPUT_SetGateway ((struct IO *)B, 0);
 
     INPUT_MAP_BIT (MAIN, A, IO_BOARD_INB_ISP);
     INPUT_MAP_BIT (MAIN, B, IO_BOARD_INB_WAKEUP);
@@ -128,6 +145,16 @@ void IO_BOARD_Attach (struct IO_BOARD *const B)
     INPUT_MAP_BIT (CONTROL, StoragePower, IO_BOARD_INB_SD_POW);
     INPUT_MAP_BIT (CONTROL, WirelessEnable, IO_BOARD_INB_WIFI_EN);
     INPUT_MAP_BIT (CONTROL, SoundMute, IO_BOARD_INB_SOUND_MUTE);
+
+
+    OUTPUT_SetGateway ((struct IO *)B, 0);
+
+    OUTPUT_MAP_BIT (SIGN, Warning, IO_BOARD_OUTB_LED_WARN);
+    // It will command the board backlight on the SSL module, if present
+    OUTPUT_MAP_BIT (CONTROL, Backlight, IO_BOARD_OUTB_BOARD_BACKLIGHT);
+    OUTPUT_MAP_BIT (CONTROL, StoragePower, IO_BOARD_OUTB_SD_POW);
+    OUTPUT_MAP_BIT (CONTROL, WirelessEnable, IO_BOARD_OUTB_WIFI_EN);
+    OUTPUT_MAP_BIT (CONTROL, SoundMute, IO_BOARD_OUTB_SOUND_MUTE);
 }
 
 
@@ -185,50 +212,28 @@ void update (struct IO *const Io)
 
     B->inbData = 0;
 
-    #define GET_SWITCH_STATE(_n) \
-                B->inbData |= BOARD_SWITCH_GET_STATE(_n)? \
-                        (1 << IO_BOARD_INB_##_n) : 0;
-
-    #define GET_GPIO_STATE(_n) \
-                B->inbData |= BOARD_GPIO_GET_STATE(OUT_##_n)? \
-                        (1 << IO_BOARD_INB_##_n) : 0;
-
-    #define SET_LED_STATE(_n) \
-                (B->outbData & (1 << IO_BOARD_OUTB_LED_##_n))? \
-                        BOARD_LED_ON(_n) : BOARD_LED_OFF(_n);
-
-    #define SET_GPIO_STATE(_n) \
-                (B->outbData & (1 << IO_BOARD_OUTB_##_n))? \
-                        BOARD_GPIO_SET_STATE(OUT_##_n, ENABLED) : \
-                        BOARD_GPIO_SET_STATE(OUT_##_n, DISABLED);
-
     // Input
-    GET_SWITCH_STATE(ISP);
+    GET_SWITCH_STATE    (ISP);
     getWakeupState      (B);
     getBoardBacklight   (B);
     getSdPower          (B);
-    GET_GPIO_STATE(WIFI_EN);
-    GET_GPIO_STATE(SOUND_MUTE);
+    GET_GPIO_STATE      (WIFI_EN);
+    GET_GPIO_STATE      (SOUND_MUTE);
 
     // Output
-    SET_LED_STATE(WARN);
+    SET_LED_STATE       (WARN);
     setBoardBacklight   (B);
     Board_SetSdPower    (B->outbData & (1 << IO_BOARD_OUTB_SD_POW));
-    SET_GPIO_STATE(WIFI_EN);
-    SET_GPIO_STATE(SOUND_MUTE);
-
-    #undef SET_GPIO_STATE
-    #undef SET_LED_STATE
-    #undef GET_GPIO_STATE
-    #undef GET_SWITCH_STATE
+    SET_GPIO_STATE      (WIFI_EN);
+    SET_GPIO_STATE      (SOUND_MUTE);
 }
 
 
 IO_Count availableInputs (struct IO *const Io, const enum IO_Type IoType,
-                          const uint32_t InputSource)
+                          const IO_Port InPort)
 {
     (void) Io;
-    (void) InputSource;
+    (void) InPort;
 
     // This driver handles no analog inputs
     if (IoType == IO_Type_Range)
@@ -241,10 +246,10 @@ IO_Count availableInputs (struct IO *const Io, const enum IO_Type IoType,
 
 
 IO_Count availableOutputs (struct IO *const Io, const enum IO_Type IoType,
-                           const uint32_t OutputSource)
+                           const IO_Port OutPort)
 {
     (void) Io;
-    (void) OutputSource;
+    (void) OutPort;
 
     // This driver handles no analog outputs
     if (IoType == IO_Type_Range)
@@ -257,60 +262,56 @@ IO_Count availableOutputs (struct IO *const Io, const enum IO_Type IoType,
 
 
 uint32_t getInput (struct IO *const Io, const enum IO_Type IoType,
-                   const uint16_t Index, const uint32_t InputSource)
+                   const IO_Code Code, const IO_Port InPort)
 {
-    BOARD_AssertParams (IoType == IO_Type_Bit &&
-                         Index < IO_BOARD_INB__COUNT);
+    BOARD_AssertParams (IoType == IO_Type_Bit && Code < IO_BOARD_INB__COUNT);
 
-    (void) InputSource;
+    (void) InPort;
 
     struct IO_BOARD *const B = (struct IO_BOARD *) Io;
 
-    return (B->inbData & (1 << Index));
+    return (B->inbData & (1 << Code));
 }
 
 
 void setOutput (struct IO *const Io, const enum IO_Type IoType,
-                const uint16_t Index, const uint32_t OutputSource,
+                const IO_Code Code, const IO_Port OutPort,
                 const uint32_t Value)
 {
-    BOARD_AssertParams (IoType == IO_Type_Bit &&
-                         Index < IO_BOARD_OUTB__COUNT);
+    BOARD_AssertParams (IoType == IO_Type_Bit && Code < IO_BOARD_OUTB__COUNT);
 
-    (void) OutputSource;
+    (void) OutPort;
 
     struct IO_BOARD *const B = (struct IO_BOARD *) Io;
 
     if (Value)
     {
-        B->outbData |= (1 << Index);
+        B->outbData |= (1 << Code);
     }
     else
     {
-        B->outbData &= ~(1 << Index);
+        B->outbData &= ~(1 << Code);
     }
 }
 
 
 const char * inputName (struct IO *const Io, const enum IO_Type IoType,
-                        const uint16_t Index)
+                        const IO_Code Code)
 {
-    BOARD_AssertParams (IoType == IO_Type_Bit &&
-                         Index < IO_BOARD_INB__COUNT);
+    BOARD_AssertParams (IoType == IO_Type_Bit && Code < IO_BOARD_INB__COUNT);
 
     (void) Io;
 
-    return s_InputNames[Index];
+    return s_InputNames[Code];
 }
 
 
 const char * outputName (struct IO *const Io, const enum IO_Type IoType,
-                         const uint16_t Index)
+                         const IO_Code Code)
 {
-    BOARD_AssertParams (IoType == IO_Type_Bit &&
-                         Index < IO_BOARD_OUTB__COUNT);
+    BOARD_AssertParams (IoType == IO_Type_Bit && Code < IO_BOARD_OUTB__COUNT);
 
     (void) Io;
 
-    return s_OutputNames[Index];
+    return s_OutputNames[Code];
 }

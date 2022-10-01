@@ -6,6 +6,13 @@
 #include "embedul.ar/source/arch/arm-cortex/stm32/drivers/random_rng.h"
 
 
+struct BOARD_IO_PROFILES
+{
+    struct INPUT_PROFILE_MAIN   inMain;
+    struct OUTPUT_PROFILE_SIGN  outSign;
+};
+
+
 struct BOARD_NUCLEO_144
 {
     struct BOARD                device;

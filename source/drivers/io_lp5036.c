@@ -30,14 +30,42 @@
 
 static const char * s_OutputNamesRange[IO_LP5036_OUTR__COUNT] =
 {
-    "out0", "out1", "out2", "out3", "out4",
-    "out5", "out6", "out7", "out8", "out9", 
-    "out10", "out11", "out12", "out13", "out14",
-    "out15", "out16", "out17", "out18", "out19", 
-    "out20", "out21", "out22", "out23", "out24",
-    "out25", "out26", "out27", "out28", "out29", 
-    "out30", "out31", "out32", "out33", "out34",
-    "out35"
+    [IO_LP5036_OUTR_0]  = "out0",
+    [IO_LP5036_OUTR_1]  = "out1",
+    [IO_LP5036_OUTR_2]  = "out2",
+    [IO_LP5036_OUTR_3]  = "out3",
+    [IO_LP5036_OUTR_4]  = "out4",
+    [IO_LP5036_OUTR_5]  = "out5",
+    [IO_LP5036_OUTR_6]  = "out6",
+    [IO_LP5036_OUTR_7]  = "out7",
+    [IO_LP5036_OUTR_8]  = "out8",
+    [IO_LP5036_OUTR_9]  = "out9", 
+    [IO_LP5036_OUTR_10] = "out10",
+    [IO_LP5036_OUTR_11] = "out11",
+    [IO_LP5036_OUTR_12] = "out12",
+    [IO_LP5036_OUTR_13] = "out13",
+    [IO_LP5036_OUTR_14] = "out14",
+    [IO_LP5036_OUTR_15] = "out15",
+    [IO_LP5036_OUTR_16] = "out16",
+    [IO_LP5036_OUTR_17] = "out17",
+    [IO_LP5036_OUTR_18] = "out18",
+    [IO_LP5036_OUTR_19] = "out19", 
+    [IO_LP5036_OUTR_20] = "out20",
+    [IO_LP5036_OUTR_21] = "out21",
+    [IO_LP5036_OUTR_22] = "out22",
+    [IO_LP5036_OUTR_23] = "out23",
+    [IO_LP5036_OUTR_24] = "out24",
+    [IO_LP5036_OUTR_25] = "out25",
+    [IO_LP5036_OUTR_26] = "out26",
+    [IO_LP5036_OUTR_27] = "out27",
+    [IO_LP5036_OUTR_28] = "out28",
+    [IO_LP5036_OUTR_29] = "out29", 
+    [IO_LP5036_OUTR_30] = "out30",
+    [IO_LP5036_OUTR_31] = "out31",
+    [IO_LP5036_OUTR_32] = "out32",
+    [IO_LP5036_OUTR_33] = "out33",
+    [IO_LP5036_OUTR_34] = "out34",
+    [IO_LP5036_OUTR_35] = "out35"
 };
 
 
@@ -46,15 +74,15 @@ static void         update              (struct IO *const Io);
 static IO_Count
                     availableOutputs    (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint32_t OutputSource);
+                                         const IO_Port OutPort);
 static void         setOutput           (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index,
-                                         const uint32_t OutputSource,
+                                         const IO_Code Inx,
+                                         const IO_Port OutPort,
                                          const uint32_t Value);
 static const char * outputName          (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index);
+                                         const IO_Code Inx);
 
 
 static const struct IO_IFACE IO_LP5036_IFACE =
@@ -156,10 +184,10 @@ static void update (struct IO *const Io)
 
 static IO_Count availableOutputs (struct IO *const Io,
                                   const enum IO_Type IoType,
-                                  const uint32_t OutputSource)
+                                  const IO_Port OutPort)
 {
     (void) Io;
-    (void) OutputSource;
+    (void) OutPort;
 
     // This driver handles no digital outputs
     if (IoType == IO_Type_Bit)
@@ -172,30 +200,30 @@ static IO_Count availableOutputs (struct IO *const Io,
 
 
 static void setOutput (struct IO *const Io, const enum IO_Type IoType,
-                       const uint16_t Index, const uint32_t OutputSource,
+                       const IO_Code Inx, const IO_Port OutPort,
                        const uint32_t Value)
 {
     BOARD_AssertParams (IoType == IO_Type_Range &&
-                         Index < IO_LP5036_OUTR__COUNT &&
-                         Value <= 0xFF);
+                        Inx < IO_LP5036_OUTR__COUNT &&
+                        Value <= 0xFF);
 
-    (void) OutputSource;
+    (void) OutPort;
 
     struct IO_LP5036 *const L = (struct IO_LP5036 *) Io;
 
     // outData[0] reserved as the i2c registry to write to.
-    L->outData[Index + 1] = Value;
+    L->outData[Inx + 1] = Value;
 }
 
 
 static const char * outputName (struct IO *const Io,
                                 const enum IO_Type IoType,
-                                const uint16_t Index)
+                                const IO_Code Inx)
 {
     BOARD_AssertParams (IoType == IO_Type_Range &&
-                         Index < IO_LP5036_OUTR__COUNT);
+                        Inx < IO_LP5036_OUTR__COUNT);
 
     (void) Io;
 
-    return s_OutputNamesRange[Index];
+    return s_OutputNamesRange[Inx];
 }

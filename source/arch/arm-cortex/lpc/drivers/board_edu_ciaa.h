@@ -37,6 +37,19 @@
 #include "embedul.ar/source/arch/arm-cortex/lpc/drivers/sound_pcm5100.h"
 
 
+struct BOARD_IO_PROFILES
+{
+    struct INPUT_PROFILE_MAIN               inMain;
+    struct OUTPUT_PROFILE_SIGN              outSign;
+#ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
+    struct INPUT_PROFILE_GP1                inGp1;
+    struct INPUT_PROFILE_GP2                inGp2;
+    struct INPUT_PROFILE_CONTROL            inControl;
+    struct OUTPUT_PROFILE_CONTROL           outControl;
+#endif
+};
+
+
 struct BOARD_EDU_CIAA
 {
     struct BOARD                            device;

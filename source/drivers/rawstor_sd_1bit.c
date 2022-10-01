@@ -112,7 +112,7 @@ static inline void setCSLow (struct RAWSTOR_SD_1BIT *const S)
 {
     (void) S;
 
-    OUTPUT_BitNow (OUTPUT_Bit_StorageEnable, 1);
+    OUTPUT_SET_BIT_NOW (CONTROL, StorageEnable, 1);
 }
 
 
@@ -121,7 +121,7 @@ static inline void setCSHigh (struct RAWSTOR_SD_1BIT *const S)
 {
     (void) S;
 
-    OUTPUT_BitNow (OUTPUT_Bit_StorageEnable, 0);
+    OUTPUT_SET_BIT_NOW (CONTROL, StorageEnable, 0);
 }
 
 
@@ -219,7 +219,7 @@ static void powerOn (struct RAWSTOR_SD_1BIT *const S)
 {
     (void) S;
 
-    OUTPUT_BitNow (OUTPUT_Bit_StoragePower, 1);
+    OUTPUT_SET_BIT_NOW (CONTROL, StoragePower, 1);
 }
 
 
@@ -227,7 +227,7 @@ static void powerOff (struct RAWSTOR_SD_1BIT *const S)
 {
     (void) S;
 
-    OUTPUT_BitNow (OUTPUT_Bit_StoragePower, 0);
+    OUTPUT_SET_BIT_NOW (CONTROL, StoragePower, 0);
 }
 
 
@@ -235,7 +235,7 @@ static bool powerStatus (struct RAWSTOR_SD_1BIT *const S)
 {
     (void) S;
 
-    if (!INPUT_BIT_IS_MAPPED(CONTROL,StoragePower))
+    if (!INPUT_BIT_IS_MAPPED(CONTROL, StoragePower))
     {
         return true;
     }

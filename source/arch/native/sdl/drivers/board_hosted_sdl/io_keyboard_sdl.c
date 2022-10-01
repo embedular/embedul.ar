@@ -30,14 +30,14 @@
 static void         update              (struct IO *const Io);
 static IO_Count     availableInputs     (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint32_t InputSource);
+                                         const IO_Port InPort);
 static uint32_t     getInput            (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index,
-                                         const uint32_t InputSource);
+                                         const IO_Code Code,
+                                         const IO_Port InPort);
 static const char * inputName           (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index);
+                                         const IO_Code Code);
 
 
 static const struct IO_IFACE IO_KEYBOARD_SDL_IFACE =
@@ -69,7 +69,7 @@ void IO_KEYBOARD_SDL_Init (struct IO_KEYBOARD_SDL *const K)
 
 void IO_KEYBOARD_SDL_Attach (struct IO_KEYBOARD_SDL *const K)
 {
-    INPUT_SetDevice ((struct IO *) K, 0);
+    INPUT_SetGateway ((struct IO *) K, 0);
 
     // Default keymappings
     INPUT_MAP_BIT (GP1, Right, SDL_SCANCODE_RIGHT);
@@ -119,10 +119,10 @@ void update (struct IO *const Io)
 
 
 IO_Count availableInputs (struct IO *const Io, const enum IO_Type IoType,
-                          const uint32_t InputSource)
+                          const IO_Port InPort)
 {
     (void) Io;
-    (void) InputSource;
+    (void) InPort;
 
     // A keyboard has no analog inputs
     if (IoType == IO_Type_Range)
@@ -138,27 +138,27 @@ IO_Count availableInputs (struct IO *const Io, const enum IO_Type IoType,
 
 
 uint32_t getInput (struct IO *const Io, const enum IO_Type IoType,
-                   const uint16_t Index, const uint32_t InputSource)
+                   const IO_Code Code, const IO_Port InPort)
 {
-    BOARD_AssertParams (IoType == IO_Type_Bit && Index < SDL_NUM_SCANCODES);
+    BOARD_AssertParams (IoType == IO_Type_Bit && Code < SDL_NUM_SCANCODES);
     
-    (void) InputSource;
+    (void) InPort;
 
     struct IO_KEYBOARD_SDL *const K = (struct IO_KEYBOARD_SDL *) Io;
 
-    return BITFIELD_GetBit (&K->inputBf, Index);
+    return BITFIELD_GetBit (&K->inputBf, Code);
 }
 
 
 const char * inputName (struct IO *const Io,
                         const enum IO_Type IoType,
-                        const uint16_t Index)
+                        const IO_Code Code)
 {
-    BOARD_AssertParams (IoType == IO_Type_Bit && Index < SDL_NUM_SCANCODES);
+    BOARD_AssertParams (IoType == IO_Type_Bit && Code < SDL_NUM_SCANCODES);
 
     (void) Io;
 
-    const SDL_Keycode Keycode = SDL_GetKeyFromScancode (Index);
+    const SDL_Keycode Keycode = SDL_GetKeyFromScancode (Code);
 
     return SDL_GetKeyName (Keycode);
 }

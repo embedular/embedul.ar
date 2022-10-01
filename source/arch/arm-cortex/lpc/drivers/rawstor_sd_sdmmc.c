@@ -172,7 +172,7 @@ static void powerOn (struct RAWSTOR_SD_SDMMC *const M)
 {
     (void) M;
 
-    OUTPUT_BitNow (OUTPUT_Bit_StoragePower, 1);
+    OUTPUT_SET_BIT_NOW (CONTROL, StoragePower, 1);
 
     // Wait a couple of milliseconds for power to stabilize
     BOARD_Delay (200);
@@ -183,7 +183,7 @@ static void powerOff (struct RAWSTOR_SD_SDMMC *const M)
 {
     (void) M;
 
-    OUTPUT_BitNow (OUTPUT_Bit_StoragePower, 0);
+    OUTPUT_SET_BIT_NOW (CONTROL, StoragePower, 0);
 
     // Wait a couple of milliseconds for power to stabilize
     BOARD_Delay (200);

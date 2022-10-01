@@ -31,30 +31,33 @@
 #define HUEWHEEL_DEFAULT_STEP           0x0280
 
 
-static const char * s_OutputNamesBit[] =
+static const char * s_OutputNamesBit[IO_HUEWHEEL_OUTB__COUNT] =
 {
-    "dir"
+    [IO_HUEWHEEL_OUTB_Dir]              = "dir"
 };
 
 
-static const char * s_OutputNamesRange[] =
+static const char * s_OutputNamesRange[IO_HUEWHEEL_OUTR__COUNT] =
 {
-    "step", "maxlum", "phase", "duration"
+    [IO_HUEWHEEL_OUTR_Step]             = "step",
+    [IO_HUEWHEEL_OUTR_MaxLuminance]     = "maxlum",
+    [IO_HUEWHEEL_OUTR_Phase]            = "phase",
+    [IO_HUEWHEEL_OUTR_Duration]         = "duration"
 };
 
 
 static void         update              (struct IO *const Io);
 static IO_Count     availableOutputs    (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint32_t OutputSource);
+                                         const IO_Port OutPort);
 static void         setOutput           (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index,
-                                         const uint32_t OutputSource,
+                                         const IO_Code Inx,
+                                         const IO_Port OutPort,
                                          const uint32_t Value);
 static const char * outputName          (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const uint16_t Index);
+                                         const IO_Code Inx);
 
 
 static const struct IO_IFACE IO_HUEWHEEL_IFACE =
@@ -92,19 +95,17 @@ static void animFlash (struct IO_HUEWHEEL *const H, const uint32_t Duration)
 
 
 void IO_HUEWHEEL_Init (struct IO_HUEWHEEL *const H,
-                       struct IO *const OutputDriver,
-                       const uint32_t OutputDriverSource,
+                       const struct IO_Gateway OutGateway,
                        const struct HUEWHEEL_PolarPlacement
                        *const PolarPlacement,
                        const uint32_t PolarPlacementElements)
 {
-    BOARD_AssertParams (H && IO_Initialized(OutputDriver) && 
+    BOARD_AssertParams (H && IO_Initialized(OutGateway.driver) && 
                          PolarPlacement && PolarPlacementElements);
 
     DEVICE_IMPLEMENTATION_Clear (H);
 
-    H->outputDriver             = OutputDriver;
-    H->outputDriverSource       = OutputDriverSource;
+    H->outGateway               = OutGateway;
     H->polarPlacement           = PolarPlacement;
     H->polarPlacementElements   = PolarPlacementElements;
 
@@ -119,15 +120,14 @@ void IO_HUEWHEEL_Attach (struct IO_HUEWHEEL *const H)
 {
     BOARD_AssertParams (H);
 
-    OUTPUT_SetDevice ((struct IO *)H, 0);
+    OUTPUT_SetGateway ((struct IO *)H, 0);
 
-    OUTPUT_MapBit   (OUTPUT_Bit_MarqueeDir, IO_HUEWHEEL_OUTB_Dir);
-    OUTPUT_MapRange (OUTPUT_Range_MarqueeStep, IO_HUEWHEEL_OUTR_Step);
-    OUTPUT_MapRange (OUTPUT_Range_MarqueeFlashMaxLuminance, 
-                     IO_HUEWHEEL_OUTR_MaxLuminance);
-    OUTPUT_MapRange (OUTPUT_Range_MarqueeFlashPhase, IO_HUEWHEEL_OUTR_Phase);
-    OUTPUT_MapRange (OUTPUT_Range_MarqueeFlashDuration,
-                     IO_HUEWHEEL_OUTR_Duration);
+    OUTPUT_MAP_BIT      (MARQUEE, Dir, IO_HUEWHEEL_OUTB_Dir);
+    OUTPUT_MAP_RANGE    (MARQUEE, Step, IO_HUEWHEEL_OUTR_Step);
+    OUTPUT_MAP_RANGE    (MARQUEE, FlashMaxLuminance, 
+                         IO_HUEWHEEL_OUTR_MaxLuminance);
+    OUTPUT_MAP_RANGE    (MARQUEE, FlashPhase, IO_HUEWHEEL_OUTR_Phase);
+    OUTPUT_MAP_RANGE    (MARQUEE, FlashDuration, IO_HUEWHEEL_OUTR_Duration);
 }
 
 
@@ -145,26 +145,29 @@ static void update (struct IO *const Io)
                                         ANIM_GetValue(&H->globalSaturation),
                                         ANIM_GetValue(&H->globalLuminance));
 
-        IO_SetOutput (H->outputDriver, IO_Type_Range,
-                        Pp->OutputIndexRed,
-                        H->outputDriverSource,
-                        RGB.r,
-                        IO_UpdateValue_Async);
+        IO_SetOutput (H->outGateway.driver,
+                      IO_Type_Range,
+                      Pp->OutInxRed,
+                      H->outGateway.driverPort,
+                      RGB.r,
+                      IO_UpdateValue_Async);
 
-        IO_SetOutput (H->outputDriver, IO_Type_Range,
-                        Pp->OutputIndexGreen,
-                        H->outputDriverSource,
-                        RGB.g,
-                        IO_UpdateValue_Async);
+        IO_SetOutput (H->outGateway.driver,
+                      IO_Type_Range,
+                      Pp->OutInxGreen,
+                      H->outGateway.driverPort,
+                      RGB.g,
+                      IO_UpdateValue_Async);
 
-        IO_SetOutput (H->outputDriver, IO_Type_Range,
-                        Pp->OutputIndexBlue,
-                        H->outputDriverSource,
-                        RGB.b,
-                        IO_UpdateValue_Async);
+        IO_SetOutput (H->outGateway.driver,
+                      IO_Type_Range,
+                      Pp->OutInxBlue,
+                      H->outGateway.driverPort,
+                      RGB.b,
+                      IO_UpdateValue_Async);
     }
 
-    IO_Update (H->outputDriver);
+    IO_Update (H->outGateway.driver);
 
     H->currentOffset = (H->dir == HUEWHEEL_Dir_Clockwise)?
                                     H->currentOffset + H->step :
@@ -172,11 +175,12 @@ static void update (struct IO *const Io)
 }
 
 
-static IO_Count availableOutputs (struct IO *const Io, const enum IO_Type IoType,
-                                  const uint32_t OutputSource)
+static IO_Count availableOutputs (struct IO *const Io,
+                                  const enum IO_Type IoType,
+                                  const IO_Port OutPort)
 {
     (void) Io;
-    (void) OutputSource;
+    (void) OutPort;
 
     return (IoType == IO_Type_Bit)? IO_HUEWHEEL_OUTB__COUNT : 
                                     IO_HUEWHEEL_OUTR__COUNT;
@@ -184,18 +188,18 @@ static IO_Count availableOutputs (struct IO *const Io, const enum IO_Type IoType
 
 
 static void setOutput (struct IO *const Io, const enum IO_Type IoType,
-                       const uint16_t Index, const uint32_t OutputSource,
+                       const IO_Code Inx, const IO_Port OutPort,
                        const uint32_t Value)
 {
-    (void) OutputSource;
+    (void) OutPort;
 
     struct IO_HUEWHEEL *const H = (struct IO_HUEWHEEL *) Io;
 
     if (IoType == IO_Type_Bit)
     {
-        BOARD_AssertParams (Index < IO_HUEWHEEL_OUTB__COUNT);
+        BOARD_AssertParams (Inx < IO_HUEWHEEL_OUTB__COUNT);
 
-        switch (Index)
+        switch (Inx)
         {
             case IO_HUEWHEEL_OUTB_Dir:
                 H->dir = Value? HUEWHEEL_Dir_CounterCW : 
@@ -205,9 +209,9 @@ static void setOutput (struct IO *const Io, const enum IO_Type IoType,
     }
     else 
     {
-        BOARD_AssertParams (Index < IO_HUEWHEEL_OUTR__COUNT);
+        BOARD_AssertParams (Inx < IO_HUEWHEEL_OUTR__COUNT);
 
-        switch (Index)
+        switch (Inx)
         {
             case IO_HUEWHEEL_OUTR_Step:
                 H->step = Value;
@@ -230,16 +234,16 @@ static void setOutput (struct IO *const Io, const enum IO_Type IoType,
 
 
 static const char * outputName (struct IO *const Io, const enum IO_Type IoType,
-                                const uint16_t Index)
+                                const IO_Code Inx)
 {
     (void) Io;
 
     if (IoType == IO_Type_Bit)
     {
-        BOARD_AssertParams (Index < IO_HUEWHEEL_OUTB__COUNT);
-        return s_OutputNamesBit[Index];
+        BOARD_AssertParams (Inx < IO_HUEWHEEL_OUTB__COUNT);
+        return s_OutputNamesBit[Inx];
     }
 
-    BOARD_AssertParams (Index < IO_HUEWHEEL_OUTR__COUNT);
-    return s_OutputNamesRange[Index];
+    BOARD_AssertParams (Inx < IO_HUEWHEEL_OUTR__COUNT);
+    return s_OutputNamesRange[Inx];
 }

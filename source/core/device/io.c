@@ -28,8 +28,8 @@
 
 
 void IO_Init (struct IO *const Io,
-                     const struct IO_IFACE *iface,
-                     const TIMER_Ticks DeferredUpdatePeriod)
+              const struct IO_IFACE *iface,
+              const TIMER_Ticks DeferredUpdatePeriod)
 {
     BOARD_AssertParams (Io && iface);
 
@@ -77,7 +77,7 @@ void IO_Update (struct IO *const Io)
 
 
 IO_Count IO_AvailableInputs (struct IO *const Io, const enum IO_Type IoType,
-                             const uint32_t InputSource)
+                             const IO_Port InPort)
 {
     BOARD_AssertParams (Io);
     BOARD_AssertState  (Io->iface);
@@ -87,12 +87,12 @@ IO_Count IO_AvailableInputs (struct IO *const Io, const enum IO_Type IoType,
         return 0;
     }
 
-    return Io->iface->AvailableInputs (Io, IoType, InputSource);
+    return Io->iface->AvailableInputs (Io, IoType, InPort);
 }
 
 
 IO_Count IO_AvailableOutputs (struct IO *const Io, const enum IO_Type IoType,
-                              const uint32_t OutputSource)
+                              const IO_Port OutPort)
 {
     BOARD_AssertParams (Io);
     BOARD_AssertState  (Io->iface);
@@ -102,12 +102,12 @@ IO_Count IO_AvailableOutputs (struct IO *const Io, const enum IO_Type IoType,
         return 0;
     }
 
-    return Io->iface->AvailableOutputs (Io, IoType, OutputSource);
+    return Io->iface->AvailableOutputs (Io, IoType, OutPort);
 }
 
 
 uint32_t IO_GetInput (struct IO *const Io, const enum IO_Type IoType,
-                      const uint16_t Index, const uint32_t InputSource,
+                      const IO_Code Inx, const IO_Port InPort,
                       const enum IO_UpdateValue When)
 {
     BOARD_AssertParams (Io);
@@ -118,19 +118,19 @@ uint32_t IO_GetInput (struct IO *const Io, const enum IO_Type IoType,
         Io->iface->Update (Io);        
     }
 
-    return Io->iface->GetInput (Io, IoType, Index, InputSource);
+    return Io->iface->GetInput (Io, IoType, Inx, InPort);
 }
 
 
 void IO_SetOutput (struct IO *const Io, const enum IO_Type IoType,
-                   const BITFIELD_Index Index, const uint32_t InputSource,
+                   const IO_Code Inx, const IO_Port InPort,
                    const uint32_t Value, const enum IO_UpdateValue When)
 {
     BOARD_AssertParams (Io);
     BOARD_AssertState  (Io->iface && Io->iface->SetOutput &&
                         Io->iface->Update);
 
-    Io->iface->SetOutput (Io, IoType, Index, InputSource, Value);
+    Io->iface->SetOutput (Io, IoType, Inx, InPort, Value);
 
     if (When == IO_UpdateValue_Now)
     {
@@ -139,13 +139,13 @@ void IO_SetOutput (struct IO *const Io, const enum IO_Type IoType,
 }
 
 
-uint16_t IO_FirstOnIndex (struct IO *const Io, const enum IO_Type IoType,
-                          const uint32_t InputSource)
+IO_Code IO_GetAnyInput (struct IO *const Io, const enum IO_Type IoType,
+                        const IO_Port InPort)
 {
     BOARD_AssertParams (Io);
-    BOARD_AssertState  (Io->iface && Io->iface->FirstOnIndex);
+    BOARD_AssertState  (Io->iface && Io->iface->GetAnyInput);
 
-    return Io->iface->FirstOnIndex (Io, IoType, InputSource);    
+    return Io->iface->GetAnyInput (Io, IoType, InPort);    
 }
 
 
@@ -159,20 +159,20 @@ const char * IO_Description (struct IO *const Io)
 
 
 const char * IO_InputName (struct IO *const Io, const enum IO_Type IoType,
-                           const uint16_t Index)
+                           const IO_Code Inx)
 {
     BOARD_AssertParams (Io);
     BOARD_AssertState  (Io->iface && Io->iface->InputName);
 
-    return Io->iface->InputName (Io, IoType, Index);
+    return Io->iface->InputName (Io, IoType, Inx);
 }
 
 
 const char * IO_OutputName (struct IO *const Io, const enum IO_Type IoType,
-                            const uint16_t Index)
+                            const IO_Code Inx)
 {
     BOARD_AssertParams (Io);
     BOARD_AssertState  (Io->iface && Io->iface->OutputName);
 
-    return Io->iface->OutputName (Io, IoType, Index);
+    return Io->iface->OutputName (Io, IoType, Inx);
 }

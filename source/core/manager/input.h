@@ -34,10 +34,10 @@
 #include <stdint.h>
 
 
-#define INPUT_MAX_DEVICES       LIB_EMBEDULAR_CONFIG_INPUT_MAX_DEVICES
+#define INPUT_MAX_GATEWAYS       LIB_EMBEDULAR_CONFIG_INPUT_MAX_GATEWAYS
 
 #if (LIB_EMBEDULAR_CONFIG_INPUT_ACTION == 1)
-#define INPUT_ACTION(_inbn,_swa) \
+    #define INPUT_ACTION(_inbn,_swa) \
             ((INPUT_BitAsSwitchAction(INPUT_Bit_ ## _inbn) == \
                         INPUT_ACTION_Type_ ## _swa)? true : false)
 #endif
@@ -54,7 +54,7 @@
     INPUT_MAP (_pname,Range,_pid,_drv_index)
 
 #define INPUT_IS_MAPPED(_pname,_ptype,_pid) \
-    INPUT_ ## _ptype ## IsMapped (INPUT_PROFILE_Type_ ## _pname, \
+    INPUT_Is ## _ptype ## Mapped (INPUT_PROFILE_Type_ ## _pname, \
                     INPUT_PROFILE_ ## _pname ## _Bit_ ## _pid)
 
 #define INPUT_BIT_IS_MAPPED(_pname,_pid) \
@@ -65,7 +65,7 @@
 
 #define INPUT_GET(_pname,_ptype,_update,_pid) \
     INPUT_Get ## _ptype ## _update (INPUT_PROFILE_Type_ ## _pname, \
-                    INPUT_PROFILE_ ## _pname ## _Bit_ ## _pid)
+                    INPUT_PROFILE_ ## _pname ## _ ## _ptype ## _ ## _pid)
 
 #define INPUT_GET_BIT_NOW(_pname,_pid) \
     INPUT_GET(_pname,Bit,Now,_pid)
@@ -77,7 +77,8 @@
     INPUT_GET(_pname,Bit,Action,_pid)
 
 #define INPUT_CHECK_BIT_ACTION(_pname,_pid,_action) \
-    ((INPUT_GET_BIT_ACTION(_pname,_pid) == _action)? true : false)
+    ((INPUT_GET_BIT_ACTION(_pname,_pid) == INPUT_ACTION_Type_ ## _action)? \
+        true : false)
 
 #define INPUT_GET_RANGE_NOW(_pname,_pid) \
     INPUT_GET(_pname,Range,Now,_pid)
@@ -86,19 +87,11 @@
     INPUT_GET(_pname,Range,Buffer,_pid)
 
 
-// Device = Driver + Driver Source
-struct INPUT_Device
-{
-    struct IO               * driver;
-    uint32_t                driverSource;
-};
-
-
 struct INPUT
 {
-    struct INPUT_Device     device      [INPUT_MAX_DEVICES];
     struct INPUT_PROFILE    profiles    [INPUT_PROFILE_Type__COUNT];
-    uint16_t                nextDeviceId;
+    struct IO_Gateway       gateways    [INPUT_MAX_GATEWAYS];
+    IO_GatewayId            nextGatewayId;
 };
 
 
@@ -110,8 +103,8 @@ enum INPUT_UpdateValue
 
 
 void            INPUT_Init                  (struct INPUT *const I);
-void            INPUT_SetDevice             (struct IO *const Driver,
-                                             const uint32_t DriverSource);
+void            INPUT_SetGateway            (struct IO *const Driver,
+                                             const uint32_t DriverPort);
 bool            INPUT_HasProfile            (const enum INPUT_PROFILE_Type
                                              ProfileType);
 uint32_t        INPUT_ProfileBits           (const enum INPUT_PROFILE_Type
@@ -119,40 +112,40 @@ uint32_t        INPUT_ProfileBits           (const enum INPUT_PROFILE_Type
 uint32_t        INPUT_ProfileRanges         (const enum INPUT_PROFILE_Type
                                              ProfileType);
 void            INPUT_MapBit                (const enum INPUT_PROFILE_Type
-                                             ProfileType, const uint32_t Inb,
+                                             ProfileType, const IO_Code Inb,
                                              const uint16_t DriverIndex);
 void            INPUT_MapRange              (const enum INPUT_PROFILE_Type
-                                             ProfileType, const uint32_t Inr,
+                                             ProfileType, const IO_Code Inr,
                                              const uint16_t DriverIndex);
 bool            INPUT_MapBitByOnState       (const enum INPUT_PROFILE_Type
-                                             ProfileType, const uint32_t Inb);
+                                             ProfileType, const IO_Code Inb);
 uint32_t        INPUT_GetBit                (const enum INPUT_PROFILE_Type
-                                             ProfileType, const uint32_t Inb,
+                                             ProfileType, const IO_Code Inb,
                                              const enum INPUT_UpdateValue When);
 uint32_t        INPUT_GetBitNow             (const enum INPUT_PROFILE_Type
-                                             ProfileType, const uint32_t Inb);
+                                             ProfileType, const IO_Code Inb);
 uint32_t        INPUT_GetBitBuffer          (const enum INPUT_PROFILE_Type
-                                             ProfileType, const uint32_t Inb);
+                                             ProfileType, const IO_Code Inb);
 #if (LIB_EMBEDULAR_CONFIG_INPUT_ACTION == 1)
 enum INPUT_ACTION_Type
                 INPUT_GetBitAction          (const enum INPUT_PROFILE_Type
-                                             ProfileType, const uint32_t Inb);
+                                             ProfileType, const IO_Code Inb);
 #endif
 uint32_t        INPUT_GetRange              (const enum INPUT_PROFILE_Type
-                                             ProfileType, const uint32_t Inr,
+                                             ProfileType, const IO_Code Inr,
                                              const enum INPUT_UpdateValue When);
 uint32_t        INPUT_GetRangeNow           (const enum INPUT_PROFILE_Type
-                                             ProfileType, const uint32_t Inr);
+                                             ProfileType, const IO_Code Inr);
 uint32_t        INPUT_GetRangeBuffer        (const enum INPUT_PROFILE_Type
-                                             ProfileType, const uint32_t Inr);
+                                             ProfileType, const IO_Code Inr);
 const char *    INPUT_MappedBitName         (const enum INPUT_PROFILE_Type
-                                             ProfileType, const uint32_t Inb);
+                                             ProfileType, const IO_Code Inb);
 const char *    INPUT_MappedRangeName       (const enum INPUT_PROFILE_Type
-                                             ProfileType, const uint32_t Inr);
+                                             ProfileType, const IO_Code Inr);
 bool            INPUT_IsBitMapped           (const enum INPUT_PROFILE_Type
-                                             ProfileType, const uint32_t Inb);
+                                             ProfileType, const IO_Code Inb);
 bool            INPUT_IsRangeMapped         (const enum INPUT_PROFILE_Type
-                                             ProfileType, const uint32_t Inr);
+                                             ProfileType, const IO_Code Inr);
 bool            INPUT_AnyBit                (const enum INPUT_PROFILE_SelectFlag
                                              Profiles);
 void            INPUT_Update                (void);

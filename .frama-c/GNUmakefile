@@ -84,6 +84,7 @@ native_hosted.parse: \
 ../source/core/manager/input/profile.c \
 ../source/core/manager/log.c \
 ../source/core/manager/output.c \
+../source/core/manager/output/profile.c \
 ../source/core/manager/storage.c \
 ../source/core/manager/storage/cache.c \
 ../source/core/misc/hsl.c \

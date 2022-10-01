@@ -54,11 +54,16 @@
                                     "`M40`4`L1"
 
 
-
-#ifdef BSS_SECTION_RETROCIAA_SYSTEM
-BSS_SECTION_RETROCIAA_SYSTEM
+#ifdef BSS_SECTION_BOARD
+BSS_SECTION_BOARD
 #endif
 static struct BOARD_RETRO_CIAA s_board_retro_ciaa;
+
+#ifdef BSS_SECTION_IO_PROFILES
+BSS_SECTION_IO_PROFILES
+#endif
+static struct BOARD_IO_PROFILES s_io_profiles;
+
 
 static const struct HUEWHEEL_PolarPlacement s_HuewheelPolarPlacement[12] = 
 {
@@ -154,6 +159,20 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
             break;
         }
 
+        case BOARD_Stage_InitIOProfiles:
+        {
+            INPUT_PROFILE_ATTACH    (CONTROL, B, s_io_profiles.inControl);
+            INPUT_PROFILE_ATTACH    (GP1, B, s_io_profiles.inGp1);
+            INPUT_PROFILE_ATTACH    (GP2, B, s_io_profiles.inGp2);
+            INPUT_PROFILE_ATTACH    (LIGHTDEV, B, s_io_profiles.inLightdev);
+            INPUT_PROFILE_ATTACH    (MAIN, B, s_io_profiles.inMain);
+            OUTPUT_PROFILE_ATTACH   (CONTROL, B, s_io_profiles.outControl);
+            OUTPUT_PROFILE_ATTACH   (LIGHTDEV, B, s_io_profiles.outLightdev);
+            OUTPUT_PROFILE_ATTACH   (MARQUEE, B, s_io_profiles.outMarquee);
+            OUTPUT_PROFILE_ATTACH   (SIGN, B, s_io_profiles.outSign);
+            break;
+        }
+
         case BOARD_Stage_InitRandomDriver:
         {
             RANDOM_SFMT_Init (&R->randomSfmt, Board_GetSeed());
@@ -222,11 +241,14 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
                                     0x80);
 
                     IO_HUEWHEEL_Init    (&R->ioHuewheel,
-                                         (struct IO *)&R->ioLp5036,
-                                         0, s_HuewheelPolarPlacement, 12);
+                                         (struct IO_Gateway) {
+                                            .driver = (struct IO *)&R->ioLp5036,
+                                            .driverPort = 0
+                                         }, 
+                                         s_HuewheelPolarPlacement, 12);
                     IO_HUEWHEEL_Attach  (&R->ioHuewheel);
 
-                    OUTPUT_RangeDefer (OUTPUT_Range_MarqueeStep, 520);
+                    OUTPUT_SET_RANGE_DEFER (MARQUEE, Step, 520);
 
                     IO_DUAL_GENESIS_PCA9673_Init    (
                                             &R->ioDualGenesis, 
