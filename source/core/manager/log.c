@@ -299,11 +299,14 @@ void LOG__assertFailed (struct STREAM *const S, const char *const Func,
                         const char *const File, const int Line,
                         const char *const Msg)
 {
+    // Visually closing current context levels, if any
     outContextLevel (S, "x", "x", true);
-    outStr          (S, "\r\n");
-    outStr          (S, LOG_BASE_COLOR);
-    outContextInfo  (S,  "[", "]", BOARD_TicksNow(),
-                     LOG_PREFIX_ASSERT_STR, Func, File, Line);
+    outContextInfo  (S, s_l->contextIndent? " " : "[",
+                        s_l->contextIndent? "╵" : "]",
+                        BOARD_TicksNow(),
+                        LOG_PREFIX_ASSERT_STR, Func, File, Line);
+
+    outStr (S, LOG_BASE_COLOR);
 
     if (Msg)
     {

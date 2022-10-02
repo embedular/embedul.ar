@@ -27,6 +27,7 @@
 
 #include "embedul.ar/source/core/object.h"
 #include "embedul.ar/source/core/variant.h"
+#include <string.h>
 
 
 #define DEVICE_COMMAND_GET_CONNECTED            "g|connected"

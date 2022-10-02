@@ -55,6 +55,7 @@
                 "log_hello_world",
                 "log_functions",
                 "log_context",
+                "log_assert",
                 "empty",
             ],
             "default": "log_context"
