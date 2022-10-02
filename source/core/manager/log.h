@@ -102,7 +102,6 @@
               _msg, VARIANT_AutoParams(__VA_ARGS__))
 
 #define LOG_Plain(_msg,...) \
-    OBJECT_AssertValid(_dp); \
     LOG_Args (NULL, NULL, NULL, LOG_LINE_NO_TIMING, \
               NULL, \
               NULL, LOG_SUFFIX_NEWLINE_STR, \

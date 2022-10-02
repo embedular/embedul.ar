@@ -54,7 +54,7 @@ int main (const int Argc, const char *const Argv[])
 
         LOG (NOBJ, LANG_ENTERING_APP_MAIN);
         retVal = EMBEDULAR_Main (Argc, Argv);
-        LOG (NOBJ, LANG_LEAVED_APP_MAIN);
+        LOG (NOBJ, LANG_RETURNED_FROM_APP_MAIN);
         LOG_Items (1, LANG_RETURN_VALUE, (int64_t)retVal);
     }
     LOG_ContextEnd ();

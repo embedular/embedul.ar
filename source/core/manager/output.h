@@ -95,33 +95,35 @@ uint32_t        OUTPUT_ProfileBits      (const enum OUTPUT_PROFILE_Type
 uint32_t        OUTPUT_ProfileRanges    (const enum OUTPUT_PROFILE_Type
                                          ProfileType);
 void            OUTPUT_MapBit           (const enum OUTPUT_PROFILE_Type
-                                         ProfileType, const IO_Code Outb,
-                                         const uint16_t DriverIndex);
+                                         ProfileType, const IO_Code ProfileCode,
+                                         const IO_Code DriverCode);
 void            OUTPUT_MapRange         (const enum OUTPUT_PROFILE_Type
-                                         ProfileType, const IO_Code Outr,
-                                         const uint16_t DriverIndex);
+                                         ProfileType, const IO_Code ProfileCode,
+                                         const IO_Code DriverCode);
 void            OUTPUT_SetBit           (const enum OUTPUT_PROFILE_Type
-                                         ProfileType, const IO_Code Outb,
+                                         ProfileType, const IO_Code ProfileCode,
                                          const uint32_t Value,
                                          const enum OUTPUT_UpdateValue When);
 void            OUTPUT_SetBitNow        (const enum OUTPUT_PROFILE_Type
-                                         ProfileType, const IO_Code Outb,
+                                         ProfileType, const IO_Code ProfileCode,
                                          const uint32_t Value);
 void            OUTPUT_SetBitDefer      (const enum OUTPUT_PROFILE_Type
-                                         ProfileType, const IO_Code Outb,
+                                         ProfileType, const IO_Code ProfileCode,
                                          const uint32_t Value);
 void            OUTPUT_SetRange         (const enum OUTPUT_PROFILE_Type
-                                         ProfileType, const IO_Code Outr,
+                                         ProfileType, const IO_Code ProfileCode,
                                          const uint32_t Value,
                                          const enum OUTPUT_UpdateValue When);
 void            OUTPUT_SetRangeNow      (const enum OUTPUT_PROFILE_Type
-                                         ProfileType, const IO_Code Outr,
+                                         ProfileType, const IO_Code ProfileCode,
                                          const uint32_t Value);
 void            OUTPUT_SetRangeDefer    (const enum OUTPUT_PROFILE_Type
-                                         ProfileType, const IO_Code Outr,
+                                         ProfileType, const IO_Code ProfileCode,
                                          const uint32_t Value);
 const char *    OUTPUT_MappedBitName    (const enum OUTPUT_PROFILE_Type
-                                         ProfileType, const IO_Code Outb);
+                                         ProfileType,
+                                         const IO_Code ProfileCode);
 const char *    OUTPUT_MappedRangeName  (const enum OUTPUT_PROFILE_Type
-                                         ProfileType, const IO_Code Outr);
+                                         ProfileType, 
+                                         const IO_Code ProfileCode);
 void            OUTPUT_Update           (void);

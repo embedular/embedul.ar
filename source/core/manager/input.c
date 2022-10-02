@@ -25,6 +25,7 @@
 
 #include "embedul.ar/source/core/manager/input.h"
 #include "embedul.ar/source/core/device/board.h"
+#include "source/core/device/io.h"
 
 
 static struct INPUT * s_i = NULL;
@@ -47,7 +48,7 @@ void INPUT_Init (struct INPUT *const I)
 }
 
 
-void INPUT_SetGateway (struct IO *const Driver, const uint32_t DriverPort)
+void INPUT_SetGateway (struct IO *const Driver, const IO_Port DriverPort)
 {
     BOARD_AssertParams (s_i->nextGatewayId < INPUT_MAX_GATEWAYS && Driver);
 
@@ -59,25 +60,25 @@ void INPUT_SetGateway (struct IO *const Driver, const uint32_t DriverPort)
 
 
 static void inMapByGatewayId (struct IO_PROFILE_Map *const Map,
-                              const uint16_t GatewayId,
-                              const IO_Code DriverInx)
+                              const IO_GatewayId GatewayId,
+                              const IO_Code DriverCode)
 {
     BOARD_AssertParams (GatewayId < INPUT_MAX_GATEWAYS);
     BOARD_AssertState  (s_i->gateways[GatewayId].driver);
 
     Map->gatewayId  = GatewayId;
-    Map->driverCode  = DriverInx;
+    Map->driverCode = DriverCode;
 }
 
 
 static void inputMapCurrent (struct IO_PROFILE_Map *const Map,
-                             const IO_Code DriverInx)
+                             const IO_Code DriverCode)
 {
     BOARD_AssertState (s_i->nextGatewayId);
 
-    const uint16_t CurrentGatewayId = s_i->nextGatewayId - 1;
+    const IO_GatewayId CurrentGatewayId = s_i->nextGatewayId - 1;
 
-    inMapByGatewayId (Map, CurrentGatewayId, DriverInx);
+    inMapByGatewayId (Map, CurrentGatewayId, DriverCode);
 }
 
 
@@ -94,40 +95,40 @@ getProfile (const enum INPUT_PROFILE_Type ProfileType)
 // BitMap must exist in ProfileType
 static struct IO_PROFILE_Map *
 getBitMapping (const enum INPUT_PROFILE_Type ProfileType,
-               const IO_Code Inb)
+               const IO_Code ProfileCode)
 {
     struct INPUT_PROFILE *const P = getProfile (ProfileType);
-    if (Inb >= P->bitCount || !P->bitMap)
+    if (ProfileCode >= P->bitCount || !P->bitMap)
     {
-        LOG_Warn (s_i, LANG_INVALID_IMPLEMENTATION);
+        LOG_Warn (s_i, LANG_INVALID_IO_PROFILE);
         LOG_Items (3,
-                    "inb",          Inb,
-                    "bitMap",       (void *)P->bitMap,
-                    "bitCount",     P->bitCount);
+                    "profile code",     ProfileCode,
+                    "bitMap addr.",     (void *)P->bitMap,
+                    "bitCount",         P->bitCount);
 
         BOARD_AssertState (false);
     }
-    return &P->bitMap[Inb];
+    return &P->bitMap[ProfileCode];
 }
 
 
 // RangeMap must exist in ProfileType
 static struct IO_PROFILE_Map *
 getRangeMapping (const enum INPUT_PROFILE_Type ProfileType,
-                 const IO_Code Inr)
+                 const IO_Code ProfileCode)
 {
     struct INPUT_PROFILE *const P = getProfile (ProfileType);
-    if (Inr >= P->rangeCount || !P->rangeMap)
+    if (ProfileCode >= P->rangeCount || !P->rangeMap)
     {
-        LOG_Warn (s_i, LANG_INVALID_IMPLEMENTATION);
+        LOG_Warn (s_i, LANG_INVALID_IO_PROFILE);
         LOG_Items (3,
-                    "inr",          Inr,
-                    "rangeMap",     (void *)P->rangeMap,
-                    "rangeCount",   P->rangeCount);
+                    "profile code",     ProfileCode,
+                    "rangeMap addr.",   (void *)P->rangeMap,
+                    "rangeCount",       P->rangeCount);
 
         BOARD_AssertState (false);
     }
-    return &P->rangeMap[Inr];
+    return &P->rangeMap[ProfileCode];
 }
 
 
@@ -151,36 +152,36 @@ uint32_t INPUT_ProfileRanges (const enum INPUT_PROFILE_Type ProfileType)
 
 
 void INPUT_MapBit (const enum INPUT_PROFILE_Type ProfileType,
-                   const IO_Code Inb, const IO_Code DriverInx)
+                   const IO_Code ProfileCode, const IO_Code DriverCode)
 {
-    inputMapCurrent (getBitMapping(ProfileType, Inb), DriverInx);
+    inputMapCurrent (getBitMapping(ProfileType, ProfileCode), DriverCode);
 }
 
 
 void INPUT_MapRange (const enum INPUT_PROFILE_Type ProfileType,
-                     const IO_Code Inr, const IO_Code DriverInx)
+                     const IO_Code ProfileCode, const IO_Code DriverCode)
 {
-    inputMapCurrent (getRangeMapping(ProfileType, Inr), DriverInx);
+    inputMapCurrent (getRangeMapping(ProfileType, ProfileCode), DriverCode);
 }
 
 
 bool INPUT_MapBitByOnState (const enum INPUT_PROFILE_Type ProfileType,
-                            const IO_Code Inb)
+                            const IO_Code ProfileCode)
 {
-    struct IO_PROFILE_Map *const Map = getBitMapping (ProfileType, Inb);
+    struct IO_PROFILE_Map *const Map = getBitMapping (ProfileType, ProfileCode);
 
     // Check registered drivers for one that has any input bit in 1 
-    for (uint8_t gatewayId = 0; gatewayId < INPUT_MAX_GATEWAYS; ++gatewayId)
+    for (IO_GatewayId gId = 0; gId < INPUT_MAX_GATEWAYS; ++gId)
     {
-        struct IO_Gateway *const G = &s_i->gateways[gatewayId];
+        struct IO_Gateway *const G = &s_i->gateways[gId];
         if (G->driver)
         {
-            const IO_Code DriverInx = IO_GetAnyInput (G->driver,
+            const IO_Code DriverCode = IO_GetAnyInput (G->driver,
                                                 IO_Type_Bit, G->driverPort);
 
-            if (DriverInx != IO_INVALID_CODE)
+            if (DriverCode != IO_INVALID_CODE)
             {
-                inMapByGatewayId (Map, gatewayId, DriverInx);
+                inMapByGatewayId (Map, gId, DriverCode);
                 return true;
             }
         }
@@ -192,8 +193,8 @@ bool INPUT_MapBitByOnState (const enum INPUT_PROFILE_Type ProfileType,
 
 static bool isMapped (const struct IO_PROFILE_Map *const Map)
 {
-    const IO_Code DriverInx = Map->driverCode;
-    return (DriverInx != IO_INVALID_CODE)? true : false;
+    const IO_Code DriverCode = Map->driverCode;
+    return (DriverCode != IO_INVALID_CODE)? true : false;
 }
 
 
@@ -226,7 +227,8 @@ static uint32_t input (const enum IO_Type IoType,
 
 
 uint32_t INPUT_GetBit (const enum INPUT_PROFILE_Type ProfileType,
-                       const IO_Code Inb, const enum INPUT_UpdateValue When)
+                       const IO_Code ProfileCode,
+                       const enum INPUT_UpdateValue When)
 {
     struct INPUT_PROFILE *const P = getProfile (ProfileType);
 
@@ -235,28 +237,29 @@ uint32_t INPUT_GetBit (const enum INPUT_PROFILE_Type ProfileType,
         return 0;
     }
 
-    BOARD_AssertParams (Inb < P->bitCount);
+    BOARD_AssertParams (ProfileCode < P->bitCount);
 
-    return input (IO_Type_Bit, &P->bitMap[Inb], When);
+    return input (IO_Type_Bit, &P->bitMap[ProfileCode], When);
 }
 
 
 uint32_t INPUT_GetBitNow (const enum INPUT_PROFILE_Type ProfileType,
-                          const IO_Code Inb)
+                          const IO_Code ProfileCode)
 {
-    return INPUT_GetBit (ProfileType, Inb, INPUT_UpdateValue_Now);
+    return INPUT_GetBit (ProfileType, ProfileCode, INPUT_UpdateValue_Now);
 }
 
 
 uint32_t INPUT_GetBitBuffer (const enum INPUT_PROFILE_Type ProfileType,
-                             const IO_Code Inb)
+                             const IO_Code ProfileCode)
 {
-    return INPUT_GetBit (ProfileType, Inb, INPUT_UpdateValue_Buffer);
+    return INPUT_GetBit (ProfileType, ProfileCode, INPUT_UpdateValue_Buffer);
 }
 
 
 uint32_t INPUT_GetRange (const enum INPUT_PROFILE_Type ProfileType,
-                         const IO_Code Inr, const enum INPUT_UpdateValue When)
+                         const IO_Code ProfileCode,
+                         const enum INPUT_UpdateValue When)
 {
     struct INPUT_PROFILE *const P = getProfile (ProfileType);
 
@@ -265,16 +268,16 @@ uint32_t INPUT_GetRange (const enum INPUT_PROFILE_Type ProfileType,
         return 0;
     }
 
-    BOARD_AssertParams (Inr < P->rangeCount);
+    BOARD_AssertParams (ProfileCode < P->rangeCount);
 
-    return input (IO_Type_Range, &P->rangeMap[Inr], When);
+    return input (IO_Type_Range, &P->rangeMap[ProfileCode], When);
 }
 
 
 #if (LIB_EMBEDULAR_CONFIG_INPUT_ACTION == 1)
 enum INPUT_ACTION_Type
 INPUT_GetBitAction (const enum INPUT_PROFILE_Type ProfileType,
-                    const IO_Code Inb)
+                    const IO_Code ProfileCode)
 {
     struct INPUT_PROFILE *const P = getProfile (ProfileType);
 
@@ -283,34 +286,34 @@ INPUT_GetBitAction (const enum INPUT_PROFILE_Type ProfileType,
         return INPUT_ACTION_Type_None;
     }
 
-    BOARD_AssertParams (Inb < P->bitCount);
+    BOARD_AssertParams (ProfileCode < P->bitCount);
 
-    return INPUT_ACTION_Last (&P->bitAction[Inb]);
+    return INPUT_ACTION_Last (&P->bitAction[ProfileCode]);
 }
 #endif
 
 
 uint32_t INPUT_GetRangeNow (const enum INPUT_PROFILE_Type ProfileType,
-                            const IO_Code Inr)
+                            const IO_Code ProfileCode)
 {
-    return INPUT_GetRange (ProfileType, Inr, INPUT_UpdateValue_Now);
+    return INPUT_GetRange (ProfileType, ProfileCode, INPUT_UpdateValue_Now);
 }
 
 
 uint32_t INPUT_GetRangeBuffer (const enum INPUT_PROFILE_Type ProfileType,
-                               const IO_Code Inr)
+                               const IO_Code ProfileCode)
 {
-    return INPUT_GetRange (ProfileType, Inr, INPUT_UpdateValue_Buffer);
+    return INPUT_GetRange (ProfileType, ProfileCode, INPUT_UpdateValue_Buffer);
 }
 
 
 static const char *
 mappedInputName (const enum INPUT_PROFILE_Type ProfileType,
-                 const enum IO_Type IoType, const IO_Code Inx)
+                 const enum IO_Type IoType, const IO_Code ProfileCode)
 {
     struct IO_PROFILE_Map *const Map = (IoType == IO_Type_Bit)?
-                                            getBitMapping(ProfileType, Inx) :
-                                            getRangeMapping(ProfileType, Inx);
+                                    getBitMapping(ProfileType, ProfileCode) :
+                                    getRangeMapping(ProfileType, ProfileCode);
 
     BOARD_AssertParams (Map->driverCode != IO_INVALID_CODE);
 
@@ -321,30 +324,30 @@ mappedInputName (const enum INPUT_PROFILE_Type ProfileType,
 
 
 const char * INPUT_MappedBitName (const enum INPUT_PROFILE_Type ProfileType,
-                                  const IO_Code Inb)
+                                  const IO_Code ProfileCode)
 {
-    return mappedInputName (ProfileType, IO_Type_Bit, Inb);
+    return mappedInputName (ProfileType, IO_Type_Bit, ProfileCode);
 }
 
 
 const char * INPUT_MappedRangeName (const enum INPUT_PROFILE_Type ProfileType,
-                                    const IO_Code Inr)
+                                    const IO_Code ProfileCode)
 {
-    return mappedInputName (ProfileType, IO_Type_Range, Inr);
+    return mappedInputName (ProfileType, IO_Type_Range, ProfileCode);
 }
 
 
 bool INPUT_IsBitMapped (const enum INPUT_PROFILE_Type ProfileType,
-                        const IO_Code Inb)
+                        const IO_Code ProfileCode)
 {
-    return isMapped (getBitMapping(ProfileType, Inb));
+    return isMapped (getBitMapping(ProfileType, ProfileCode));
 }
 
 
 bool INPUT_IsRangeMapped (const enum INPUT_PROFILE_Type ProfileType,
-                          const IO_Code Inr)
+                          const IO_Code ProfileCode)
 {
-    return isMapped (getRangeMapping(ProfileType, Inr));
+    return isMapped (getRangeMapping(ProfileType, ProfileCode));
 }
 
 
@@ -366,9 +369,9 @@ bool INPUT_AnyBit (const enum INPUT_PROFILE_SelectFlag Profiles)
 
             if (P->bitCount)
             {
-                for (uint32_t inb = 0; inb < P->bitCount; ++inb)
+                for (uint32_t pcode = 0; pcode < P->bitCount; ++pcode)
                 {
-                    if (input (IO_Type_Bit, &P->bitMap[inb],
+                    if (input (IO_Type_Bit, &P->bitMap[pcode],
                                                 INPUT_UpdateValue_Buffer))
                     {
                         return true;
@@ -384,9 +387,9 @@ bool INPUT_AnyBit (const enum INPUT_PROFILE_SelectFlag Profiles)
 
 void INPUT_Update (void)
 {
-    for (uint32_t gatewayId = 0; gatewayId < INPUT_MAX_GATEWAYS; ++gatewayId)
+    for (IO_GatewayId gId = 0; gId < INPUT_MAX_GATEWAYS; ++gId)
     {
-        struct IO * inDriver = s_i->gateways[gatewayId].driver;
+        struct IO * inDriver = s_i->gateways[gId].driver;
 
         if (inDriver)
         {
@@ -400,10 +403,10 @@ void INPUT_Update (void)
         struct INPUT_PROFILE *const P = getProfile (t);
         if (P->bitAction)
         {
-            for (uint32_t inb = 0; inb < P->bitCount; ++inb)
+            for (uint32_t pcode = 0; pcode < P->bitCount; ++pcode)
             {
-                const bool Status = INPUT_GetBitBuffer(t, inb)? true : false;
-                INPUT_ACTION_Update (&P->bitAction[inb], Status);
+                const bool Status = INPUT_GetBitBuffer(t, pcode)? true : false;
+                INPUT_ACTION_Update (&P->bitAction[pcode], Status);
             }
         }
     }
