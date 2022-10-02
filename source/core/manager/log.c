@@ -300,6 +300,8 @@ void LOG__assertFailed (struct STREAM *const S, const char *const Func,
                         const char *const Msg)
 {
     outContextLevel (S, "x", "x", true);
+    outStr          (S, "\r\n");
+    outStr          (S, LOG_BASE_COLOR);
     outContextInfo  (S,  "[", "]", BOARD_TicksNow(),
                      LOG_PREFIX_ASSERT_STR, Func, File, Line);
 
@@ -313,7 +315,6 @@ void LOG__assertFailed (struct STREAM *const S, const char *const Func,
     }
 
     outStr  (S, ".\r\n");
-    outStr  (S, LOG_BASE_COLOR);
 }
 
 
@@ -503,7 +504,7 @@ void LOG_ItemsArg (const bool Timestamp, const uint32_t ItemCount,
         }
 
         LOG_Args (NULL, NULL, NULL, Line, NULL,
-                  LOG_PREFIX_ITEM_STR, LOG_SUFFIX_NEWLINE_STR,
+                  NULL, LOG_SUFFIX_NEWLINE_STR,
                   s_l->logItemsStyle->Items[ItemIndex], 
                   ArgValues, ArgCount);
 
@@ -515,7 +516,7 @@ void LOG_ItemsArg (const bool Timestamp, const uint32_t ItemCount,
     else
     {
         LOG_Args (NULL, NULL, NULL, Line, NULL,
-                  LOG_PREFIX_ITEM_STR, LOG_SUFFIX_NEWLINE_STR,
+                  NULL, LOG_SUFFIX_NEWLINE_STR,
                   s_l->logItemsStyle->Items[ItemIndex], 
                   ArgValues, ArgCount);
     }
