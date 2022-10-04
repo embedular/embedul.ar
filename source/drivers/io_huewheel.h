@@ -27,11 +27,14 @@
 #include "embedul.ar/source/core/anim.h"
 
 
+#define IO_HUEWHEEL_PORT_COUNT          1
+
+
 struct HUEWHEEL_PolarPlacement
 {
-    const uint8_t       OutInxRed;
-    const uint8_t       OutInxGreen;
-    const uint8_t       OutInxBlue;
+    const uint8_t       OutDriverCodeRed;
+    const uint8_t       OutDriverCodeGreen;
+    const uint8_t       OutDriverCodeBlue;
     const uint8_t       PolarPlacement;
 };
 
@@ -40,6 +43,18 @@ enum HUEWHEEL_Dir
 {
     HUEWHEEL_Dir_Clockwise = 0,
     HUEWHEEL_Dir_CounterCW
+};
+
+
+enum IO_HUEWHEEL_INB
+{
+    IO_HUEWHEEL_INB__COUNT
+};
+
+
+enum IO_HUEWHEEL_INR
+{
+    IO_HUEWHEEL_INR__COUNT
 };
 
 
@@ -63,6 +78,7 @@ enum IO_HUEWHEEL_OUTR
 struct IO_HUEWHEEL
 {
     struct IO               device;
+    struct IO_PortInfo      portInfo[IO_HUEWHEEL_PORT_COUNT];
     struct IO_Gateway       outGateway;
     const struct HUEWHEEL_PolarPlacement
                             * polarPlacement;

@@ -30,12 +30,39 @@
 #include "SDL.h"
 
 
+#define IO_KEYBOARD_SDL_PORT_COUNT      1
 #define IO_KEYBOARD_SDL_STATUS_COUNT    ((SDL_NUM_SCANCODES >> 5) + 1)
+
+
+enum IO_KEBOARD_SDL_INB
+{
+    IO_KEYBOARD_SDL_INB__COUNT = SDL_NUM_SCANCODES
+};
+
+
+enum IO_KEBOARD_SDL_INR
+{
+    IO_KEYBOARD_SDL_INR__COUNT
+};
+
+
+enum IO_KEBOARD_SDL_OUTB
+{
+    IO_KEYBOARD_SDL_OUTB__COUNT
+};
+
+
+enum IO_KEBOARD_SDL_OUTR
+{
+    IO_KEYBOARD_SDL_OUTR__COUNT
+};
+
 
 
 struct IO_KEYBOARD_SDL
 {
     struct IO           device;
+    struct IO_PortInfo  portInfo[IO_KEYBOARD_SDL_PORT_COUNT];
     uint32_t            inputStatus[IO_KEYBOARD_SDL_STATUS_COUNT];
     struct BITFIELD     inputBf;
 };

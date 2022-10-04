@@ -28,6 +28,9 @@
 #include "embedul.ar/source/core/device/io.h"
 
 
+#define IO_DUAL_NES_VIDEOEX_PORT_COUNT  2
+
+
 /*
     NES Gamepad Input Layout
     ---------------------------------------------------------
@@ -52,13 +55,32 @@ enum IO_DUAL_NES_VIDEOEX_INB
 };
 
 
+enum IO_DUAL_NES_VIDEOEX_INR
+{
+    IO_DUAL_NES_VIDEOEX_INR__COUNT
+};
+
+
+enum IO_DUAL_NES_VIDEOEX_OUTB
+{
+    IO_DUAL_NES_VIDEOEX_OUTB__COUNT
+};
+
+
+enum IO_DUAL_NES_VIDEOEX_OUTR
+{
+    IO_DUAL_NES_VIDEOEX_OUTR__COUNT
+};
+
+
 // The driver expects periodically updated raw gamepad status data at
 // g_ddaExchange.io1/.io2.
 struct IO_DUAL_NES_VIDEOEX
 {
-    struct IO       device;
-    uint32_t        gp1Data;
-    uint32_t        gp2Data;
+    struct IO           device;
+    struct IO_PortInfo  portInfo[IO_DUAL_NES_VIDEOEX_PORT_COUNT];
+    uint32_t            gp1Data;
+    uint32_t            gp2Data;
 };
 
 

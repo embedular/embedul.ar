@@ -28,20 +28,22 @@
 
 
 void IO_Init (struct IO *const Io,
-              const struct IO_IFACE *iface,
+              const struct IO_IFACE *const Iface,
+              const struct IO_PortInfo *const PortInfo,
               const TIMER_Ticks DeferredUpdatePeriod)
 {
-    BOARD_AssertParams (Io && iface);
+    BOARD_AssertParams (Io && Iface && PortInfo);
 
     // Required Interface
     BOARD_AssertInterface (
-        iface->Description && iface->Update &&
-        ((iface->AvailableInputs && iface->GetInput && iface->InputName) ||
-        (iface->AvailableOutputs && iface->SetOutput && iface->OutputName)));
+        Iface->Description && Iface->PortCount > 0 && Iface->Update &&
+        ((Iface->GetInput && Iface->InputName) ||
+         (Iface->SetOutput && Iface->OutputName)));
 
     OBJECT_Clear (Io);
 
-    Io->iface                   = iface;
+    Io->iface                   = Iface;
+    Io->portInfo                = PortInfo;
     Io->deferredUpdatePeriod    = DeferredUpdatePeriod;
 
     LOG_ContextBegin (Io, LANG_INIT);
@@ -76,61 +78,83 @@ void IO_Update (struct IO *const Io)
 }
 
 
-IO_Count IO_AvailableInputs (struct IO *const Io, const enum IO_Type IoType,
-                             const IO_Port InPort)
+IO_Port IO_PortCount (struct IO *const Io)
 {
     BOARD_AssertParams (Io);
     BOARD_AssertState  (Io->iface);
 
-    if (!Io->iface->AvailableInputs)
-    {
-        return 0;
-    }
+    return Io->iface->PortCount;
+}
 
-    return Io->iface->AvailableInputs (Io, IoType, InPort);
+
+IO_Count IO_InputCount (struct IO *const Io, const enum IO_Type IoType)
+{
+    BOARD_AssertParams (Io && IoType < IO_Type__COUNT);
+    BOARD_AssertState  (Io->iface);
+
+    return Io->iface->InCount[IoType];
+}
+
+
+IO_Count IO_OutputCount (struct IO *const Io, const enum IO_Type IoType)
+{
+    BOARD_AssertParams (Io && IoType < IO_Type__COUNT);
+    BOARD_AssertState  (Io->iface);
+
+    return Io->iface->OutCount[IoType];
+}
+
+
+IO_Count IO_AvailableInputs (struct IO *const Io, const enum IO_Type IoType,
+                             const IO_Port Port)
+{
+    BOARD_AssertParams (Io && IoType < IO_Type__COUNT);
+    BOARD_AssertState  (Io->iface && Io->portInfo);
+    BOARD_AssertParams (Port < Io->iface->PortCount);
+
+    return Io->portInfo[Port].inAvailable[IoType];
 }
 
 
 IO_Count IO_AvailableOutputs (struct IO *const Io, const enum IO_Type IoType,
                               const IO_Port OutPort)
 {
-    BOARD_AssertParams (Io);
-    BOARD_AssertState  (Io->iface);
+    BOARD_AssertParams (Io && IoType < IO_Type__COUNT);
+    BOARD_AssertState  (Io->iface && Io->portInfo);
+    BOARD_AssertParams (OutPort < Io->iface->PortCount);
 
-    if (!Io->iface->AvailableOutputs)
-    {
-        return 0;
-    }
-
-    return Io->iface->AvailableOutputs (Io, IoType, OutPort);
+    return Io->portInfo[OutPort].outAvailable[IoType];
 }
 
 
 uint32_t IO_GetInput (struct IO *const Io, const enum IO_Type IoType,
-                      const IO_Code Inx, const IO_Port InPort,
+                      const IO_Code DriverCode, const IO_Port Port,
                       const enum IO_UpdateValue When)
 {
-    BOARD_AssertParams (Io);
-    BOARD_AssertState  (Io->iface && Io->iface->GetInput);
+    BOARD_AssertParams (Io && IoType < IO_Type__COUNT);
+    BOARD_AssertState  (Io->iface && Io->iface->GetInput && Io->iface->Update);
+    BOARD_AssertParams (DriverCode < Io->iface->InCount[IoType] &&
+                        Port < Io->iface->PortCount);
 
     if (When == IO_UpdateValue_Now)
     {
         Io->iface->Update (Io);        
     }
 
-    return Io->iface->GetInput (Io, IoType, Inx, InPort);
+    return Io->iface->GetInput (Io, IoType, DriverCode, Port);
 }
 
 
 void IO_SetOutput (struct IO *const Io, const enum IO_Type IoType,
-                   const IO_Code Inx, const IO_Port InPort,
+                   const IO_Code DriverCode, const IO_Port Port,
                    const uint32_t Value, const enum IO_UpdateValue When)
 {
-    BOARD_AssertParams (Io);
-    BOARD_AssertState  (Io->iface && Io->iface->SetOutput &&
-                        Io->iface->Update);
+    BOARD_AssertParams (Io && IoType < IO_Type__COUNT);
+    BOARD_AssertState  (Io->iface && Io->iface->SetOutput && Io->iface->Update);
+    BOARD_AssertParams (DriverCode < Io->iface->OutCount[IoType] &&
+                        Port < Io->iface->PortCount);
 
-    Io->iface->SetOutput (Io, IoType, Inx, InPort, Value);
+    Io->iface->SetOutput (Io, IoType, DriverCode, Port, Value);
 
     if (When == IO_UpdateValue_Now)
     {
@@ -140,12 +164,13 @@ void IO_SetOutput (struct IO *const Io, const enum IO_Type IoType,
 
 
 IO_Code IO_GetAnyInput (struct IO *const Io, const enum IO_Type IoType,
-                        const IO_Port InPort)
+                        const IO_Port Port)
 {
-    BOARD_AssertParams (Io);
+    BOARD_AssertParams (Io && IoType < IO_Type__COUNT);
     BOARD_AssertState  (Io->iface && Io->iface->GetAnyInput);
+    BOARD_AssertParams (Port < Io->iface->PortCount);
 
-    return Io->iface->GetAnyInput (Io, IoType, InPort);    
+    return Io->iface->GetAnyInput (Io, IoType, Port);    
 }
 
 
@@ -159,20 +184,22 @@ const char * IO_Description (struct IO *const Io)
 
 
 const char * IO_InputName (struct IO *const Io, const enum IO_Type IoType,
-                           const IO_Code Inx)
+                           const IO_Code DriverCode)
 {
-    BOARD_AssertParams (Io);
+    BOARD_AssertParams (Io && IoType < IO_Type__COUNT);
     BOARD_AssertState  (Io->iface && Io->iface->InputName);
+    BOARD_AssertParams (DriverCode < Io->iface->InCount[IoType]);
 
-    return Io->iface->InputName (Io, IoType, Inx);
+    return Io->iface->InputName (Io, IoType, DriverCode);
 }
 
 
 const char * IO_OutputName (struct IO *const Io, const enum IO_Type IoType,
-                            const IO_Code Inx)
+                            const IO_Code DriverCode)
 {
-    BOARD_AssertParams (Io);
+    BOARD_AssertParams (Io && IoType < IO_Type__COUNT);
     BOARD_AssertState  (Io->iface && Io->iface->OutputName);
+    BOARD_AssertParams (DriverCode < Io->iface->OutCount[IoType]);
 
-    return Io->iface->OutputName (Io, IoType, Inx);
+    return Io->iface->OutputName (Io, IoType, DriverCode);
 }

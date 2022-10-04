@@ -28,7 +28,7 @@
 #include "embedul.ar/source/core/device/board.h"
 
 
-static const char * s_InputNames[] =
+static const char * s_InputBitNames[IO_DUAL_NES_VIDEOEX_INB__COUNT] =
 {
     [IO_DUAL_NES_VIDEOEX_INB_Right]     = "right",
     [IO_DUAL_NES_VIDEOEX_INB_Left]      = "left",
@@ -42,29 +42,21 @@ static const char * s_InputNames[] =
 
 
 static void         update              (struct IO *const Io);
-static IO_Count
-                    availableInputs     (struct IO *const Io,
-                                         const enum IO_Type IoType,
-                                         const IO_Port InPort);
 static uint32_t     getInput            (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const IO_Code Code,
-                                         const IO_Port InPort);
+                                         const IO_Code DriverCode,
+                                         const IO_Port Port);
 static const char * inputName           (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const IO_Code Code);
+                                         const IO_Code DriverCode);
 
 
 static const struct IO_IFACE IO_DUAL_NES_VIDEOEX_IFACE =
 {
-    .Description        = "nes from video adapter",
+    IO_IFACE_DECLARE("nes from video adapter", DUAL_NES_VIDEOEX),
     .Update             = update,
-    .AvailableInputs    = availableInputs,
-    .AvailableOutputs   = UNSUPPORTED,
     .GetInput           = getInput,
-    .SetOutput          = UNSUPPORTED,
-    .InputName          = inputName,
-    .OutputName         = UNSUPPORTED
+    .InputName          = inputName
 };
 
 
@@ -74,8 +66,10 @@ void IO_DUAL_NES_VIDEOEX_Init (struct IO_DUAL_NES_VIDEOEX *const N)
 
     DEVICE_IMPLEMENTATION_Clear (N);
 
+    IO_INIT_STATIC_PORT_INFO (N, DUAL_NES_VIDEOEX);
+
     // Update once per frame (~60 Hz).
-    IO_Init ((struct IO *)N, &IO_DUAL_NES_VIDEOEX_IFACE, 15);
+    IO_Init ((struct IO *)N, &IO_DUAL_NES_VIDEOEX_IFACE, N->portInfo, 15);
 }
 
 
@@ -116,43 +110,24 @@ void update (struct IO *const Io)
 }
 
 
-IO_Count availableInputs (struct IO *const Io, const enum IO_Type IoType,
-                          const IO_Port InPort)
-{
-    (void) Io;
-    (void) InPort;
-
-    // NES controllers have no analog inputs
-    if (IoType == IO_Type_Range)
-    {
-        return 0;
-    }
-
-    return IO_DUAL_NES_VIDEOEX_INB__COUNT;
-}
-
-
 uint32_t getInput (struct IO *const Io, const enum IO_Type IoType,
-                   const IO_Code Code, const IO_Port InPort)
+                   const IO_Code DriverCode, const IO_Port Port)
 {
-    BOARD_AssertParams (IoType == IO_Type_Bit &&
-                        Code < IO_DUAL_NES_VIDEOEX_INB__COUNT &&
-                        InPort < 2);
-    
+    (void) IoType;
+
     struct IO_DUAL_NES_VIDEOEX *const N = (struct IO_DUAL_NES_VIDEOEX *) Io;
 
-    return (InPort == 0)? N->gp1Data & (1 << Code) : N->gp2Data & (1 << Code);
+    return (Port == 0)? N->gp1Data & (1 << DriverCode) :
+                        N->gp2Data & (1 << DriverCode);
 }
 
 
 const char * inputName (struct IO *const Io,
                         const enum IO_Type IoType,
-                        const IO_Code Code)
+                        const IO_Code DriverCode)
 {
-    BOARD_AssertParams (IoType == IO_Type_Bit &&
-                        Code < IO_DUAL_NES_VIDEOEX_INB__COUNT);
-
     (void) Io;
+    (void) IoType;
 
-    return s_InputNames[Code];
+    return s_InputBitNames[DriverCode];
 }

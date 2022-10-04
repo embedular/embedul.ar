@@ -30,6 +30,8 @@
 #include "embedul.ar/source/core/manager/comm.h"
 
 
+
+#define IO_PCA9956B_PORT_COUNT          1
 #define IO_PCA9956B_CHANNEL_COUNT       24
 
 
@@ -46,6 +48,12 @@ enum IO_PCA9956B_INR
     IO_PCA9956B_INR_CHANNELS_SHORTED_BITFIELD = 0,
     IO_PCA9956B_INR_CHANNELS_OPEN_BITFIELD,
     IO_PCA9956B_INR__COUNT
+};
+
+
+enum IO_PCA9956B_OUTB
+{
+    IO_PCA9956B_OUTB__COUNT
 };
 
 
@@ -111,6 +119,7 @@ enum IO_PCA9956B_OUTR
 struct IO_PCA9956B
 {
     struct IO           device;
+    struct IO_PortInfo  portInfo[IO_PCA9956B_PORT_COUNT];
     struct PACKET       * packet;
     uint32_t            channelsShorted;
     uint32_t            channelsOpen;

@@ -28,28 +28,21 @@
 
 
 static void         update              (struct IO *const Io);
-static IO_Count     availableInputs     (struct IO *const Io,
-                                         const enum IO_Type IoType,
-                                         const IO_Port InPort);
 static uint32_t     getInput            (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const IO_Code Code,
-                                         const IO_Port InPort);
+                                         const IO_Code DriverCode,
+                                         const IO_Port Port);
 static const char * inputName           (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const IO_Code Code);
+                                         const IO_Code DriverCode);
 
 
 static const struct IO_IFACE IO_KEYBOARD_SDL_IFACE =
 {
-    .Description        = "sdl keyboard",
+    IO_IFACE_DECLARE("sdl keyboard", KEYBOARD_SDL),
     .Update             = update,
-    .AvailableInputs    = availableInputs,
-    .AvailableOutputs   = UNSUPPORTED,
     .GetInput           = getInput,
-    .SetOutput          = UNSUPPORTED,
-    .InputName          = inputName,
-    .OutputName         = UNSUPPORTED
+    .InputName          = inputName
 };
 
 
@@ -59,11 +52,13 @@ void IO_KEYBOARD_SDL_Init (struct IO_KEYBOARD_SDL *const K)
 
     DEVICE_IMPLEMENTATION_Clear (K);
 
+    IO_INIT_STATIC_PORT_INFO (K, KEYBOARD_SDL);
+
     BITFIELD_Init (&K->inputBf, K->inputStatus,
                    IO_KEYBOARD_SDL_STATUS_COUNT, NULL, 0);
 
     // Update once per frame (~60 Hz).
-    IO_Init ((struct IO *)K, &IO_KEYBOARD_SDL_IFACE, 15);
+    IO_Init ((struct IO *)K, &IO_KEYBOARD_SDL_IFACE, K->portInfo, 15);
 }
 
 
@@ -118,47 +113,26 @@ void update (struct IO *const Io)
 }
 
 
-IO_Count availableInputs (struct IO *const Io, const enum IO_Type IoType,
-                          const IO_Port InPort)
-{
-    (void) Io;
-    (void) InPort;
-
-    // A keyboard has no analog inputs
-    if (IoType == IO_Type_Range)
-    {
-        return 0;
-    }
-
-    // In reality it depends on the keyboard. Besides, SDL_NUM_SCANCODES is a
-    // reserved, maximum amount. There are like 200 undefined scancodes on the
-    // higher side. Nevertheless, the driver supports them all.
-    return SDL_NUM_SCANCODES;
-}
-
-
 uint32_t getInput (struct IO *const Io, const enum IO_Type IoType,
-                   const IO_Code Code, const IO_Port InPort)
+                   const IO_Code DriverCode, const IO_Port Port)
 {
-    BOARD_AssertParams (IoType == IO_Type_Bit && Code < SDL_NUM_SCANCODES);
-    
-    (void) InPort;
+    (void) IoType;
+    (void) Port;
 
     struct IO_KEYBOARD_SDL *const K = (struct IO_KEYBOARD_SDL *) Io;
 
-    return BITFIELD_GetBit (&K->inputBf, Code);
+    return BITFIELD_GetBit (&K->inputBf, DriverCode);
 }
 
 
 const char * inputName (struct IO *const Io,
                         const enum IO_Type IoType,
-                        const IO_Code Code)
+                        const IO_Code DriverCode)
 {
-    BOARD_AssertParams (IoType == IO_Type_Bit && Code < SDL_NUM_SCANCODES);
-
     (void) Io;
+    (void) IoType;
 
-    const SDL_Keycode Keycode = SDL_GetKeyFromScancode (Code);
+    const SDL_Keycode Keycode = SDL_GetKeyFromScancode (DriverCode);
 
     return SDL_GetKeyName (Keycode);
 }

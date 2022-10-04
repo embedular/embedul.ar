@@ -27,6 +27,9 @@
 
 #include "embedul.ar/source/core/device/io.h"
 
+
+#define IO_BOARD_PORT_COUNT             1
+
 /*
     EDU-CIAA-NXP input (x) and output [x] layout
     (No additional board switches on RETRO-CIAA expansion)
@@ -106,11 +109,24 @@ enum IO_BOARD_OUTB
 };
 
 
+enum IO_BOARD_INR
+{
+    IO_BOARD_INR__COUNT
+};
+
+
+enum IO_BOARD_OUTR
+{
+    IO_BOARD_OUTR__COUNT
+};
+
+
 struct IO_BOARD
 {
-    struct IO       device;
-    uint32_t        inbData;
-    uint32_t        outbData;
+    struct IO           device;
+    struct IO_PortInfo  portInfo[IO_BOARD_PORT_COUNT];
+    uint32_t            inbData;
+    uint32_t            outbData;
 };
 
 

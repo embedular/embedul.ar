@@ -28,6 +28,9 @@
 #include "embedul.ar/source/core/device/io.h"
 #include "embedul.ar/source/arch/arm-cortex/lpc/18xx_43xx/lpcopen/boards/retro_ciaa/board.h"
 
+
+#define IO_BOARD_PORT_COUNT             1
+
 /*
     RETRO-CIAA Standalone human interface input (x) and output [x] layout.
 
@@ -68,12 +71,26 @@ enum IO_BOARD_OUTB
 };
 
 
+enum IO_BOARD_INR
+{
+    IO_BOARD_INR__COUNT
+};
+
+
+enum IO_BOARD_OUTR
+{
+    IO_BOARD_OUTR__COUNT
+};
+
+
 struct IO_BOARD
 {
-    struct IO                           device;
-    uint32_t                            inbData;
-    uint32_t                            outbData;
-    volatile enum CHIP_EVRT_SRC_ACTIVE  wakeupActive;
+    struct IO           device;
+    struct IO_PortInfo  portInfo[IO_BOARD_PORT_COUNT];
+    uint32_t            inbData;
+    uint32_t            outbData;
+    volatile enum CHIP_EVRT_SRC_ACTIVE
+                        wakeupActive;
 };
 
 

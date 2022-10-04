@@ -30,7 +30,25 @@
 #include "embedul.ar/source/core/manager/comm.h"
 
 
-#define IO_LP5036_RGB_LED_COUNT     12
+#define IO_LP5036_PORT_COUNT            1
+
+
+enum IO_LP5036_INB
+{
+    IO_LP5036_INB__COUNT
+};
+
+
+enum IO_LP5036_INR
+{
+    IO_LP5036_INR__COUNT
+};
+
+
+enum IO_LP5036_OUTB
+{
+    IO_LP5036_OUTB__COUNT
+};
 
 /*
     36 output channels of 8-bit intensity each.
@@ -80,6 +98,7 @@ enum IO_LP5036_OUTR
 struct IO_LP5036
 {
     struct IO           device;
+    struct IO_PortInfo  portInfo[IO_LP5036_PORT_COUNT];
     struct PACKET       * packet;
     // outData[0] reserved as the i2c register to write to.
     uint8_t             outData[IO_LP5036_OUTR__COUNT + 1];

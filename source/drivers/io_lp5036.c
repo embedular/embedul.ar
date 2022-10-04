@@ -28,7 +28,7 @@
 #include "embedul.ar/source/core/device/packet/error_log.h"
 
 
-static const char * s_OutputNamesRange[IO_LP5036_OUTR__COUNT] =
+static const char * s_OutputRangeNames[IO_LP5036_OUTR__COUNT] =
 {
     [IO_LP5036_OUTR_0]  = "out0",
     [IO_LP5036_OUTR_1]  = "out1",
@@ -71,30 +71,22 @@ static const char * s_OutputNamesRange[IO_LP5036_OUTR__COUNT] =
 
 static void         hardwareInit        (struct IO *const Io);
 static void         update              (struct IO *const Io);
-static IO_Count
-                    availableOutputs    (struct IO *const Io,
-                                         const enum IO_Type IoType,
-                                         const IO_Port OutPort);
 static void         setOutput           (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const IO_Code Inx,
+                                         const IO_Code DriverCode,
                                          const IO_Port OutPort,
                                          const uint32_t Value);
 static const char * outputName          (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const IO_Code Inx);
+                                         const IO_Code DriverCode);
 
 
 static const struct IO_IFACE IO_LP5036_IFACE =
 {
-    .Description        = "lp5036 36-channel led driver",
+    IO_IFACE_DECLARE("lp5036 36-channel led driver", LP5036),
     .HardwareInit       = hardwareInit,
     .Update             = update,
-    .AvailableInputs    = UNSUPPORTED,
-    .AvailableOutputs   = availableOutputs,
-    .GetInput           = UNSUPPORTED,
     .SetOutput          = setOutput,
-    .InputName          = UNSUPPORTED,
     .OutputName         = outputName
 };
 
@@ -121,12 +113,14 @@ void IO_LP5036_Init (struct IO_LP5036 *const L, const enum COMM_Packet Com,
 
     DEVICE_IMPLEMENTATION_Clear (L);
 
+    IO_INIT_STATIC_PORT_INFO (L, LP5036);
+
     L->packet       = COMM_GetPacket (Com);
     L->i2cAddr      = I2cAddr;
     L->maxIntensity = MaxIntensity;
 
     // Update once per frame (~60 Hz).
-    IO_Init ((struct IO *)L, &IO_LP5036_IFACE, 15);
+    IO_Init ((struct IO *)L, &IO_LP5036_IFACE, L->portInfo, 15);
 }
 
 
@@ -182,48 +176,28 @@ static void update (struct IO *const Io)
 }
 
 
-static IO_Count availableOutputs (struct IO *const Io,
-                                  const enum IO_Type IoType,
-                                  const IO_Port OutPort)
-{
-    (void) Io;
-    (void) OutPort;
-
-    // This driver handles no digital outputs
-    if (IoType == IO_Type_Bit)
-    {
-        return 0;
-    }
-
-    return IO_LP5036_OUTR__COUNT;
-}
-
-
 static void setOutput (struct IO *const Io, const enum IO_Type IoType,
-                       const IO_Code Inx, const IO_Port OutPort,
+                       const IO_Code DriverCode, const IO_Port Port,
                        const uint32_t Value)
 {
-    BOARD_AssertParams (IoType == IO_Type_Range &&
-                        Inx < IO_LP5036_OUTR__COUNT &&
-                        Value <= 0xFF);
+    BOARD_AssertParams (Value <= 0xFF);
 
-    (void) OutPort;
+    (void) IoType;
+    (void) Port;
 
     struct IO_LP5036 *const L = (struct IO_LP5036 *) Io;
 
     // outData[0] reserved as the i2c registry to write to.
-    L->outData[Inx + 1] = Value;
+    L->outData[DriverCode + 1] = Value;
 }
 
 
 static const char * outputName (struct IO *const Io,
                                 const enum IO_Type IoType,
-                                const IO_Code Inx)
+                                const IO_Code DriverCode)
 {
-    BOARD_AssertParams (IoType == IO_Type_Range &&
-                        Inx < IO_LP5036_OUTR__COUNT);
-
     (void) Io;
+    (void) IoType;
 
-    return s_OutputNamesRange[Inx];
+    return s_OutputRangeNames[DriverCode];
 }

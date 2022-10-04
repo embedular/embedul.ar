@@ -25,7 +25,6 @@
 
 #include "embedul.ar/source/core/manager/input.h"
 #include "embedul.ar/source/core/device/board.h"
-#include "source/core/device/io.h"
 
 
 static struct INPUT * s_i = NULL;

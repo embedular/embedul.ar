@@ -46,23 +46,21 @@
 #define PCA9956B_AUTOINC_EFLAG0             (0x80 | 0x41)
 
 
-static const char *
-s_InputNamesBit[IO_PCA9956B_INB__COUNT] =
+static const char * s_InputBitNames[IO_PCA9956B_INB__COUNT] =
 {
     [IO_PCA9956B_INB_OVERTEMP]      = "overtemp",
     [IO_PCA9956B_INB_CHANNEL_ERROR] = "channel error"
 };
 
 
-static const char *
-s_InputNamesRange[IO_PCA9956B_INR__COUNT] =
+static const char * s_InputRangeNames[IO_PCA9956B_INR__COUNT] =
 {
     [IO_PCA9956B_INR_CHANNELS_SHORTED_BITFIELD] = "channels shorted",
     [IO_PCA9956B_INR_CHANNELS_OPEN_BITFIELD]    = "channels open"
 };
 
 
-static const char * s_OutputNamesRange[IO_PCA9956B_OUTR__COUNT] =
+static const char * s_OutputRangeNames[IO_PCA9956B_OUTR__COUNT] =
 {
     [IO_PCA9956B_OUTR_CH0_IREF]     = "ch0 iref",
     [IO_PCA9956B_OUTR_CH1_IREF]     = "ch1 iref",
@@ -117,38 +115,28 @@ static const char * s_OutputNamesRange[IO_PCA9956B_OUTR__COUNT] =
 
 static void         hardwareInit        (struct IO *const Io);
 static void         update              (struct IO *const Io);
-static IO_Count
-                    availableInputs     (struct IO *const Io,
-                                         const enum IO_Type IoType,
-                                         const IO_Port InPort);
-static IO_Count
-                    availableOutputs    (struct IO *const Io,
-                                         const enum IO_Type IoType,
-                                         const IO_Port OutPort);
 static uint32_t     getInput            (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const IO_Code Inx,
-                                         const IO_Port InPort);
+                                         const IO_Code DriverCode,
+                                         const IO_Port Port);
 static void         setOutput           (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const IO_Code Inx,
-                                         const IO_Port OutPort,
+                                         const IO_Code DriverCode,
+                                         const IO_Port Port,
                                          const uint32_t Value);
 static const char * inputName           (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const IO_Code Inx);
+                                         const IO_Code DriverCode);
 static const char * outputName          (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const IO_Code Inx);
+                                         const IO_Code DriverCode);
 
 
 static const struct IO_IFACE IO_PCA9956B_IFACE =
 {
-    .Description        = "pca9956B 24-channel led driver",
+    IO_IFACE_DECLARE("pca9956B 24-channel led driver", PCA9956B),
     .HardwareInit       = hardwareInit,
     .Update             = update,
-    .AvailableInputs    = availableInputs,
-    .AvailableOutputs   = availableOutputs,
     .GetInput           = getInput,
     .SetOutput          = setOutput,
     .InputName          = inputName,
@@ -163,11 +151,13 @@ void IO_PCA9956B_Init (struct IO_PCA9956B *const P,
 
     DEVICE_IMPLEMENTATION_Clear (P);
 
+    IO_INIT_STATIC_PORT_INFO (P, PCA9956B);
+
     P->packet   = COMM_GetPacket (Com);
     P->i2cAddr  = I2cAddr;
 
     // Update at 60 Hz.
-    IO_Init ((struct IO *)P, &IO_PCA9956B_IFACE, 15);
+    IO_Init ((struct IO *)P, &IO_PCA9956B_IFACE, P->portInfo, 15);
 }
 
 
@@ -362,79 +352,37 @@ static void update (struct IO *const Io)
 }
 
 
-static IO_Count availableInputs (struct IO *const Io,
-                                 const enum IO_Type IoType,
-                                 const IO_Port InPort)
-{
-    (void) Io;
-    (void) InPort;
-
-    // This driver handles no "analog" inputs
-    if (IoType == IO_Type_Range)
-    {
-        return 0;
-    } 
-
-    return IO_PCA9956B_INB__COUNT;
-}
-
-
-static IO_Count availableOutputs (struct IO *const Io,
-                                  const enum IO_Type IoType,
-                                  const IO_Port OutPort)
-{
-    (void) Io;
-    (void) OutPort;
-
-    // This driver handles no digital outputs
-    if (IoType == IO_Type_Bit)
-    {
-        return 0;
-    }
-
-    return IO_PCA9956B_OUTR__COUNT;
-}
-
-
 static uint32_t getInput (struct IO *const Io, const enum IO_Type IoType,
-                          const IO_Code Inx, const IO_Port InPort)
+                          const IO_Code DriverCode, const IO_Port Port)
 {
-    (void) InPort;
+    (void) Port;
     
     struct IO_PCA9956B *const P = (struct IO_PCA9956B *) Io;
 
     if (IoType == IO_Type_Bit)
     {
-        BOARD_AssertParams (Inx < IO_PCA9956B_INB__COUNT);
+        BOARD_AssertParams (DriverCode < IO_PCA9956B_INB__COUNT);
 
-        switch (Inx)
+        switch (DriverCode)
         {
             case IO_PCA9956B_INB_OVERTEMP:
                 return P->overtemp;
 
             case IO_PCA9956B_INB_CHANNEL_ERROR:
                 return P->chError;
-
-            default:
-                BOARD_AssertUnexpectedValue (Io, Inx);
-                break;
         }
     }
-    else if (IoType == IO_Type_Range)
+    else
     {
-        BOARD_AssertParams (Inx < IO_PCA9956B_INR__COUNT);
+        BOARD_AssertParams (DriverCode < IO_PCA9956B_INR__COUNT);
 
-        switch (Inx)
+        switch (DriverCode)
         {
             case IO_PCA9956B_INR_CHANNELS_SHORTED_BITFIELD:
                 return P->channelsShorted;
 
             case IO_PCA9956B_INR_CHANNELS_OPEN_BITFIELD:
                 return P->channelsOpen;
-
-            default:
-                BOARD_AssertUnexpectedValue (Io, Inx);
-                break;
         }
     }
 
@@ -445,62 +393,57 @@ static uint32_t getInput (struct IO *const Io, const enum IO_Type IoType,
 
 static void setOutput (struct IO *const Io,
                        const enum IO_Type IoType,
-                       const IO_Code Inx, const IO_Port OutPort,
+                       const IO_Code DriverCode, const IO_Port Port,
                        const uint32_t Value)
 {
-    BOARD_AssertParams (IoType == IO_Type_Range &&
-                        Inx < IO_PCA9956B_OUTR__COUNT &&
-                        Value <= 0xFF);
+    BOARD_AssertParams (Value <= 0xFF);
 
-    (void) OutPort;
+    (void) IoType;
+    (void) Port;
 
     struct IO_PCA9956B *const P = (struct IO_PCA9956B *) Io;
 
-    if (Inx <= IO_PCA9956B_OUTR__CH_IREF_END)
+    if (DriverCode <= IO_PCA9956B_OUTR__CH_IREF_END)
     {
         // chIref[0] is the i2c registry to write to.
-        P->chIref[Inx + 1] = Value;
+        P->chIref[DriverCode + 1] = Value;
         P->update |= PCA9956B_UPDATE_IREF;
     }
-    else if (Inx >= IO_PCA9956B_OUTR__CH_PWM_BEGIN &&
-             Inx <= IO_PCA9956B_OUTR__CH_PWM_END)
+    else if (DriverCode >= IO_PCA9956B_OUTR__CH_PWM_BEGIN &&
+             DriverCode <= IO_PCA9956B_OUTR__CH_PWM_END)
     {
         // chPwm[0] is the i2c registry to write to.
-        P->chPwm[Inx + 1 - IO_PCA9956B_OUTR__CH_PWM_BEGIN] = Value;
+        P->chPwm[DriverCode + 1 - IO_PCA9956B_OUTR__CH_PWM_BEGIN] = Value;
         P->update |= PCA9956B_UPDATE_PWM;
     }
     else
     {
-        BOARD_AssertUnexpectedValue (Io, Inx);
+        BOARD_AssertUnexpectedValue (Io, DriverCode);
     }
 }
 
 
 static const char * inputName (struct IO *const Io,
                                const enum IO_Type IoType,
-                               const IO_Code Inx)
+                               const IO_Code DriverCode)
 {
     (void) Io;
 
     if (IoType == IO_Type_Bit)
     {
-        BOARD_AssertParams (Inx < IO_PCA9956B_INB__COUNT);
-        return s_InputNamesBit[Inx];
+        return s_InputBitNames[DriverCode];
     }
 
-    BOARD_AssertParams (Inx < IO_PCA9956B_INR__COUNT);
-    return s_InputNamesRange[Inx];
+    return s_InputRangeNames[DriverCode];
 }
 
 
 static const char * outputName (struct IO *const Io,
                                 const enum IO_Type IoType,
-                                const IO_Code Inx)
+                                const IO_Code DriverCode)
 {
-    BOARD_AssertParams (IoType == IO_Type_Range &&
-                        Inx < IO_PCA9956B_OUTR__COUNT);
-
     (void) Io;
+    (void) IoType;
 
-    return s_OutputNamesRange[Inx];
+    return s_OutputRangeNames[DriverCode];
 }

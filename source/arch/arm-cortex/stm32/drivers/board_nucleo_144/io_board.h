@@ -28,6 +28,9 @@
 #include "embedul.ar/source/core/device/io.h"
 #include "embedul.ar/source/arch/arm-cortex/stm32/drivers/board_nucleo_144/bsp.h"
 
+
+#define IO_BOARD_PORT_COUNT             1
+
 /*
     ST NUCLEO-144 human interface input (x) and output [x] layout.
 
@@ -64,13 +67,25 @@ enum IO_BOARD_OUTB
 };
 
 
-struct IO_BOARD
+enum IO_BOARD_INR
 {
-    struct IO       device;
-    uint32_t        inbData;
-    uint32_t        outbData;
+    IO_BOARD_INR__COUNT
 };
 
+
+enum IO_BOARD_OUTR
+{
+    IO_BOARD_OUTR__COUNT
+};
+
+
+struct IO_BOARD
+{
+    struct IO           device;
+    struct IO_PortInfo  portInfo[IO_BOARD_PORT_COUNT];
+    uint32_t            inbData;
+    uint32_t            outbData;
+};
 
 
 void IO_BOARD_Init      (struct IO_BOARD *const B);

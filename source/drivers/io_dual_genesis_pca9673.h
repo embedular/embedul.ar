@@ -30,6 +30,8 @@
 #include "embedul.ar/source/core/manager/comm.h"
 
 
+#define IO_DUAL_GENESIS_PORT_COUNT      2
+
 /*
     GENESIS (MegaDrive) Gamepad Input Layout
 
@@ -63,26 +65,44 @@ enum IO_DUAL_GENESIS_INB
     IO_DUAL_GENESIS_INB_X,
     IO_DUAL_GENESIS_INB_Y,
     IO_DUAL_GENESIS_INB_Z,
-    IO_DUAL_GENESIS_INB__6Buttons_COUNT,
+    IO_DUAL_GENESIS_INB__COUNT,
+    IO_DUAL_GENESIS_INB__6Buttons_COUNT = IO_DUAL_GENESIS_INB__COUNT,
     IO_DUAL_GENESIS_INB__3Buttons_COUNT = IO_DUAL_GENESIS_INB_Mode
+};
+
+
+enum IO_DUAL_GENESIS_INR
+{
+    IO_DUAL_GENESIS_INR__COUNT
+};
+
+
+enum IO_DUAL_GENESIS_OUTB
+{
+    IO_DUAL_GENESIS_OUTB__COUNT
+};
+
+
+enum IO_DUAL_GENESIS_OUTR
+{
+    IO_DUAL_GENESIS_OUTR__COUNT
 };
 
 
 // This driver has no outputs
 struct IO_DUAL_GENESIS_PCA9673
 {
-    struct IO       device;
-    uint32_t        gp1Data;
-    uint32_t        gp2Data;
-    IO_Count        gp1AvailIn;
-    IO_Count        gp2AvailIn;
-    struct PACKET   * packet;
-    uint8_t         txData[2];
-    uint8_t         rxData[2];
+    struct IO           device;
+    struct IO_PortInfo  portInfo[IO_DUAL_GENESIS_PORT_COUNT];
+    uint32_t            gp1Data;
+    uint32_t            gp2Data;
+    struct PACKET       * packet;
+    uint8_t             txData[2];
+    uint8_t             rxData[2];
     #ifdef IO_DUAL_GENESIS_PCA9673_I2C_LOG_GP1
-    uint8_t         log[6];
+    uint8_t             log[6];
     #endif
-    uint8_t         i2cAddr;
+    uint8_t             i2cAddr;
 };
 
 

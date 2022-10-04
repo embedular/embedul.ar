@@ -29,7 +29,26 @@
 #include "embedul.ar/source/core/timer.h"
 
 
-#define IO_INVALID_CODE     ((IO_Code) -1)
+#define IO_INVALID_CODE             ((IO_Code) -1)
+
+#define IO_IFACE_DECLARE(_desc,_name) \
+    .Description                = _desc, \
+    .PortCount                  = IO_ ## _name ## _PORT_COUNT, \
+    .InCount[IO_Type_Bit]       = IO_ ## _name ## _INB__COUNT, \
+    .InCount[IO_Type_Range]     = IO_ ## _name ## _INR__COUNT, \
+    .OutCount[IO_Type_Bit]      = IO_ ## _name ## _OUTB__COUNT, \
+    .OutCount[IO_Type_Range]    = IO_ ## _name ## _OUTR__COUNT
+
+#define IO_INIT_STATIC_PORT_INFO(_impl,_name) \
+    for (unsigned int i = 0; i < IO_ ## _name ## _PORT_COUNT; ++i) { \
+    _impl->portInfo[i].inAvailable [IO_Type_Bit]    = \
+        IO_ ## _name ## _INB__COUNT; \
+    _impl->portInfo[i].inAvailable [IO_Type_Range]  = \
+        IO_ ## _name ## _INR__COUNT; \
+    _impl->portInfo[i].outAvailable[IO_Type_Bit]    = \
+        IO_ ## _name ## _OUTB__COUNT; \
+    _impl->portInfo[i].outAvailable[IO_Type_Range]  = \
+        IO_ ## _name ## _OUTR__COUNT; }
 
 
 typedef uint16_t    IO_Count;
@@ -58,33 +77,28 @@ struct IO;
 
 typedef void            (* IO_HardwareInitFunc)(struct IO *const Io);
 typedef void            (* IO_UpdateFunc)(struct IO *const Io);
-// May change any time on hotplugged devices
-typedef IO_Count        (* IO_AvailableInputsFunc)(struct IO *const Io,
-                         const enum IO_Type IoType, const IO_Port InPort);
-typedef IO_Count        (* IO_AvailableOutputsFunc)(struct IO *const Io,
-                         const enum IO_Type IoType,
-                         const IO_Port OutPort);
 typedef uint32_t        (* IO_GetInputFunc)(struct IO *const Io,
-                         const enum IO_Type IoType, const IO_Code Inx,
-                         const IO_Port InPort);
+                         const enum IO_Type IoType, const IO_Code DriverCode,
+                         const IO_Port Port);
 typedef void            (* IO_SetOutputFunc)(struct IO *const Io,
-                         const enum IO_Type IoType, const IO_Code Inx,
+                         const enum IO_Type IoType, const IO_Code DriverCode,
                          const IO_Port OutPort, const uint32_t Value);
 typedef IO_Code         (* IO_GetAnyInputFunc)(struct IO *const Io,
-                         const enum IO_Type IoType, const IO_Port InPort);
+                         const enum IO_Type IoType, const IO_Port Port);
 typedef const char *    (* IO_InputNameFunc)(struct IO *const Io,
-                         const enum IO_Type IoType, const IO_Code Inx);
+                         const enum IO_Type IoType, const IO_Code DriverCode);
 typedef const char *    (* IO_OutputNameFunc)(struct IO *const Io,
-                         const enum IO_Type IoType, const IO_Code Inx);
+                         const enum IO_Type IoType, const IO_Code DriverCode);
 
 
 struct IO_IFACE
 {
     const char                      * const Description;
+    const IO_Port                   PortCount;
+    const IO_Count                  InCount[IO_Type__COUNT];
+    const IO_Count                  OutCount[IO_Type__COUNT];
     const IO_HardwareInitFunc       HardwareInit;
     const IO_UpdateFunc             Update;
-    const IO_AvailableInputsFunc    AvailableInputs;
-    const IO_AvailableOutputsFunc   AvailableOutputs;
     const IO_GetInputFunc           GetInput;
     const IO_GetAnyInputFunc        GetAnyInput;
     const IO_SetOutputFunc          SetOutput;
@@ -93,11 +107,19 @@ struct IO_IFACE
 };
 
 
+struct IO_PortInfo
+{
+    IO_Count                inAvailable[IO_Type__COUNT];
+    IO_Count                outAvailable[IO_Type__COUNT];
+};
+
+
 struct IO
 {
-    const struct IO_IFACE   * iface;
-    TIMER_Ticks             deferredUpdatePeriod;
-    TIMER_Ticks             lastDeferredUpdate;
+    const struct IO_IFACE       * iface;
+    const struct IO_PortInfo    * portInfo;
+    TIMER_Ticks                 deferredUpdatePeriod;
+    TIMER_Ticks                 lastDeferredUpdate;
 };
 
 
@@ -109,35 +131,41 @@ struct IO_Gateway
 
 
 void            IO_Init                 (struct IO *const Io,
-                                         const struct IO_IFACE *iface,
-                                         const TIMER_Ticks 
+                                         const struct IO_IFACE *const Iface,
+                                         const struct IO_PortInfo *const
+                                         PortInfo, const TIMER_Ticks
                                          DeferredUpdatePeriod);
 bool            IO_Initialized          (struct IO *const Io);
 void            IO_Update               (struct IO *const Io);
+IO_Port         IO_PortCount            (struct IO *const Io);
+IO_Count        IO_InputCount           (struct IO *const Io,
+                                         const enum IO_Type IoType);
+IO_Count        IO_OutputCount          (struct IO *const Io,
+                                         const enum IO_Type IoType);
 IO_Count        IO_AvailableInputs      (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const IO_Port InPort);
+                                         const IO_Port Port);
 IO_Count        IO_AvailableOutputs     (struct IO *const Io,
                                          const enum IO_Type IoType,
                                          const IO_Port OutPort);
 uint32_t        IO_GetInput             (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const IO_Code Inx,
-                                         const IO_Port InPort,
+                                         const IO_Code DriverCode,
+                                         const IO_Port Port,
                                          const enum IO_UpdateValue When);
 void            IO_SetOutput            (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const IO_Code Inx,
+                                         const IO_Code DriverCode,
                                          const IO_Port OutPort,
                                          const uint32_t Value,
                                          const enum IO_UpdateValue When);
 IO_Code         IO_GetAnyInput          (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const IO_Port InPort);
+                                         const IO_Port Port);
 const char *    IO_Description          (struct IO *const Io);
 const char *    IO_InputName            (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const IO_Code Inx);
+                                         const IO_Code DriverCode);
 const char *    IO_OutputName           (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const IO_Code Inx);
+                                         const IO_Code DriverCode);

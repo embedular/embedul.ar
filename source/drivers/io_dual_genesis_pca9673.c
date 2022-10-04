@@ -76,30 +76,22 @@ s_InputNamesBit[IO_DUAL_GENESIS_INB__6Buttons_COUNT] =
 
 static void         hardwareInit        (struct IO *const Io);
 static void         update              (struct IO *const Io);
-static IO_Count
-                    availableInputs     (struct IO *const Io,
-                                         const enum IO_Type IoType,
-                                         const IO_Port InPort);
 static uint32_t     getInput            (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const IO_Code Inx,
-                                         const IO_Port InPort);
+                                         const IO_Code DriverCode,
+                                         const IO_Port Port);
 static const char * inputName           (struct IO *const Io,
                                          const enum IO_Type IoType,
-                                         const IO_Code Inx);
+                                         const IO_Code DriverCode);
 
 
 static const struct IO_IFACE IO_DUAL_GENESIS_PCA9673_IFACE =
 {
-    .Description        = "dual genesis on pca9673",
+    IO_IFACE_DECLARE("dual genesis on pca9673", DUAL_GENESIS),
     .HardwareInit       = hardwareInit,
     .Update             = update,
-    .AvailableInputs    = availableInputs,
-    .AvailableOutputs   = UNSUPPORTED,
     .GetInput           = getInput,
-    .SetOutput          = UNSUPPORTED,
-    .InputName          = inputName,
-    .OutputName         = UNSUPPORTED
+    .InputName          = inputName
 };
 
 
@@ -111,11 +103,14 @@ void IO_DUAL_GENESIS_PCA9673_Init (struct IO_DUAL_GENESIS_PCA9673 *const G,
 
     DEVICE_IMPLEMENTATION_Clear (G);
 
+    // This drivers supports hot-plugged devices. Available input/outputs
+    // is zero initially.
+
     G->packet   = COMM_GetPacket (Com);
     G->i2cAddr  = I2cAddr;
 
     // Update once per frame (~60 Hz).
-    IO_Init ((struct IO *)G, &IO_DUAL_GENESIS_PCA9673_IFACE, 15);
+    IO_Init ((struct IO *)G, &IO_DUAL_GENESIS_PCA9673_IFACE, G->portInfo, 15);
 }
 
 
@@ -233,10 +228,13 @@ static bool processHardwareState (struct IO_DUAL_GENESIS_PCA9673 *const G,
         G->txData[1] &= ~CHCFG_2TH;
     }
 
+    IO_Count *const Gp1Count = &G->portInfo[0].inAvailable[IO_Type_Bit];
+    IO_Count *const Gp2Count = &G->portInfo[1].inAvailable[IO_Type_Bit];
+
     // Turn on/off gamepads detection led (OK LOW). Note that for the first
     // 2 states, gp#ButtonsSupported will keep the last state processed.
-    G->txData[0] &= G->gp1AvailIn? ~CHCFG_1OK : 0xFF;
-    G->txData[1] &= G->gp2AvailIn? ~CHCFG_2OK : 0xFF;
+    G->txData[0] &= (* Gp1Count)? ~CHCFG_1OK : 0xFF;
+    G->txData[1] &= (* Gp2Count)? ~CHCFG_2OK : 0xFF;
 
     // Keep inputs HIGH, flip TH, and get input status for both controllers.
     PACKET_SendTo   (G->packet, &VARIANT_SpawnUint(G->i2cAddr));
@@ -269,9 +267,9 @@ static bool processHardwareState (struct IO_DUAL_GENESIS_PCA9673 *const G,
 
             // State 2, D3=D2=0 (Right & Left pressed): gamepad detected. 3
             // or 6-buttons. Assume 3 by now.
-            G->gp1AvailIn = (CH1(D3, Right) && CH1(D2, Left))?
+            (* Gp1Count) = (CH1(D3, Right) && CH1(D2, Left))?
                                 IO_DUAL_GENESIS_INB__3Buttons_COUNT : 0;
-            G->gp2AvailIn = (CH2(D3, Right) && CH2(D2, Left))?
+            (* Gp2Count) = (CH2(D3, Right) && CH2(D2, Left))?
                                 IO_DUAL_GENESIS_INB__3Buttons_COUNT : 0;
             break;
 
@@ -283,27 +281,27 @@ static bool processHardwareState (struct IO_DUAL_GENESIS_PCA9673 *const G,
             break;
 
         case 3:
-            if (G->gp1AvailIn && CH1(D1, Down) && CH1(D0, Up))
+            if ((* Gp1Count) && CH1(D1, Down) && CH1(D0, Up))
             {
                 // 6-buttons gamepad
-                G->gp1AvailIn = IO_DUAL_GENESIS_INB__6Buttons_COUNT;
+                (* Gp1Count) = IO_DUAL_GENESIS_INB__6Buttons_COUNT;
             }
 
-            if (G->gp2AvailIn && CH2(D1, Down) && CH2(D0, Up))
+            if ((* Gp2Count) && CH2(D1, Down) && CH2(D0, Up))
             {
                 // 6-buttons gamepad
-                G->gp2AvailIn = IO_DUAL_GENESIS_INB__6Buttons_COUNT;
+                (* Gp2Count) = IO_DUAL_GENESIS_INB__6Buttons_COUNT;
             }
             break;
 
         case 4:
-            if (G->gp1AvailIn == IO_DUAL_GENESIS_INB__6Buttons_COUNT)
+            if ((* Gp1Count) == IO_DUAL_GENESIS_INB__6Buttons_COUNT)
             {
                 G->gp1Data |= CH1(D3, Mode) | CH1(D2, X) | CH1(D1, Y) |
                               CH1(D0, Z);
             }
 
-            if (G->gp2AvailIn == IO_DUAL_GENESIS_INB__6Buttons_COUNT)
+            if ((* Gp2Count) == IO_DUAL_GENESIS_INB__6Buttons_COUNT)
             {
                 G->gp2Data |= CH2(D3, Mode) | CH2(D2, X) | CH2(D1, Y) |
                               CH2(D0, Z);
@@ -335,45 +333,24 @@ void update (struct IO *const Io)
 }
 
 
-IO_Count availableInputs (struct IO *const Io, const enum IO_Type IoType,
-                          const IO_Port InPort)
-{
-    BOARD_AssertParams (InPort < 2);
-
-    struct IO_DUAL_GENESIS_PCA9673 *const G =
-                            (struct IO_DUAL_GENESIS_PCA9673 *) Io;
-
-    // Genesis/MegaDrive controllers have no analog inputs
-    if (IoType == IO_Type_Range)
-    {
-        return 0;
-    }
-
-    return (InPort == 0)? G->gp1AvailIn : G->gp2AvailIn;
-}
-
-
 uint32_t getInput (struct IO *const Io, const enum IO_Type IoType,
-                   const IO_Code Inx, const IO_Port InPort)
+                   const IO_Code DriverCode, const IO_Port Port)
 {
-    BOARD_AssertParams (IoType == IO_Type_Bit &&
-                        Inx < IO_DUAL_GENESIS_INB__6Buttons_COUNT &&
-                        InPort < 2);
-    
+    (void) IoType;
+
     struct IO_DUAL_GENESIS_PCA9673 *const G =
                             (struct IO_DUAL_GENESIS_PCA9673 *) Io;
 
-    return (InPort == 0)? G->gp1Data & (1 << Inx) : G->gp2Data & (1 << Inx);
+    return (Port == 0)? G->gp1Data & (1 << DriverCode) :
+                        G->gp2Data & (1 << DriverCode);
 }
 
 
 const char * inputName (struct IO *const Io, const enum IO_Type IoType,
-                        const IO_Code Inx)
+                        const IO_Code DriverCode)
 {
-    BOARD_AssertParams (IoType == IO_Type_Bit &&
-                        Inx < IO_DUAL_GENESIS_INB__6Buttons_COUNT);
-
     (void) Io;
+    (void) IoType;
 
-    return s_InputNamesBit[Inx];
+    return s_InputNamesBit[DriverCode];
 }
