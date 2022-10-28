@@ -199,9 +199,9 @@ void * initComponent (struct BOARD *const B,
             SCREEN_RegisterDevice (SCREEN_Role_Menu,
                               (struct VIDEO *)&H->videoVgafbMenu);
 
-            VIDEO_RGB332_VGAFB_Init (&H->videoVgafbConsole);
-            SCREEN_RegisterDevice (SCREEN_Role_Console,
-                              (struct VIDEO *)&H->videoVgafbConsole);
+            //VIDEO_RGB332_VGAFB_Init (&H->videoVgafbConsole);
+            //SCREEN_RegisterDevice (SCREEN_Role_Console,
+            //                  (struct VIDEO *)&H->videoVgafbConsole);
 
             H->screenToWindowId[SCREEN_Role_Primary] = 
                 H->videoAdapterSim.device.windowId;
@@ -209,8 +209,8 @@ void * initComponent (struct BOARD *const B,
             H->screenToWindowId[SCREEN_Role_Menu] = 
                 H->videoVgafbMenu.device.windowId;
 
-            H->screenToWindowId[SCREEN_Role_Console] = 
-                H->videoVgafbConsole.device.windowId;
+            //H->screenToWindowId[SCREEN_Role_Console] = 
+            //    H->videoVgafbConsole.device.windowId;
             break;
         }
 

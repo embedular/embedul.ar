@@ -56,7 +56,7 @@ struct BOARD_HOSTED
     struct RANDOM_SFMT              randomSfmt;
     struct VIDEO_RGB332_ADAPTER_SIM videoAdapterSim;
     struct VIDEO_RGB332_VGAFB       videoVgafbMenu;
-    struct VIDEO_RGB332_VGAFB       videoVgafbConsole;
+    //struct VIDEO_RGB332_VGAFB       videoVgafbConsole;
     struct SOUND_SDLMIXER           soundSdlmixer;
     struct IO_KEYBOARD              ioKeyboard;
     struct IO_GUI                   ioGui;
