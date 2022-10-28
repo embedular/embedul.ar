@@ -25,20 +25,21 @@
 
 #include "embedul.ar/source/arch/arm-cortex/stm32/drivers/board_nucleo_144/io_board.h"
 #include "embedul.ar/source/core/device/board.h"
+#include "source/core/manager/input.h"
 #include "source/core/manager/output.h"
 
 
 static const char * s_InputBitNames[IO_BOARD_INB__COUNT] =
 {
-    [IO_BOARD_INB_USER] = "user"
+    [IO_BOARD_INB_USER] = "User"
 };
 
 
 static const char * s_OutputBitNames[IO_BOARD_OUTB__COUNT] =
 {
-    [IO_BOARD_OUTB_LED_GREEN]   = "green led",
-    [IO_BOARD_OUTB_LED_BLUE]    = "blue led",
-    [IO_BOARD_OUTB_LED_RED]     = "red led"
+    [IO_BOARD_OUTB_LED_GREEN]   = "Green LED",
+    [IO_BOARD_OUTB_LED_BLUE]    = "Blue LED",
+    [IO_BOARD_OUTB_LED_RED]     = "Red LED"
 };
 
 
@@ -94,12 +95,12 @@ void IO_BOARD_Attach (struct IO_BOARD *const B)
 {
     BOARD_AssertParams (B);
 
-    INPUT_SetGateway ((struct IO *)B, 0);
+    INPUT_RegisterGateway ((struct IO *)B, 0);
 
     INPUT_MAP_BIT (MAIN, A, IO_BOARD_INB_USER);
 
 
-    OUTPUT_SetGateway ((struct IO *)B, 0);
+    OUTPUT_RegisterGateway ((struct IO *)B, 0);
 
     OUTPUT_MAP_BIT (SIGN, Warning, IO_BOARD_OUTB_LED_RED);
     OUTPUT_MAP_BIT (SIGN, Green, IO_BOARD_OUTB_LED_GREEN);

@@ -51,7 +51,7 @@ enum IO_LP5036_OUTB
 };
 
 /*
-    36 output channels of 8-bit intensity each.
+    36 output, 8-bit channels.
 */
 enum IO_LP5036_OUTR
 {

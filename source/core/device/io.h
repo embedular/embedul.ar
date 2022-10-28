@@ -27,6 +27,7 @@
 
 #include "embedul.ar/source/core/bitfield.h"
 #include "embedul.ar/source/core/timer.h"
+#include <stdint.h>
 
 
 #define IO_INVALID_CODE             ((IO_Code) -1)
@@ -55,6 +56,7 @@ typedef uint16_t    IO_Count;
 typedef uint16_t    IO_Code;
 typedef uint16_t    IO_GatewayId;
 typedef uint32_t    IO_Port;
+typedef uint32_t    IO_Value;
 
 
 enum IO_Type
@@ -77,12 +79,12 @@ struct IO;
 
 typedef void            (* IO_HardwareInitFunc)(struct IO *const Io);
 typedef void            (* IO_UpdateFunc)(struct IO *const Io);
-typedef uint32_t        (* IO_GetInputFunc)(struct IO *const Io,
+typedef IO_Value        (* IO_GetInputFunc)(struct IO *const Io,
                          const enum IO_Type IoType, const IO_Code DriverCode,
                          const IO_Port Port);
 typedef void            (* IO_SetOutputFunc)(struct IO *const Io,
                          const enum IO_Type IoType, const IO_Code DriverCode,
-                         const IO_Port OutPort, const uint32_t Value);
+                         const IO_Port OutPort, const IO_Value Value);
 typedef IO_Code         (* IO_GetAnyInputFunc)(struct IO *const Io,
                          const enum IO_Type IoType, const IO_Port Port);
 typedef const char *    (* IO_InputNameFunc)(struct IO *const Io,
@@ -130,6 +132,20 @@ struct IO_Gateway
 };
 
 
+struct IO_ConstGateway
+{
+    const struct IO         *const Driver;
+    const IO_Port           DriverPort;
+};
+
+
+enum IO_MapAction
+{
+    IO_MapAction_NoRemap,
+    IO_MapAction_Overwrite
+};
+
+
 void            IO_Init                 (struct IO *const Io,
                                          const struct IO_IFACE *const Iface,
                                          const struct IO_PortInfo *const
@@ -148,7 +164,7 @@ IO_Count        IO_AvailableInputs      (struct IO *const Io,
 IO_Count        IO_AvailableOutputs     (struct IO *const Io,
                                          const enum IO_Type IoType,
                                          const IO_Port OutPort);
-uint32_t        IO_GetInput             (struct IO *const Io,
+IO_Value        IO_GetInput             (struct IO *const Io,
                                          const enum IO_Type IoType,
                                          const IO_Code DriverCode,
                                          const IO_Port Port,
@@ -157,7 +173,7 @@ void            IO_SetOutput            (struct IO *const Io,
                                          const enum IO_Type IoType,
                                          const IO_Code DriverCode,
                                          const IO_Port OutPort,
-                                         const uint32_t Value,
+                                         const IO_Value Value,
                                          const enum IO_UpdateValue When);
 IO_Code         IO_GetAnyInput          (struct IO *const Io,
                                          const enum IO_Type IoType,

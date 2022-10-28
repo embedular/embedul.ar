@@ -62,54 +62,54 @@ static const char * s_InputRangeNames[IO_PCA9956B_INR__COUNT] =
 
 static const char * s_OutputRangeNames[IO_PCA9956B_OUTR__COUNT] =
 {
-    [IO_PCA9956B_OUTR_CH0_IREF]     = "ch0 iref",
-    [IO_PCA9956B_OUTR_CH1_IREF]     = "ch1 iref",
-    [IO_PCA9956B_OUTR_CH2_IREF]     = "ch2 iref",
-    [IO_PCA9956B_OUTR_CH3_IREF]     = "ch3 iref",
-    [IO_PCA9956B_OUTR_CH4_IREF]     = "ch4 iref",
-    [IO_PCA9956B_OUTR_CH5_IREF]     = "ch5 iref",
-    [IO_PCA9956B_OUTR_CH6_IREF]     = "ch6 iref",
-    [IO_PCA9956B_OUTR_CH7_IREF]     = "ch7 iref",
-    [IO_PCA9956B_OUTR_CH8_IREF]     = "ch8 iref",
-    [IO_PCA9956B_OUTR_CH9_IREF]     = "ch9 iref", 
-    [IO_PCA9956B_OUTR_CH10_IREF]    = "ch10 iref",
-    [IO_PCA9956B_OUTR_CH11_IREF]    = "ch11 iref",
-    [IO_PCA9956B_OUTR_CH12_IREF]    = "ch12 iref",
-    [IO_PCA9956B_OUTR_CH13_IREF]    = "ch13 iref",
-    [IO_PCA9956B_OUTR_CH14_IREF]    = "ch14 iref",
-    [IO_PCA9956B_OUTR_CH15_IREF]    = "ch15 iref",
-    [IO_PCA9956B_OUTR_CH16_IREF]    = "ch16 iref",
-    [IO_PCA9956B_OUTR_CH17_IREF]    = "ch17 iref",
-    [IO_PCA9956B_OUTR_CH18_IREF]    = "ch18 iref",
-    [IO_PCA9956B_OUTR_CH19_IREF]    = "ch19 iref", 
-    [IO_PCA9956B_OUTR_CH20_IREF]    = "ch20 iref",
-    [IO_PCA9956B_OUTR_CH21_IREF]    = "ch21 iref",
-    [IO_PCA9956B_OUTR_CH22_IREF]    = "ch22 iref",
-    [IO_PCA9956B_OUTR_CH23_IREF]    = "ch23 iref",
-    [IO_PCA9956B_OUTR_CH0_PWM]      = "ch0 pwm",
-    [IO_PCA9956B_OUTR_CH1_PWM]      = "ch1 pwm",
-    [IO_PCA9956B_OUTR_CH2_PWM]      = "ch2 pwm",
-    [IO_PCA9956B_OUTR_CH3_PWM]      = "ch3 pwm",
-    [IO_PCA9956B_OUTR_CH4_PWM]      = "ch4 pwm",
-    [IO_PCA9956B_OUTR_CH5_PWM]      = "ch5 pwm",
-    [IO_PCA9956B_OUTR_CH6_PWM]      = "ch6 pwm",
-    [IO_PCA9956B_OUTR_CH7_PWM]      = "ch7 pwm",
-    [IO_PCA9956B_OUTR_CH8_PWM]      = "ch8 pwm",
-    [IO_PCA9956B_OUTR_CH9_PWM]      = "ch9 pwm", 
-    [IO_PCA9956B_OUTR_CH10_PWM]     = "ch10 pwm",
-    [IO_PCA9956B_OUTR_CH11_PWM]     = "ch11 pwm",
-    [IO_PCA9956B_OUTR_CH12_PWM]     = "ch12 pwm",
-    [IO_PCA9956B_OUTR_CH13_PWM]     = "ch13 pwm",
-    [IO_PCA9956B_OUTR_CH14_PWM]     = "ch14 pwm",
-    [IO_PCA9956B_OUTR_CH15_PWM]     = "ch15 pwm",
-    [IO_PCA9956B_OUTR_CH16_PWM]     = "ch16 pwm",
-    [IO_PCA9956B_OUTR_CH17_PWM]     = "ch17 pwm",
-    [IO_PCA9956B_OUTR_CH18_PWM]     = "ch18 pwm",
-    [IO_PCA9956B_OUTR_CH19_PWM]     = "ch19 pwm", 
-    [IO_PCA9956B_OUTR_CH20_PWM]     = "ch20 pwm",
-    [IO_PCA9956B_OUTR_CH21_PWM]     = "ch21 pwm",
-    [IO_PCA9956B_OUTR_CH22_PWM]     = "ch22 pwm",
-    [IO_PCA9956B_OUTR_CH23_PWM]     = "ch23 pwm"
+    [IO_PCA9956B_OUTR_CH0_IREF]     = "Ch0 IRef",
+    [IO_PCA9956B_OUTR_CH1_IREF]     = "Ch1 IRef",
+    [IO_PCA9956B_OUTR_CH2_IREF]     = "Ch2 IRef",
+    [IO_PCA9956B_OUTR_CH3_IREF]     = "Ch3 IRef",
+    [IO_PCA9956B_OUTR_CH4_IREF]     = "Ch4 IRef",
+    [IO_PCA9956B_OUTR_CH5_IREF]     = "Ch5 IRef",
+    [IO_PCA9956B_OUTR_CH6_IREF]     = "Ch6 IRef",
+    [IO_PCA9956B_OUTR_CH7_IREF]     = "Ch7 IRef",
+    [IO_PCA9956B_OUTR_CH8_IREF]     = "Ch8 IRef",
+    [IO_PCA9956B_OUTR_CH9_IREF]     = "Ch9 IRef", 
+    [IO_PCA9956B_OUTR_CH10_IREF]    = "Ch10 IRef",
+    [IO_PCA9956B_OUTR_CH11_IREF]    = "Ch11 IRef",
+    [IO_PCA9956B_OUTR_CH12_IREF]    = "Ch12 IRef",
+    [IO_PCA9956B_OUTR_CH13_IREF]    = "Ch13 IRef",
+    [IO_PCA9956B_OUTR_CH14_IREF]    = "Ch14 IRef",
+    [IO_PCA9956B_OUTR_CH15_IREF]    = "Ch15 IRef",
+    [IO_PCA9956B_OUTR_CH16_IREF]    = "Ch16 IRef",
+    [IO_PCA9956B_OUTR_CH17_IREF]    = "Ch17 IRef",
+    [IO_PCA9956B_OUTR_CH18_IREF]    = "Ch18 IRef",
+    [IO_PCA9956B_OUTR_CH19_IREF]    = "Ch19 IRef", 
+    [IO_PCA9956B_OUTR_CH20_IREF]    = "Ch20 IRef",
+    [IO_PCA9956B_OUTR_CH21_IREF]    = "Ch21 IRef",
+    [IO_PCA9956B_OUTR_CH22_IREF]    = "Ch22 IRef",
+    [IO_PCA9956B_OUTR_CH23_IREF]    = "Ch23 IRef",
+    [IO_PCA9956B_OUTR_CH0_PWM]      = "Ch0 PWM",
+    [IO_PCA9956B_OUTR_CH1_PWM]      = "Ch1 PWM",
+    [IO_PCA9956B_OUTR_CH2_PWM]      = "Ch2 PWM",
+    [IO_PCA9956B_OUTR_CH3_PWM]      = "Ch3 PWM",
+    [IO_PCA9956B_OUTR_CH4_PWM]      = "Ch4 PWM",
+    [IO_PCA9956B_OUTR_CH5_PWM]      = "Ch5 PWM",
+    [IO_PCA9956B_OUTR_CH6_PWM]      = "Ch6 PWM",
+    [IO_PCA9956B_OUTR_CH7_PWM]      = "Ch7 PWM",
+    [IO_PCA9956B_OUTR_CH8_PWM]      = "Ch8 PWM",
+    [IO_PCA9956B_OUTR_CH9_PWM]      = "Ch9 PWM", 
+    [IO_PCA9956B_OUTR_CH10_PWM]     = "Ch10 PWM",
+    [IO_PCA9956B_OUTR_CH11_PWM]     = "Ch11 PWM",
+    [IO_PCA9956B_OUTR_CH12_PWM]     = "Ch12 PWM",
+    [IO_PCA9956B_OUTR_CH13_PWM]     = "Ch13 PWM",
+    [IO_PCA9956B_OUTR_CH14_PWM]     = "Ch14 PWM",
+    [IO_PCA9956B_OUTR_CH15_PWM]     = "Ch15 PWM",
+    [IO_PCA9956B_OUTR_CH16_PWM]     = "Ch16 PWM",
+    [IO_PCA9956B_OUTR_CH17_PWM]     = "Ch17 PWM",
+    [IO_PCA9956B_OUTR_CH18_PWM]     = "Ch18 PWM",
+    [IO_PCA9956B_OUTR_CH19_PWM]     = "Ch19 PWM", 
+    [IO_PCA9956B_OUTR_CH20_PWM]     = "Ch20 PWM",
+    [IO_PCA9956B_OUTR_CH21_PWM]     = "Ch21 PWM",
+    [IO_PCA9956B_OUTR_CH22_PWM]     = "Ch22 PWM",
+    [IO_PCA9956B_OUTR_CH23_PWM]     = "Ch23 PWM"
 };
 
 
@@ -171,27 +171,26 @@ void IO_PCA9956B_Attach (struct IO_PCA9956B *const P,
     BOARD_AssertParams (DeviceOffset < 
                         LIB_EMBEDULAR_CONFIG_INPUT_MAX_LIGHTING_DEVICES);
 
+    INPUT_RegisterGateway ((struct IO *)P, 0);
 
-    INPUT_SetGateway ((struct IO *)P, 0);
+    INPUT_Map (INPUT_PROFILE_Type_LIGHTDEV, IO_Type_Range,
+               INPUT_PROFILE_LIGHTDEV_Range_ChannelsShorted(DeviceOffset),
+               IO_PCA9956B_INR_CHANNELS_SHORTED_BITFIELD);
 
-    INPUT_MapRange (INPUT_PROFILE_Type_LIGHTDEV,
-                    INPUT_PROFILE_LIGHTDEV_Range_ChannelsShorted(DeviceOffset),
-                    IO_PCA9956B_INR_CHANNELS_SHORTED_BITFIELD);
+    INPUT_Map (INPUT_PROFILE_Type_LIGHTDEV, IO_Type_Range,
+               INPUT_PROFILE_LIGHTDEV_Range_ChannelsOpen(DeviceOffset),
+               IO_PCA9956B_INR_CHANNELS_OPEN_BITFIELD);
 
-    INPUT_MapRange (INPUT_PROFILE_Type_LIGHTDEV,
-                    INPUT_PROFILE_LIGHTDEV_Range_ChannelsOpen(DeviceOffset),
-                    IO_PCA9956B_INR_CHANNELS_OPEN_BITFIELD);
-
-    INPUT_MapBit (INPUT_PROFILE_Type_LIGHTDEV,
+    INPUT_Map (INPUT_PROFILE_Type_LIGHTDEV, IO_Type_Bit,
                   INPUT_PROFILE_LIGHTDEV_Bit_Overtemp(DeviceOffset),
                   IO_PCA9956B_INB_OVERTEMP);
 
-    INPUT_MapBit (INPUT_PROFILE_Type_LIGHTDEV,
-                  INPUT_PROFILE_LIGHTDEV_Bit_ChannelError(DeviceOffset),
-                  IO_PCA9956B_INB_CHANNEL_ERROR);
+    INPUT_Map (INPUT_PROFILE_Type_LIGHTDEV, IO_Type_Bit,
+               INPUT_PROFILE_LIGHTDEV_Bit_ChannelError(DeviceOffset),
+               IO_PCA9956B_INB_CHANNEL_ERROR);
 
 
-    OUTPUT_SetGateway ((struct IO *)P, 0);
+    OUTPUT_RegisterGateway ((struct IO *)P, 0);
 
     const enum OUTPUT_PROFILE_LIGHTDEV_Range IrefStart = 
                     OUTPUT_PROFILE_LIGHTDEV_Range_Iref(ChannelOffset);
@@ -201,10 +200,10 @@ void IO_PCA9956B_Attach (struct IO_PCA9956B *const P,
 
     for (uint32_t i = 0; i < IO_PCA9956B_CHANNEL_COUNT; ++i)
     {
-        OUTPUT_MapRange (OUTPUT_PROFILE_Type_LIGHTDEV,
-                         IrefStart + i, IO_PCA9956B_OUTR_CH0_IREF + i);
-        OUTPUT_MapRange (OUTPUT_PROFILE_Type_LIGHTDEV,
-                         PwmStart + i, IO_PCA9956B_OUTR_CH0_PWM + i);
+        OUTPUT_Map (OUTPUT_PROFILE_Type_LIGHTDEV, IO_Type_Range,
+                    IrefStart + i, IO_PCA9956B_OUTR_CH0_IREF + i);
+        OUTPUT_Map (OUTPUT_PROFILE_Type_LIGHTDEV, IO_Type_Range,
+                    PwmStart + i, IO_PCA9956B_OUTR_CH0_PWM + i);
     }
 }
 

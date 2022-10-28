@@ -84,5 +84,5 @@ struct IO_DUAL_NES_VIDEOEX
 };
 
 
-void IO_DUAL_NES_VIDEOEX_Init (struct IO_DUAL_NES_VIDEOEX *const N);
+void IO_DUAL_NES_VIDEOEX_Init   (struct IO_DUAL_NES_VIDEOEX *const N);
 void IO_DUAL_NES_VIDEOEX_Attach (struct IO_DUAL_NES_VIDEOEX *const N);

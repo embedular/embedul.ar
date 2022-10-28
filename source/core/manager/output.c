@@ -30,34 +30,6 @@
 static struct OUTPUT * s_o = NULL;
 
 
-void OUTPUT_Init (struct OUTPUT *const O)
-{
-    BOARD_AssertState  (!s_o);
-    BOARD_AssertParams (O);
-
-    OBJECT_Clear (O);
-
-    {
-        LOG_AutoContext (O, LANG_INIT);
-
-        s_o = O;
-
-        LOG_Items (1, LANG_MAX_SOURCES, (uint32_t)OUTPUT_MAX_GATEWAYS);
-    }
-}
-
-
-void OUTPUT_SetGateway (struct IO *const Driver, const IO_Port DriverPort)
-{
-    BOARD_AssertParams (s_o->nextGatewayId < OUTPUT_MAX_GATEWAYS && Driver);
-
-    s_o->gateways[s_o->nextGatewayId].driver     = Driver;
-    s_o->gateways[s_o->nextGatewayId].driverPort = DriverPort;
-
-    ++ s_o->nextGatewayId;
-}
-
-
 static void outMapByGatewayId (struct IO_PROFILE_Map *const Map, 
                                const IO_GatewayId GatewayId,
                                const IO_Code DriverCode)
@@ -84,83 +56,29 @@ static void outputMapCurrent (struct IO_PROFILE_Map *const Map,
 inline static struct OUTPUT_PROFILE * 
 getProfile (const enum OUTPUT_PROFILE_Type ProfileType)
 {
-    BOARD_AssertParams (ProfileType < OUTPUT_PROFILE_Type__COUNT);
-
     struct OUTPUT_PROFILE *const P = &s_o->profiles[ProfileType];
     return P;
 }
 
 
-// BitMap must exist in ProfileType
+// BitMap or RangeMap must exist in ProfileType
 static struct IO_PROFILE_Map *
-getBitMapping (const enum OUTPUT_PROFILE_Type ProfileType,
-               const IO_Code ProfileCode)
+getMapping (const enum OUTPUT_PROFILE_Type ProfileType,
+            const enum IO_Type IoType, const IO_Code ProfileCode)
 {
     struct OUTPUT_PROFILE *const P = getProfile (ProfileType);
-    if (ProfileCode >= P->bitCount || !P->bitMap)
+    if (ProfileCode >= P->count[IoType] || !P->map[IoType])
     {
         LOG_Warn (s_o, LANG_INVALID_IO_PROFILE);
-        LOG_Items (3,
+        LOG_Items (4,
                     "profile code",     ProfileCode,
-                    "bitMap addr.",     (void *)P->bitMap,
-                    "bitCount",         P->bitCount);
+                    "map type",         IoType,
+                    "map address",      (void *)P->map[IoType],
+                    "map count",        P->count[IoType]);
 
         BOARD_AssertState (false);
     }
-    return &P->bitMap[ProfileCode];
-}
-
-
-// RangeMap must exist in ProfileType
-static struct IO_PROFILE_Map *
-getRangeMapping (const enum OUTPUT_PROFILE_Type ProfileType,
-                 const IO_Code ProfileCode)
-{
-    struct OUTPUT_PROFILE *const P = getProfile (ProfileType);
-    if (ProfileCode >= P->rangeCount || !P->rangeMap)
-    {
-        LOG_Warn (s_o, LANG_INVALID_IO_PROFILE);
-        LOG_Items (3,
-                    "profile code",     ProfileCode,
-                    "rangeMap addr.",   (void *)P->rangeMap,
-                    "rangeCount",       P->rangeCount);
-
-        BOARD_AssertState (false);
-    }
-    return &P->rangeMap[ProfileCode];
-}
-
-
-bool OUTPUT_HasProfile (const enum OUTPUT_PROFILE_Type ProfileType)
-{
-    struct OUTPUT_PROFILE *const P = getProfile (ProfileType);
-    return (P->bitCount || P->rangeCount)? true : false;
-}
-
-
-uint32_t OUTPUT_ProfileBits (const enum OUTPUT_PROFILE_Type ProfileType)
-{
-    return getProfile(ProfileType)->bitCount;
-}
-
-
-uint32_t OUTPUT_ProfileRanges (const enum OUTPUT_PROFILE_Type ProfileType)
-{
-    return getProfile(ProfileType)->rangeCount;
-}
-
-
-void OUTPUT_MapBit (const enum OUTPUT_PROFILE_Type ProfileType,
-                    const IO_Code ProfileCode, const IO_Code DriverCode)
-{
-    outputMapCurrent (getBitMapping(ProfileType, ProfileCode), DriverCode);
-}
-
-
-void OUTPUT_MapRange (const enum OUTPUT_PROFILE_Type ProfileType,
-                      const IO_Code ProfileCode, const IO_Code DriverCode)
-{
-    outputMapCurrent (getRangeMapping(ProfileType, ProfileCode), DriverCode);   
+    return &P->map[IoType][ProfileCode];
 }
 
 
@@ -171,9 +89,31 @@ static bool isMapped (const struct IO_PROFILE_Map *const Map)
 }
 
 
+static struct IO_Gateway * getGateway (const struct IO_PROFILE_Map *const Map)
+{
+    BOARD_AssertState (Map->gatewayId < OUTPUT_MAX_GATEWAYS);
+    struct IO_Gateway *const G = &s_o->gateways[Map->gatewayId];
+    return G;
+}
+
+
+static bool driversMatch (const struct IO_PROFILE_Map *const Map,
+                          const struct IO *const Driver)
+{
+    if (Map->driverCode == IO_INVALID_CODE)
+    {
+        return false;
+    }
+
+    struct IO_Gateway *const G = getGateway (Map);
+
+    return (G->driver == Driver)? true : false;
+}
+
+
 static void output (const enum IO_Type IoType,
                     const struct IO_PROFILE_Map *const Map,
-                    const uint32_t Value,
+                    const IO_Value Value,
                     enum OUTPUT_UpdateValue When)
 {
     if (!isMapped (Map))
@@ -181,115 +121,149 @@ static void output (const enum IO_Type IoType,
         return;
     }
 
-    const IO_Code DriverCode = Map->driverCode;
+    struct IO_Gateway *const G = getGateway (Map);
 
-    const enum IO_UpdateValue WhenIo = (When == OUTPUT_UpdateValue_Now)?
-                                                        IO_UpdateValue_Now :
-                                                        IO_UpdateValue_Async;
+    IO_SetOutput (G->driver, IoType, Map->driverCode,
+                  G->driverPort, Value, (enum IO_UpdateValue)When);
+}
 
-    if (DriverCode != IO_INVALID_CODE)
+
+void OUTPUT_Init (struct OUTPUT *const O)
+{
+    BOARD_AssertState  (!s_o);
+    BOARD_AssertParams (O);
+
+    OBJECT_Clear (O);
+
     {
-        const IO_GatewayId GatewayId = Map->gatewayId;
+        LOG_AutoContext (O, LANG_INIT);
 
-        BOARD_AssertState (GatewayId < OUTPUT_MAX_GATEWAYS);
+        s_o = O;
 
-        struct IO_Gateway *const G = &s_o->gateways[GatewayId];
+        s_o->currentMapAction = IO_MapAction_NoRemap;
 
-        IO_SetOutput (G->driver, IoType, DriverCode,
-                      s_o->gateways[GatewayId].driverPort, Value, WhenIo);
+        LOG_Items (1, LANG_MAX_SOURCES, (uint32_t)OUTPUT_MAX_GATEWAYS);
     }
 }
 
 
-void OUTPUT_SetBit (const enum OUTPUT_PROFILE_Type ProfileType,
-                    const IO_Code ProfileCode, const uint32_t Value,
-                    const enum OUTPUT_UpdateValue When)
+void OUTPUT_RegisterGateway (struct IO *const Driver, const IO_Port DriverPort)
 {
+    BOARD_AssertParams (s_o->nextGatewayId < OUTPUT_MAX_GATEWAYS && Driver);
+
+    s_o->gateways[s_o->nextGatewayId].driver     = Driver;
+    s_o->gateways[s_o->nextGatewayId].driverPort = DriverPort;
+
+    ++ s_o->nextGatewayId;
+}
+
+
+void OUTPUT_CurrentMapAction (const enum IO_MapAction MapAction)
+{
+    s_o->currentMapAction = MapAction;
+}
+
+
+bool OUTPUT_HasProfile (const enum OUTPUT_PROFILE_Type ProfileType)
+{
+    BOARD_AssertParams (ProfileType < OUTPUT_PROFILE_Type__COUNT);
+
+    struct OUTPUT_PROFILE *const P = getProfile (ProfileType);
+    return (P->count[IO_Type_Bit] || P->count[IO_Type_Range])?
+            true : false;
+}
+
+
+uint32_t OUTPUT_ProfileCodes (const enum OUTPUT_PROFILE_Type ProfileType,
+                              const enum IO_Type IoType)
+{
+    BOARD_AssertParams (ProfileType < OUTPUT_PROFILE_Type__COUNT &&
+                        IoType < IO_Type__COUNT);
+
+    return getProfile(ProfileType)->count[IoType];
+}
+
+
+bool OUTPUT_IsMapped (const enum OUTPUT_PROFILE_Type ProfileType,
+                      const enum IO_Type IoType, const IO_Code ProfileCode)
+{
+    BOARD_AssertParams (ProfileType < OUTPUT_PROFILE_Type__COUNT &&
+                        IoType < IO_Type__COUNT);
+
+    return isMapped (getMapping(ProfileType, IoType, ProfileCode));
+}
+
+
+void OUTPUT_Map (const enum OUTPUT_PROFILE_Type ProfileType,
+                 const enum IO_Type IoType, const IO_Code ProfileCode,
+                 const IO_Code DriverCode)
+{
+    BOARD_AssertParams (ProfileType < OUTPUT_PROFILE_Type__COUNT &&
+                        IoType < IO_Type__COUNT);
+
+    struct IO_PROFILE_Map *const Map =
+        getMapping (ProfileType, IoType, ProfileCode);
+
+    if (!isMapped(Map) || s_o->currentMapAction == IO_MapAction_Overwrite)
+    {
+        outputMapCurrent (Map, DriverCode);
+    }
+}
+
+
+void OUTPUT_Set (const enum OUTPUT_PROFILE_Type ProfileType,
+                 const enum IO_Type IoType, const IO_Code ProfileCode,
+                 const IO_Value Value, const enum OUTPUT_UpdateValue When)
+{
+    BOARD_AssertParams (ProfileType < OUTPUT_PROFILE_Type__COUNT &&
+                        IoType < IO_Type__COUNT);
+
     struct OUTPUT_PROFILE *const P = getProfile (ProfileType);
 
-    if (!P->bitMap)
+    if (!P->map[IoType])
     {
         return;
     }
 
-    BOARD_AssertParams (ProfileCode < P->bitCount);
+    BOARD_AssertParams (ProfileCode < P->count[IoType]);
 
-    output (IO_Type_Bit, &P->bitMap[ProfileCode], Value, When);
+    output (IoType, &P->map[IoType][ProfileCode], Value, When);
 }
 
 
-void OUTPUT_SetBitNow (const enum OUTPUT_PROFILE_Type ProfileType,
-                       const IO_Code ProfileCode, const uint32_t Value)
+void OUTPUT_SetNow (const enum OUTPUT_PROFILE_Type ProfileType,
+                    const enum IO_Type IoType, const IO_Code ProfileCode,
+                    const IO_Value Value)
 {
-    OUTPUT_SetBit (ProfileType, ProfileCode, Value, OUTPUT_UpdateValue_Now);
+    OUTPUT_Set (ProfileType, IoType, ProfileCode, Value,
+                OUTPUT_UpdateValue_Now);
 }
 
 
-void OUTPUT_SetBitDefer (const enum OUTPUT_PROFILE_Type ProfileType,
-                         const IO_Code ProfileCode, const uint32_t Value)
+void OUTPUT_SetDefer (const enum OUTPUT_PROFILE_Type ProfileType,
+                      const enum IO_Type IoType, const IO_Code ProfileCode,
+                      const IO_Value Value)
 {
-    OUTPUT_SetBit (ProfileType, ProfileCode, Value, OUTPUT_UpdateValue_Defer);
+    OUTPUT_Set (ProfileType, IoType, ProfileCode, Value,
+                OUTPUT_UpdateValue_Defer);
 }
 
 
-void OUTPUT_SetRange (const enum OUTPUT_PROFILE_Type ProfileType,
-                      const IO_Code ProfileCode, const uint32_t Value,
-                      const enum OUTPUT_UpdateValue When)
+const char * OUTPUT_MappedName (const enum OUTPUT_PROFILE_Type ProfileType,
+                                const enum IO_Type IoType,
+                                const IO_Code ProfileCode)
 {
-    struct OUTPUT_PROFILE *const P = getProfile (ProfileType);
+    BOARD_AssertParams (ProfileType < OUTPUT_PROFILE_Type__COUNT &&
+                        IoType < IO_Type__COUNT);
 
-    if (!P->rangeMap)
-    {
-        return;
-    }
-
-    BOARD_AssertParams (ProfileCode < P->rangeCount);
-
-    output (IO_Type_Range, &P->rangeMap[ProfileCode], Value, When);
-}
-
-
-void OUTPUT_SetRangeNow (const enum OUTPUT_PROFILE_Type ProfileType,
-                         const IO_Code ProfileCode, const uint32_t Value)
-{
-    OUTPUT_SetRange (ProfileType, ProfileCode, Value, OUTPUT_UpdateValue_Now);
-}
-
-
-void OUTPUT_SetRangeDefer (const enum OUTPUT_PROFILE_Type ProfileType,
-                           const IO_Code ProfileCode, const uint32_t Value)
-{
-    OUTPUT_SetRange (ProfileType, ProfileCode, Value, OUTPUT_UpdateValue_Defer);
-}
-
-
-static const char * 
-mappedOutputName (const enum OUTPUT_PROFILE_Type ProfileType,
-                  const enum IO_Type IoType, const IO_Code Outx)
-{
-    struct IO_PROFILE_Map *const Map = (IoType == IO_Type_Bit)?
-                                            getBitMapping(ProfileType, Outx) :
-                                            getRangeMapping(ProfileType, Outx);
+    struct IO_PROFILE_Map *const Map =
+        getMapping (ProfileType, IoType, ProfileCode);
 
     BOARD_AssertParams (Map->driverCode != IO_INVALID_CODE);
 
-    struct IO_Gateway *const G = &s_o->gateways[Map->gatewayId];
+    struct IO_Gateway *const G = getGateway (Map);
 
     return IO_OutputName (G->driver, IoType, Map->driverCode);    
-}
-
-
-const char * OUTPUT_MappedBitName (const enum OUTPUT_PROFILE_Type ProfileType,
-                                   const IO_Code ProfileCode)
-{
-    return mappedOutputName (ProfileType, IO_Type_Bit, ProfileCode);
-}
-
-
-const char * OUTPUT_MappedRangeName (const enum OUTPUT_PROFILE_Type ProfileType,
-                                     const IO_Code ProfileCode)
-{
-    return mappedOutputName (ProfileType, IO_Type_Range, ProfileCode);
 }
 
 
@@ -304,4 +278,35 @@ void OUTPUT_Update (void)
             IO_Update (outDriver);
         }
     }
+}
+
+
+IO_Code 
+OUTPUT__isMappedByDriver (const enum OUTPUT_PROFILE_Type ProfileType,
+                          const enum IO_Type IoType,
+                          const IO_Code ProfileCode,
+                          const struct IO *const Driver)
+{
+    struct IO_PROFILE_Map *const Map =
+        getMapping (ProfileType, IoType, ProfileCode);
+
+    return (driversMatch(Map, Driver))? Map->driverCode : IO_INVALID_CODE;
+}
+
+
+struct IO_ConstGateway
+OUTPUT__getMappedGateway (const enum OUTPUT_PROFILE_Type ProfileType,
+                          const enum IO_Type IoType,
+                          const IO_Code ProfileCode)
+{
+    struct IO_PROFILE_Map *const Map =
+        getMapping (ProfileType, IoType, ProfileCode);
+
+    const struct IO_Gateway *const Gateway = getGateway (Map);
+
+    return (struct IO_ConstGateway)
+    {
+        .Driver     = Gateway->driver,
+        .DriverPort = Gateway->driverPort 
+    };
 }

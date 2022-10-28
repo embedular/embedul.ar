@@ -170,12 +170,6 @@ void BOARD_Delay (const TIMER_Ticks Ticks)
 }
 
 
-bool BOARD_VideoDeviceOk (void)
-{
-    return s_board->video? true : false;
-}
-
-
 bool BOARD_SoundDeviceOk (void)
 {
     return s_board->sound? true : false;
@@ -190,11 +184,6 @@ const char * BOARD_Description (void)
 
 void BOARD_Update (void)
 {
-    if (s_board->iface->Update)
-    {
-        s_board->iface->Update (s_board);
-    }
-
 #ifdef LIB_EMBEDULAR_HAS_SOUND
     if (BOARD_SoundDeviceOk ())
     {
@@ -202,12 +191,12 @@ void BOARD_Update (void)
     }
 #endif
 
-#ifdef LIB_EMBEDULAR_HAS_VIDEO
-    if (BOARD_VideoDeviceOk ())
+    SCREEN_Update ();
+
+    if (s_board->iface->Update)
     {
-        VIDEO_NextFrame ();
+        s_board->iface->Update (s_board);
     }
-#endif
 
     INPUT_Update ();
     OUTPUT_Update ();
@@ -218,10 +207,9 @@ void BOARD__stage_shutdown (void)
 {
     LOG_Warn (s_board, LANG_SHUTTING_DOWN);
 
-    s_board->iface->StageChange (s_board, BOARD_Stage_Shutdown);
+    // Managers shutdown (will shut down their registered drivers)
+    SCREEN_Shutdown ();
 
-    if (s_board->video && s_board->video->iface->Shutdown)
-    {
-        s_board->video->iface->Shutdown (s_board->video);
-    }
+    // BOARD_Stage_InitHardware counterpart
+    s_board->iface->StageChange (s_board, BOARD_Stage_ShutdownHardware);
 }

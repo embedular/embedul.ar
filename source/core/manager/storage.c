@@ -67,13 +67,13 @@ void STORAGE_Init (struct STORAGE *const S)
 
     OBJECT_Clear (S);
 
-    LOG_ContextBegin (S, LANG_INIT);
     {
+        LOG_AutoContext (S, LANG_INIT);
+
         s_s = S;
 
         LOG_Items (1, LANG_DEVICE_ROLES, (uint32_t)STORAGE_Role__COUNT);
     }
-    LOG_ContextEnd ();
 }
 
 
@@ -82,9 +82,9 @@ void STORAGE_SetDevice (struct RAWSTOR *const Driver)
     if (RAWSTOR_IsMediaReady (Driver))
     {
     #ifdef LIB_EMBEDULAR_HAS_FILESYSTEM
-        STORAGE_SetVolume (STORAGE_Role_FatFsDrive0, Driver, 1);
+        STORAGE_RegisterVolume (STORAGE_Role_FatFsDrive0, Driver, 1);
     #endif
-        STORAGE_SetVolume (STORAGE_Role_LinearCache, Driver, 2);
+        STORAGE_RegisterVolume (STORAGE_Role_LinearCache, Driver, 2);
     }
 }
 
@@ -241,9 +241,9 @@ inline static void mountFilesystem (const enum STORAGE_Role Role,
 #endif
 
 
-void STORAGE_SetVolume (const enum STORAGE_Role Role,
-                        struct RAWSTOR *const Driver,
-                        const uint8_t PartitionNr)
+void STORAGE_RegisterVolume (const enum STORAGE_Role Role,
+                             struct RAWSTOR *const Driver,
+                             const uint8_t PartitionNr)
 {
     BOARD_AssertParams (Driver && 
                         PartitionNr < 5 && 
@@ -289,13 +289,13 @@ void STORAGE_SetVolume (const enum STORAGE_Role Role,
     }
 #endif
 
-    ++ s_s->volumesSet;
+    ++ s_s->registeredVolumes;
 }
 
 
-uint32_t STORAGE_VolumesSet (void)
+uint32_t STORAGE_RegisteredVolumes (void)
 {
-    return s_s->volumesSet;
+    return s_s->registeredVolumes;
 }
 
 

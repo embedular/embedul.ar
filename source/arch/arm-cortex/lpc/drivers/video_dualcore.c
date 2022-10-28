@@ -70,7 +70,7 @@ void M0APP_IRQHandler (void)
 }
 
 
-bool    hardwareInit        (struct VIDEO *const V);
+void    hardwareInit        (struct VIDEO *const V);
 bool    reachedVBICount     (struct VIDEO *const V);
 void    waitForVBI          (struct VIDEO *const V);
 void    frameTransition     (struct VIDEO *const V);
@@ -79,18 +79,19 @@ void    frameTransition     (struct VIDEO *const V);
 static const struct VIDEO_IFACE VIDEO_IFACE_DUALCORE =
 {
     .Description        = "lpc4337 cortex-m0",
+    .Width              = VIDEO_FB_WIDTH,
+    .Height             = VIDEO_FB_HEIGHT,
     .HardwareInit       = hardwareInit,
     .ReachedVBICount    = reachedVBICount,
     .WaitForVBI         = waitForVBI,
-    .FrameEnd           = UNSUPPORTED,
-    .FrameTransition    = frameTransition,
-    .FrameBegin         = UNSUPPORTED
+    .FrameTransition    = frameTransition
 };
 
 
-bool VIDEO_DUALCORE_Init (struct VIDEO_DUALCORE *const V)
+void VIDEO_DUALCORE_Init (struct VIDEO_DUALCORE *const V)
 {
-    return VIDEO_Init ((struct VIDEO *)V, &VIDEO_IFACE_DUALCORE);
+    VIDEO_Init ((struct VIDEO *)V, &VIDEO_IFACE_DUALCORE,
+                g_framebufferA, g_framebufferB);
 }
 
 
@@ -424,16 +425,8 @@ static bool loadVideoAdapter (struct VIDEO *const V)
 }
 
 
-bool hardwareInit (struct VIDEO *const V)
+void hardwareInit (struct VIDEO *const V)
 {
-    memset (g_framebufferA, 0, VIDEO_FB_SIZE);
-    memset (g_framebufferB, 0, VIDEO_FB_SIZE);
-
-    V->width        = VIDEO_FB_WIDTH;
-    V->height       = VIDEO_FB_HEIGHT;
-    V->bufferA      = g_framebufferA;
-    V->bufferB      = g_framebufferB;
-
     memset (&g_videoExchange, 0, sizeof(struct VIDEO_DUALCORE_Exchange));
 
     // Vertical Blanking Interrupt from M0 video adapter
@@ -441,18 +434,13 @@ bool hardwareInit (struct VIDEO *const V)
     NVIC_SetPriority    (M0APP_IRQn, 5);
     NVIC_EnableIRQ      (M0APP_IRQn);
 
-    if (!loadVideoAdapter (V))
-    {
-        return false;
-    }
+    BOARD_AssertState (loadVideoAdapter (V));
 
     // This fields are set once after initialization
     V->adapterDescription   = g_videoExchange.description;
     V->adapterSignal        = g_videoExchange.signal;
     V->adapterModeline      = g_videoExchange.modeline;
     V->adapterBuild         = g_videoExchange.build;
-
-    return true;
 }
 
 

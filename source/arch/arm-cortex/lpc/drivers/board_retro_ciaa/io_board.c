@@ -53,22 +53,22 @@ void EVRT_IRQHandler (void)
 
 static const char * s_InputBitNames[IO_BOARD_INB__COUNT] =
 {
-    [IO_BOARD_INB_ISP]              = "isp",
-    [IO_BOARD_INB_WAKEUP]           = "wakeup",
-    [IO_BOARD_INB_BOARD_BACKLIGHT]  = "backlight",
-    [IO_BOARD_INB_SD_POW]           = "sd power",
-    [IO_BOARD_INB_WIFI_EN]          = "wifi on",
-    [IO_BOARD_INB_SOUND_MUTE]       = "sound mute"
+    [IO_BOARD_INB_ISP]              = "ISP",
+    [IO_BOARD_INB_WAKEUP]           = "Wake up",
+    [IO_BOARD_INB_BOARD_BACKLIGHT]  = "Backlight",
+    [IO_BOARD_INB_SD_POW]           = "SD power",
+    [IO_BOARD_INB_WIFI_EN]          = "WiFi enable",
+    [IO_BOARD_INB_SOUND_MUTE]       = "Sound mute"
 };
 
 
 static const char * s_OutputBitNames[IO_BOARD_OUTB__COUNT] =
 {
-    [IO_BOARD_OUTB_LED_WARN]        = "warning",
-    [IO_BOARD_OUTB_BOARD_BACKLIGHT] = "backlight",
-    [IO_BOARD_OUTB_SD_POW]          = "sd power",
-    [IO_BOARD_OUTB_WIFI_EN]         = "wifi on",
-    [IO_BOARD_OUTB_SOUND_MUTE]      = "sound mute"
+    [IO_BOARD_OUTB_LED_WARN]        = "Warning",
+    [IO_BOARD_OUTB_BOARD_BACKLIGHT] = "Backlight",
+    [IO_BOARD_OUTB_SD_POW]          = "SD power",
+    [IO_BOARD_OUTB_WIFI_EN]         = "WiFi enable",
+    [IO_BOARD_OUTB_SOUND_MUTE]      = "Sound mute"
 };
 
 
@@ -129,7 +129,7 @@ void IO_BOARD_Attach (struct IO_BOARD *const B)
 {
     BOARD_AssertParams (B);
 
-    INPUT_SetGateway ((struct IO *)B, 0);
+    INPUT_RegisterGateway ((struct IO *)B, 0);
 
     INPUT_MAP_BIT (MAIN, A, IO_BOARD_INB_ISP);
     INPUT_MAP_BIT (MAIN, B, IO_BOARD_INB_WAKEUP);
@@ -139,7 +139,7 @@ void IO_BOARD_Attach (struct IO_BOARD *const B)
     INPUT_MAP_BIT (CONTROL, SoundMute, IO_BOARD_INB_SOUND_MUTE);
 
 
-    OUTPUT_SetGateway ((struct IO *)B, 0);
+    OUTPUT_RegisterGateway ((struct IO *)B, 0);
 
     OUTPUT_MAP_BIT (SIGN, Warning, IO_BOARD_OUTB_LED_WARN);
     // It will command the board backlight on the SSL module, if present

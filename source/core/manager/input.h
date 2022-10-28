@@ -42,10 +42,19 @@
                         INPUT_ACTION_Type_ ## _swa)? true : false)
 #endif
 
+#define INPUT_PROFILE_TYPE(_pname) \
+    INPUT_PROFILE_Type_ ## _pname
+
+#define INPUT_PROFILE_CODE(_pname,_ptype,_pid) \
+    INPUT_PROFILE_ ## _pname ## _ ## _ptype ## _ ## _pid
+
+#define INPUT_PARAMS(_pname,_ptype,_pid) \
+    INPUT_PROFILE_TYPE(_pname), \
+    IO_Type_ ## _ptype, \
+    INPUT_PROFILE_CODE(_pname,_ptype,_pid)
+
 #define INPUT_MAP(_pname,_ptype,_pid,_drv_index) \
-    INPUT_Map ## _ptype (INPUT_PROFILE_Type_ ## _pname, \
-                    INPUT_PROFILE_ ## _pname ## _ ## _ptype ## _ ## _pid, \
-                    _drv_index)
+    INPUT_Map (INPUT_PARAMS(_pname,_ptype,_pid), _drv_index)
 
 #define INPUT_MAP_BIT(_pname,_pid,_drv_index) \
     INPUT_MAP (_pname,Bit,_pid,_drv_index)
@@ -54,8 +63,7 @@
     INPUT_MAP (_pname,Range,_pid,_drv_index)
 
 #define INPUT_IS_MAPPED(_pname,_ptype,_pid) \
-    INPUT_Is ## _ptype ## Mapped (INPUT_PROFILE_Type_ ## _pname, \
-                    INPUT_PROFILE_ ## _pname ## _Bit_ ## _pid)
+    INPUT_IsMapped (INPUT_PARAMS(_pname,_ptype,_pid))
 
 #define INPUT_BIT_IS_MAPPED(_pname,_pid) \
     INPUT_IS_MAPPED(_pname,Bit,_pid)
@@ -63,9 +71,8 @@
 #define INPUT_RANGE_IS_MAPPED(_pname,_pid) \
     INPUT_IS_MAPPED(_pname,Range,_pid)
 
-#define INPUT_GET(_pname,_ptype,_update,_pid) \
-    INPUT_Get ## _ptype ## _update (INPUT_PROFILE_Type_ ## _pname, \
-                    INPUT_PROFILE_ ## _pname ## _ ## _ptype ## _ ## _pid)
+#define INPUT_GET(_pname,_ptype,_when,_pid) \
+    INPUT_Get ## _when (INPUT_PARAMS(_pname,_ptype,_pid))
 
 #define INPUT_GET_BIT_NOW(_pname,_pid) \
     INPUT_GET(_pname,Bit,Now,_pid)
@@ -74,7 +81,8 @@
     INPUT_GET(_pname,Bit,Buffer,_pid)
 
 #define INPUT_GET_BIT_ACTION(_pname,_pid) \
-    INPUT_GET(_pname,Bit,Action,_pid)
+    INPUT_GetBitAction (INPUT_PROFILE_TYPE(_pname), \
+                        INPUT_PROFILE_CODE(_pname,Bit,_pid))
 
 #define INPUT_CHECK_BIT_ACTION(_pname,_pid,_action) \
     ((INPUT_GET_BIT_ACTION(_pname,_pid) == INPUT_ACTION_Type_ ## _action)? \
@@ -92,74 +100,63 @@ struct INPUT
     struct INPUT_PROFILE    profiles    [INPUT_PROFILE_Type__COUNT];
     struct IO_Gateway       gateways    [INPUT_MAX_GATEWAYS];
     IO_GatewayId            nextGatewayId;
+    enum IO_MapAction       currentMapAction;
 };
 
 
 enum INPUT_UpdateValue
 {
-    INPUT_UpdateValue_Now = 0,
-    INPUT_UpdateValue_Buffer
+    INPUT_UpdateValue_Now = IO_UpdateValue_Now,
+    INPUT_UpdateValue_Buffer = IO_UpdateValue_Async
 };
 
 
-void            INPUT_Init                  (struct INPUT *const I);
-void            INPUT_SetGateway            (struct IO *const Driver,
-                                             const IO_Port DriverPort);
-bool            INPUT_HasProfile            (const enum INPUT_PROFILE_Type
-                                             ProfileType);
-uint32_t        INPUT_ProfileBits           (const enum INPUT_PROFILE_Type
-                                             ProfileType);
-uint32_t        INPUT_ProfileRanges         (const enum INPUT_PROFILE_Type
-                                             ProfileType);
-void            INPUT_MapBit                (const enum INPUT_PROFILE_Type
-                                             ProfileType,
-                                             const IO_Code ProfileCode,
-                                             const IO_Code DriverCode);
-void            INPUT_MapRange              (const enum INPUT_PROFILE_Type
-                                             ProfileType,
-                                             const IO_Code ProfileCode,
-                                             const IO_Code DriverCode);
-bool            INPUT_MapBitByOnState       (const enum INPUT_PROFILE_Type
-                                             ProfileType,
-                                             const IO_Code ProfileCode);
-uint32_t        INPUT_GetBit                (const enum INPUT_PROFILE_Type
-                                             ProfileType,
-                                             const IO_Code ProfileCode,
-                                             const enum INPUT_UpdateValue When);
-uint32_t        INPUT_GetBitNow             (const enum INPUT_PROFILE_Type
-                                             ProfileType,
-                                             const IO_Code ProfileCode);
-uint32_t        INPUT_GetBitBuffer          (const enum INPUT_PROFILE_Type
-                                             ProfileType,
-                                             const IO_Code ProfileCode);
+void            INPUT_Init              (struct INPUT *const I);
+void            INPUT_RegisterGateway   (struct IO *const Driver,
+                                         const IO_Port DriverPort);
+void            INPUT_CurrentMapAction  (const enum IO_MapAction MapAction);
+bool            INPUT_HasProfile        (const enum INPUT_PROFILE_Type
+                                         ProfileType);
+uint32_t        INPUT_ProfileCodes      (const enum INPUT_PROFILE_Type
+                                         ProfileType,
+                                         const enum IO_Type IoType);
+bool            INPUT_IsMapped          (const enum INPUT_PROFILE_Type
+                                         ProfileType, const enum IO_Type IoType,
+                                         const IO_Code ProfileCode);
+void            INPUT_Map               (const enum INPUT_PROFILE_Type
+                                         ProfileType, const enum IO_Type IoType,
+                                         const IO_Code ProfileCode,
+                                         const IO_Code DriverCode);
+bool            INPUT_MapBitByOnState   (const enum INPUT_PROFILE_Type
+                                         ProfileType,
+                                         const IO_Code ProfileCode);
+IO_Value        INPUT_Get               (const enum INPUT_PROFILE_Type
+                                         ProfileType, const enum IO_Type IoType,
+                                         const IO_Code ProfileCode,
+                                         const enum INPUT_UpdateValue When);
+IO_Value        INPUT_GetNow            (const enum INPUT_PROFILE_Type
+                                         ProfileType, const enum IO_Type IoType, 
+                                         const IO_Code ProfileCode);
+IO_Value        INPUT_GetBuffer         (const enum INPUT_PROFILE_Type
+                                         ProfileType, const enum IO_Type IoType,
+                                         const IO_Code ProfileCode);
 #if (LIB_EMBEDULAR_CONFIG_INPUT_ACTION == 1)
 enum INPUT_ACTION_Type
-                INPUT_GetBitAction          (const enum INPUT_PROFILE_Type
-                                             ProfileType,
-                                             const IO_Code ProfileCode);
+                INPUT_GetBitAction      (const enum INPUT_PROFILE_Type
+                                         ProfileType,
+                                         const IO_Code ProfileCode);
 #endif
-uint32_t        INPUT_GetRange              (const enum INPUT_PROFILE_Type
-                                             ProfileType,
-                                             const IO_Code ProfileCode,
-                                             const enum INPUT_UpdateValue When);
-uint32_t        INPUT_GetRangeNow           (const enum INPUT_PROFILE_Type
-                                             ProfileType,
-                                             const IO_Code ProfileCode);
-uint32_t        INPUT_GetRangeBuffer        (const enum INPUT_PROFILE_Type
-                                             ProfileType,
-                                             const IO_Code ProfileCode);
-const char *    INPUT_MappedBitName         (const enum INPUT_PROFILE_Type
-                                             ProfileType,
-                                             const IO_Code ProfileCode);
-const char *    INPUT_MappedRangeName       (const enum INPUT_PROFILE_Type
-                                             ProfileType,
-                                             const IO_Code ProfileCode);
-bool            INPUT_IsBitMapped           (const enum INPUT_PROFILE_Type
-                                             ProfileType,
-                                             const IO_Code ProfileCode);
-bool            INPUT_IsRangeMapped         (const enum INPUT_PROFILE_Type
-                                             ProfileType,
-                                             const IO_Code ProfileCode);
-bool            INPUT_AnyBit                (const enum INPUT_PROFILE_SelectFlag
-                                             Profiles);
-void            INPUT_Update                (void);
+const char *    INPUT_MappedName        (const enum INPUT_PROFILE_Type
+                                         ProfileType, const enum IO_Type IoType,
+                                         const IO_Code ProfileCode);
+bool            INPUT_AnyBit            (const enum INPUT_PROFILE_SelectFlag
+                                         Profiles);
+void            INPUT_Update            (void);
+IO_Code         INPUT__isMappedByDriver (const enum INPUT_PROFILE_Type
+                                         ProfileType, const enum IO_Type IoType,
+                                         const IO_Code ProfileCode,
+                                         const struct IO *const Driver);
+struct IO_ConstGateway
+                INPUT__getMappedGateway (const enum INPUT_PROFILE_Type
+                                         ProfileType, const enum IO_Type IoType,
+                                         const IO_Code ProfileCode);

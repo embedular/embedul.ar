@@ -30,14 +30,14 @@
 
 static const char * s_InputBitNames[IO_DUAL_NES_VIDEOEX_INB__COUNT] =
 {
-    [IO_DUAL_NES_VIDEOEX_INB_Right]     = "right",
-    [IO_DUAL_NES_VIDEOEX_INB_Left]      = "left",
-    [IO_DUAL_NES_VIDEOEX_INB_Down]      = "down",
-    [IO_DUAL_NES_VIDEOEX_INB_Up]        = "up",
-    [IO_DUAL_NES_VIDEOEX_INB_Start]     = "start",
-    [IO_DUAL_NES_VIDEOEX_INB_Select]    = "select",
-    [IO_DUAL_NES_VIDEOEX_INB_B]         = "b",
-    [IO_DUAL_NES_VIDEOEX_INB_A]         = "a"
+    [IO_DUAL_NES_VIDEOEX_INB_Right]     = "Right",
+    [IO_DUAL_NES_VIDEOEX_INB_Left]      = "Left",
+    [IO_DUAL_NES_VIDEOEX_INB_Down]      = "Down",
+    [IO_DUAL_NES_VIDEOEX_INB_Up]        = "Up",
+    [IO_DUAL_NES_VIDEOEX_INB_Start]     = "Start",
+    [IO_DUAL_NES_VIDEOEX_INB_Select]    = "Select",
+    [IO_DUAL_NES_VIDEOEX_INB_B]         = "B",
+    [IO_DUAL_NES_VIDEOEX_INB_A]         = "A"
 };
 
 
@@ -54,9 +54,9 @@ static const char * inputName           (struct IO *const Io,
 static const struct IO_IFACE IO_DUAL_NES_VIDEOEX_IFACE =
 {
     IO_IFACE_DECLARE("nes from video adapter", DUAL_NES_VIDEOEX),
-    .Update             = update,
-    .GetInput           = getInput,
-    .InputName          = inputName
+    .Update         = update,
+    .GetInput       = getInput,
+    .InputName      = inputName
 };
 
 
@@ -75,7 +75,7 @@ void IO_DUAL_NES_VIDEOEX_Init (struct IO_DUAL_NES_VIDEOEX *const N)
 
 void IO_DUAL_NES_VIDEOEX_Attach (struct IO_DUAL_NES_VIDEOEX *const N)
 {
-    INPUT_SetGateway ((struct IO *)N, 0);
+    INPUT_RegisterGateway ((struct IO *)N, 0);
 
     INPUT_MAP_BIT (GP1, Right, IO_DUAL_NES_VIDEOEX_INB_Right);
     INPUT_MAP_BIT (GP1, Left, IO_DUAL_NES_VIDEOEX_INB_Left);
@@ -86,8 +86,7 @@ void IO_DUAL_NES_VIDEOEX_Attach (struct IO_DUAL_NES_VIDEOEX *const N)
     INPUT_MAP_BIT (GP1, A, IO_DUAL_NES_VIDEOEX_INB_A);
     INPUT_MAP_BIT (GP1, B, IO_DUAL_NES_VIDEOEX_INB_B);
 
-
-    INPUT_SetGateway ((struct IO *)N, 1);
+    INPUT_RegisterGateway ((struct IO *)N, 1);
 
     INPUT_MAP_BIT (GP2, Right, IO_DUAL_NES_VIDEOEX_INB_Right);
     INPUT_MAP_BIT (GP2, Left, IO_DUAL_NES_VIDEOEX_INB_Left);

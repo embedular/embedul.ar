@@ -124,10 +124,8 @@ extern const char * OUTPUT_PROFILE_TypeString[OUTPUT_PROFILE_Type__COUNT];
 
 struct OUTPUT_PROFILE
 {
-    struct IO_PROFILE_Map   * bitMap;
-    struct IO_PROFILE_Map   * rangeMap;
-    uint16_t                bitCount;
-    uint16_t                rangeCount;
+    struct IO_PROFILE_Map   * map[IO_Type__COUNT];
+    uint16_t                count[IO_Type__COUNT];
 };
 
 
@@ -135,7 +133,8 @@ const char * OUTPUT_PROFILE_GetTypeName (enum OUTPUT_PROFILE_Type ProfileType);
 
 
 void OUTPUT_PROFILE__attach (
-    struct OUTPUT_PROFILE ProfilesArray[static const OUTPUT_PROFILE_Type__COUNT],
+    struct OUTPUT_PROFILE ProfilesArray
+        [static const OUTPUT_PROFILE_Type__COUNT],
     const enum OUTPUT_PROFILE_Type ProfileType,
     struct IO_PROFILE_Map *const BitMap,
     const uint32_t BitCount,

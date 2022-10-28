@@ -46,6 +46,7 @@
         struct INPUT *          : 1, \
         struct COMM *           : 1, \
         struct STORAGE *        : 1, \
+        struct SCREEN *         : 1, \
         struct ANIM *           : 1, \
         struct ARRAY *          : 1, \
         struct BITFIELD *       : 1, \
@@ -57,13 +58,12 @@
         struct SEQUENCE *       : 1, \
         struct VARIANT *        : 1, \
         struct INPUT_ACTION *   : 1, \
-        struct VIDEO_DOTMAP *   : 1, \
-        struct VIDEO_FADE *     : 1, \
-        struct VIDEO_FONT *     : 1, \
-        struct VIDEO_RGB332_Gradient * \
-                                : 1, \
-        struct VIDEO_SPRITE *   : 1, \
-        struct VIDEO_TILEMAP *  : 1, \
+        struct SCREEN_DOTMAP *  : 1, \
+        struct SCREEN_FADE *    : 1, \
+        struct SCREEN_FONT *    : 1, \
+        struct RGB332_Gradient *: 1, \
+        struct SCREEN_SPRITE *  : 1, \
+        struct SCREEN_TILEMAP * : 1, \
         struct NOBJ *           : 1, \
         struct OBJECT_INFO *    : 1, \
         default                 : 0 \
@@ -94,6 +94,7 @@
         struct INPUT *          : "manager", \
         struct COMM *           : "manager", \
         struct STORAGE *        : "manager", \
+        struct SCREEN *         : "manager", \
         struct ANIM *           : "base", \
         struct ARRAY *          : "base", \
         struct BITFIELD *       : "base", \
@@ -105,13 +106,12 @@
         struct SEQUENCE *       : "base", \
         struct VARIANT *        : "base", \
         struct INPUT_ACTION *   : "base", \
-        struct VIDEO_DOTMAP *   : "base" OBJECT_TYPE_SEPARATOR "video", \
-        struct VIDEO_FADE *     : "base" OBJECT_TYPE_SEPARATOR "video", \
-        struct VIDEO_FONT *     : "base" OBJECT_TYPE_SEPARATOR "video", \
-        struct VIDEO_RGB332_Gradient * \
-                                : "base" OBJECT_TYPE_SEPARATOR "video", \
-        struct VIDEO_SPRITE *   : "base" OBJECT_TYPE_SEPARATOR "video", \
-        struct VIDEO_TILEMAP *  : "base" OBJECT_TYPE_SEPARATOR "video", \
+        struct SCREEN_DOTMAP *  : "base" OBJECT_TYPE_SEPARATOR "screen", \
+        struct SCREEN_FADE *    : "base" OBJECT_TYPE_SEPARATOR "screen", \
+        struct SCREEN_FONT *    : "base" OBJECT_TYPE_SEPARATOR "screen", \
+        struct RGB332_Gradient *: "base" OBJECT_TYPE_SEPARATOR "screen", \
+        struct SCREEN_SPRITE *  : "base" OBJECT_TYPE_SEPARATOR "screen", \
+        struct SCREEN_TILEMAP * : "base" OBJECT_TYPE_SEPARATOR "screen", \
         struct NOBJ *           : "nobj", \
         struct OBJECT_INFO *    : OBJECT_INFO_Type( \
                                     (struct OBJECT_INFO *)(uintptr_t)_p) \
@@ -126,13 +126,14 @@
         struct PACKET *         : PACKET_Description((struct PACKET *)_p), \
         struct RANDOM *         : RANDOM_Description(), \
         struct SOUND *          : SOUND_Description(), \
-        struct VIDEO *          : VIDEO_Description(), \
+        struct VIDEO *          : VIDEO_Description((struct VIDEO *)_p), \
         struct BOARD *          : BOARD_Description(), \
         struct LOG *            : "log", \
         struct OUTPUT *         : "output", \
         struct INPUT *          : "input", \
         struct COMM *           : "communication", \
         struct STORAGE *        : "storage", \
+        struct SCREEN *         : "screen", \
         struct ANIM *           : "animation", \
         struct ARRAY *          : "array", \
         struct BITFIELD *       : "bitfield", \
@@ -144,13 +145,12 @@
         struct SEQUENCE *       : "sequence", \
         struct VARIANT *        : "variant", \
         struct INPUT_ACTION *   : "input action", \
-        struct VIDEO_DOTMAP *   : "dotmap", \
-        struct VIDEO_FADE *     : "fade", \
-        struct VIDEO_FONT *     : "font", \
-        struct VIDEO_RGB332_Gradient * \
-                                : "rgb332 gradient", \
-        struct VIDEO_SPRITE *   : "sprite", \
-        struct VIDEO_TILEMAP *  : "tilemap", \
+        struct SCREEN_DOTMAP *  : "dotmap", \
+        struct SCREEN_FADE *    : "fade", \
+        struct SCREEN_FONT *    : "font", \
+        struct RGB332_Gradient *: "rgb332 gradient", \
+        struct SCREEN_SPRITE *  : "sprite", \
+        struct SCREEN_TILEMAP * : "tilemap", \
         struct NOBJ *           : "not an object", \
         struct OBJECT_INFO *    : OBJECT_INFO_Description( \
                                     (struct OBJECT_INFO *)(uintptr_t)_p) \
@@ -172,6 +172,7 @@
         struct INPUT *          : _p, \
         struct COMM *           : _p, \
         struct STORAGE *        : _p, \
+        struct SCREEN *         : _p, \
         struct ANIM *           : _p, \
         struct ARRAY *          : _p, \
         struct BITFIELD *       : _p, \
@@ -183,13 +184,12 @@
         struct SEQUENCE *       : _p, \
         struct VARIANT *        : _p, \
         struct INPUT_ACTION *   : _p, \
-        struct VIDEO_DOTMAP *   : _p, \
-        struct VIDEO_FADE *     : _p, \
-        struct VIDEO_FONT *     : _p, \
-        struct VIDEO_RGB332_Gradient * \
-                                : _p, \
-        struct VIDEO_SPRITE *   : _p, \
-        struct VIDEO_TILEMAP *  : _p, \
+        struct SCREEN_DOTMAP *  : _p, \
+        struct SCREEN_FADE *    : _p, \
+        struct SCREEN_FONT *    : _p, \
+        struct RGB332_Gradient *: _p, \
+        struct SCREEN_SPRITE *  : _p, \
+        struct SCREEN_TILEMAP * : _p, \
         struct NOBJ *           : NULL, \
         struct OBJECT_INFO *    : OBJECT_INFO_Ptr( \
                                     (struct OBJECT_INFO *)(uintptr_t)_p) \

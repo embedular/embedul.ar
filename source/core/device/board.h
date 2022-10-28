@@ -31,13 +31,13 @@
 #include "embedul.ar/source/core/object.h"
 #include "embedul.ar/source/core/device.h"
 #include "embedul.ar/source/core/device/random.h"
-#include "embedul.ar/source/core/device/video.h"
 #include "embedul.ar/source/core/device/sound.h"
 #include "embedul.ar/source/core/manager/comm.h"
 #include "embedul.ar/source/core/manager/log.h"
 #include "embedul.ar/source/core/manager/input.h"
 #include "embedul.ar/source/core/manager/output.h"
 #include "embedul.ar/source/core/manager/storage.h"
+#include "embedul.ar/source/core/manager/screen.h"
 #include "embedul.ar/source/core/lang/en.h"
 #include <string.h>
 
@@ -86,10 +86,12 @@ enum BOARD_Stage
     BOARD_Stage_InitStorageDrivers,         // RAWSTOR(s)
     BOARD_Stage_InitIOLevel2Drivers,        // IO(s) that depends on Comm or 
                                             // Storage to function properly
-    BOARD_Stage_InitVideoDriver,            // VIDEO
+    BOARD_Stage_InitScreenDrivers,          // VIDEO(s)
     BOARD_Stage_InitSoundDriver,            // SOUND
+    BOARD_Stage_InitIOLevel3Drivers,        // IO(s) that depends on a given
+                                            // Screen to function properly
     BOARD_Stage_Ready,
-    BOARD_Stage_Shutdown
+    BOARD_Stage_ShutdownHardware
 };
 
 
@@ -157,7 +159,6 @@ struct BOARD
     uint32_t                        tickFrequency;
     struct STREAM                   * debugStream;
     struct RANDOM                   * random;
-    struct VIDEO                    * video;
     struct SOUND                    * sound;
     // Already allocated managers
     struct COMM                     comm;
@@ -165,6 +166,7 @@ struct BOARD
     struct INPUT                    input;
     struct OUTPUT                   output;
     struct STORAGE                  storage;
+    struct SCREEN                   screen;
     enum BOARD_Stage                currentStage;
 };
 
@@ -206,7 +208,6 @@ TIMER_Ticks         BOARD_TicksNow          (void);
 struct BOARD_RealTimeClock
                     BOARD_RealTimeClock     (void);
 void                BOARD_Delay             (const TIMER_Ticks Ticks);
-bool                BOARD_VideoDeviceOk     (void);
 bool                BOARD_SoundDeviceOk     (void);
 const char *        BOARD_Description       (void);
 void                BOARD_Update            (void);

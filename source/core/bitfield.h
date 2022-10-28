@@ -95,7 +95,13 @@ typedef uint16_t    BITFIELD_Index;
 /**
  * Maximum value represented in a :c:type:`BITFIELD_Index`.
  */
-#define BITFIELD_INDEX_MAX      ((BITFIELD_Index) -1)
+#define BITFIELD_INDEX_MAX          ((BITFIELD_Index) -1)
+
+
+/**
+ * Number of :c:type:`uint32_t` elements required to store ``x`` bits.
+ */
+#define BITFIELD_COUNT(x)           ((x >> 5) + 1)
 
 
 /**

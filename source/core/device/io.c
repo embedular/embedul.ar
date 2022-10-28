@@ -127,7 +127,7 @@ IO_Count IO_AvailableOutputs (struct IO *const Io, const enum IO_Type IoType,
 }
 
 
-uint32_t IO_GetInput (struct IO *const Io, const enum IO_Type IoType,
+IO_Value IO_GetInput (struct IO *const Io, const enum IO_Type IoType,
                       const IO_Code DriverCode, const IO_Port Port,
                       const enum IO_UpdateValue When)
 {
@@ -147,7 +147,7 @@ uint32_t IO_GetInput (struct IO *const Io, const enum IO_Type IoType,
 
 void IO_SetOutput (struct IO *const Io, const enum IO_Type IoType,
                    const IO_Code DriverCode, const IO_Port Port,
-                   const uint32_t Value, const enum IO_UpdateValue When)
+                   const IO_Value Value, const enum IO_UpdateValue When)
 {
     BOARD_AssertParams (Io && IoType < IO_Type__COUNT);
     BOARD_AssertState  (Io->iface && Io->iface->SetOutput && Io->iface->Update);

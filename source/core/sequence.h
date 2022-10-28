@@ -52,7 +52,7 @@ enum SEQUENCE_Action
 struct SEQUENCE;
 
 
-typedef void (* SEQUENCE_StageFunc) (struct SEQUENCE *const S, 
+typedef void (* SEQUENCE_StageFunc) (struct SEQUENCE *const Sequence, 
                                      void *const Param,
                                      const enum SEQUENCE_Action Action,
                                      const TIMER_Ticks Elapsed);
@@ -60,24 +60,26 @@ typedef void (* SEQUENCE_StageFunc) (struct SEQUENCE *const S,
 
 struct SEQUENCE_StageInput
 {
-    enum SEQUENCE_InputType         type;
+    enum SEQUENCE_InputType             type;
     union 
     {
-    enum INPUT_PROFILE_Type         profileType;
-    enum INPUT_PROFILE_SelectFlag   profileSelectFlags;
+        enum INPUT_PROFILE_Type         profileType;
+        enum INPUT_PROFILE_SelectFlag   profileSelectFlags;
     };
-    uint32_t                        inx;
+    IO_Code                             profileCode;
+    IO_Value                            rangeMin;
+    IO_Value                            rangeMax;
 #if (LIB_EMBEDULAR_CONFIG_INPUT_ACTION == 1)
-    enum INPUT_ACTION_Type          action;
+    enum INPUT_ACTION_Type              action;
 #endif
 };
 
 
-#define SEQUENCE_INPUT_BIT(_ptype,_inb) \
+#define SEQUENCE_INPUT_BIT(_ptype,_pcode) \
     (struct SEQUENCE_StageInput) { \
         .type           = SEQUENCE_InputType_Bit, \
         .profileType    = _ptype, \
-        .inx            = _inb \
+        .profileCode    = _pcode \
     }
 
 #define SEQUENCE_INPUT_ANY_BIT(_pflags) \
@@ -87,20 +89,22 @@ struct SEQUENCE_StageInput
     }
 
 #if (LIB_EMBEDULAR_CONFIG_INPUT_ACTION == 1)
-    #define SEQUENCE_INPUT_BIT_ACTION(_ptype,_inb,_action) \
+    #define SEQUENCE_INPUT_BIT_ACTION(_ptype,_pcode,_action) \
         (struct SEQUENCE_StageInput) { \
             .type           = SEQUENCE_InputType_BitAction, \
             .profileType    = _ptype, \
-            .inx            = _inb, \
+            .profileCode    = _pcode, \
             .action         = _action \
         }
 #endif
 
-#define SEQUENCE_INPUT_RANGE(_ptype,_inr) \
+#define SEQUENCE_INPUT_RANGE(_ptype,_pcode,_min,_max) \
     (struct SEQUENCE_StageInput) { \
         .type           = SEQUENCE_InputType_Range, \
         .profileType    = _ptype, \
-        .inx            = _inr \
+        .profileCode    = _pcode, \
+        .rangeMin       = _min, \
+        .rangeMax       = _max \
     }
 
 

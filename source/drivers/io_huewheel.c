@@ -33,16 +33,16 @@
 
 static const char * s_OutputBitNames[IO_HUEWHEEL_OUTB__COUNT] =
 {
-    [IO_HUEWHEEL_OUTB_Dir]              = "dir"
+    [IO_HUEWHEEL_OUTB_Dir]              = "Dir"
 };
 
 
 static const char * s_OutputRangeNames[IO_HUEWHEEL_OUTR__COUNT] =
 {
-    [IO_HUEWHEEL_OUTR_Step]             = "step",
-    [IO_HUEWHEEL_OUTR_MaxLuminance]     = "maxlum",
-    [IO_HUEWHEEL_OUTR_Phase]            = "phase",
-    [IO_HUEWHEEL_OUTR_Duration]         = "duration"
+    [IO_HUEWHEEL_OUTR_Step]             = "Step",
+    [IO_HUEWHEEL_OUTR_MaxLuminance]     = "Max. Luminance",
+    [IO_HUEWHEEL_OUTR_Phase]            = "Phase",
+    [IO_HUEWHEEL_OUTR_Duration]         = "Duration"
 };
 
 
@@ -115,7 +115,7 @@ void IO_HUEWHEEL_Attach (struct IO_HUEWHEEL *const H)
 {
     BOARD_AssertParams (H);
 
-    OUTPUT_SetGateway ((struct IO *)H, 0);
+    OUTPUT_RegisterGateway ((struct IO *)H, 0);
 
     OUTPUT_MAP_BIT      (MARQUEE, Dir, IO_HUEWHEEL_OUTB_Dir);
     OUTPUT_MAP_RANGE    (MARQUEE, Step, IO_HUEWHEEL_OUTR_Step);

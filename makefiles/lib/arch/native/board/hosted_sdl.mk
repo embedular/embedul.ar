@@ -35,7 +35,7 @@ TARGET_MFR := $(TARGET_ARCH)/sdl
 TARGET_FAMILY := $(TARGET_MFR)
 TARGET_BSP := $(TARGET_MFR)
 TARGET_BSP_BOARD := $(TARGET_MFR)/drivers
-TARGET_DRIVERS := $(TARGET_BSP_BOARD)/board_hosted_sdl
+TARGET_DRIVERS := $(TARGET_BSP_BOARD)
 
 # Common target init and checks
 $(call emb_include,target/check.mk)
@@ -46,10 +46,13 @@ FLASH_TOOL ?= no
 # System code
 OBJS += \
     $(LIB_EMBEDULAR_ROOT)/source/drivers/random_sfmt.o \
-    $(TARGET_BSP_BOARD)/board_hosted_sdl.o \
-    $(TARGET_DRIVERS)/video_sdl.o \
-    $(TARGET_DRIVERS)/sound_sdl.o \
-    $(TARGET_DRIVERS)/io_keyboard_sdl.o \
+    $(TARGET_BSP_BOARD)/board_hosted.o \
+    $(TARGET_DRIVERS)/video_rgb332.o \
+    $(TARGET_DRIVERS)/video_rgb332_adapter_sim.o \
+    $(TARGET_DRIVERS)/video_rgb332_vgafb.o \
+    $(TARGET_DRIVERS)/sound_sdlmixer.o \
+    $(TARGET_DRIVERS)/io_keyboard.o \
+    $(TARGET_DRIVERS)/io_gui.o \
     $(TARGET_DRIVERS)/stream_file.o \
     $(TARGET_DRIVERS)/rawstor_file.o
 

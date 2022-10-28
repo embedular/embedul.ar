@@ -235,13 +235,12 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
             break;
         }
 
-        case BOARD_Stage_InitVideoDriver:
+        case BOARD_Stage_InitScreenDrivers:
         {
         #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
-            if (VIDEO_DUALCORE_Init (&E->videoDualcore))
-            {
-                return &E->videoDualcore;
-            }
+            VIDEO_DUALCORE_Init (&E->videoDualcore);
+            SCREEN_RegisterDevice (SCREEN_Role_Primary,
+                                    (struct VIDEO *)&E->videoDualcore);    
         #endif
             break;
         }
@@ -258,12 +257,17 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
         #endif
         }
 
+        case BOARD_Stage_InitIOLevel3Drivers:
+        {
+            break;
+        }
+
         case BOARD_Stage_Ready:
         {
             break;
         }
 
-        case BOARD_Stage_Shutdown:
+        case BOARD_Stage_ShutdownHardware:
         {
             while (1)
             {

@@ -87,8 +87,9 @@ bool SEQUENCE_Update (struct SEQUENCE *const S)
                     break;
 
                 case SEQUENCE_InputType_Bit:
-                    exitStage = INPUT_GetBitBuffer (Stage->input.profileType,
-                                                 Stage->input.inx);
+                    exitStage = INPUT_GetBuffer (Stage->input.profileType,
+                                                 IO_Type_Bit,
+                                                 Stage->input.profileCode);
                     break;
 
                 case SEQUENCE_InputType_AnyBit:
@@ -97,15 +98,23 @@ bool SEQUENCE_Update (struct SEQUENCE *const S)
 
             #if (LIB_EMBEDULAR_CONFIG_INPUT_ACTION == 1)
                 case SEQUENCE_InputType_BitAction:
-                    exitStage = (INPUT_GetBitAction(Stage->input.profileType,
-                                     Stage->input.inx) == Stage->input.action);
+                    exitStage =
+                        (INPUT_GetBitAction(Stage->input.profileType,
+                            Stage->input.profileCode) == Stage->input.action)?
+                            true : false;
                     break;
             #endif
 
                 case SEQUENCE_InputType_Range:
-                    exitStage = INPUT_GetRangeBuffer (Stage->input.profileType,
-                                                   Stage->input.inx);
+                {
+                    IO_Value Value = INPUT_GetBuffer (Stage->input.profileType,
+                                                      IO_Type_Range,
+                                                      Stage->input.profileCode);
+                    exitStage = (Value >= Stage->input.rangeMin &&
+                                 Value <= Stage->input.rangeMax)? 
+                                 true : false;
                     break;
+                }
             }
         }
 

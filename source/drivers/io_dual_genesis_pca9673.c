@@ -59,18 +59,18 @@
 static const char *
 s_InputNamesBit[IO_DUAL_GENESIS_INB__6Buttons_COUNT] =
 {
-    [IO_DUAL_GENESIS_INB_Right]     = "right",
-    [IO_DUAL_GENESIS_INB_Left]      = "left",
-    [IO_DUAL_GENESIS_INB_Down]      = "down",
-    [IO_DUAL_GENESIS_INB_Up]        = "up",
-    [IO_DUAL_GENESIS_INB_Start]     = "start",
-    [IO_DUAL_GENESIS_INB_A]         = "a",
-    [IO_DUAL_GENESIS_INB_B]         = "b",
-    [IO_DUAL_GENESIS_INB_C]         = "c",
-    [IO_DUAL_GENESIS_INB_Mode]      = "mode",
-    [IO_DUAL_GENESIS_INB_X]         = "x",
-    [IO_DUAL_GENESIS_INB_Y]         = "y",
-    [IO_DUAL_GENESIS_INB_Z]         = "z"
+    [IO_DUAL_GENESIS_INB_Right]     = "Right",
+    [IO_DUAL_GENESIS_INB_Left]      = "Left",
+    [IO_DUAL_GENESIS_INB_Down]      = "Down",
+    [IO_DUAL_GENESIS_INB_Up]        = "Up",
+    [IO_DUAL_GENESIS_INB_Start]     = "Start",
+    [IO_DUAL_GENESIS_INB_A]         = "A",
+    [IO_DUAL_GENESIS_INB_B]         = "B",
+    [IO_DUAL_GENESIS_INB_C]         = "C",
+    [IO_DUAL_GENESIS_INB_Mode]      = "Mode",
+    [IO_DUAL_GENESIS_INB_X]         = "X",
+    [IO_DUAL_GENESIS_INB_Y]         = "Y",
+    [IO_DUAL_GENESIS_INB_Z]         = "Z"
 };
 
 
@@ -118,7 +118,7 @@ void IO_DUAL_GENESIS_PCA9673_Attach (struct IO_DUAL_GENESIS_PCA9673 *const G)
 {
     BOARD_AssertParams (G);
 
-    INPUT_SetGateway ((struct IO *)G, 0);
+    INPUT_RegisterGateway ((struct IO *)G, 0);
 
     INPUT_MAP_BIT (GP1, Right, IO_DUAL_GENESIS_INB_Right);
     INPUT_MAP_BIT (GP1, Left, IO_DUAL_GENESIS_INB_Left);
@@ -133,8 +133,7 @@ void IO_DUAL_GENESIS_PCA9673_Attach (struct IO_DUAL_GENESIS_PCA9673 *const G)
     INPUT_MAP_BIT (GP1, Y, IO_DUAL_GENESIS_INB_Y);
     INPUT_MAP_BIT (GP1, Z, IO_DUAL_GENESIS_INB_Z);
 
-
-    INPUT_SetGateway ((struct IO *)G, 1);
+    INPUT_RegisterGateway ((struct IO *)G, 1);
 
     INPUT_MAP_BIT (GP2, Right, IO_DUAL_GENESIS_INB_Right);
     INPUT_MAP_BIT (GP2, Left, IO_DUAL_GENESIS_INB_Left);

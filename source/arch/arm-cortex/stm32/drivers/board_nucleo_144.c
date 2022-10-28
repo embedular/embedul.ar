@@ -237,7 +237,7 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
             break;
         }
 
-        case BOARD_Stage_InitVideoDriver:
+        case BOARD_Stage_InitScreenDrivers:
         {
             break;
         }
@@ -247,12 +247,17 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
             break;
         }
 
+        case BOARD_Stage_InitIOLevel3Drivers:
+        {
+            break;
+        }
+
         case BOARD_Stage_Ready:
         {
             break;
         }
 
-        case BOARD_Stage_Shutdown:
+        case BOARD_Stage_ShutdownHardware:
         {
             while (1)
             {

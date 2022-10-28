@@ -47,33 +47,33 @@
 
 static const char * s_InputBitNames[IO_BOARD_INB__COUNT] =
 {
-    [IO_BOARD_INB_TEC_1]            = "tec 1",
-    [IO_BOARD_INB_TEC_2]            = "tec 2",
-    [IO_BOARD_INB_TEC_3]            = "tec 3",
-    [IO_BOARD_INB_TEC_4]            = "tec 4"
+    [IO_BOARD_INB_TEC_1]            = "TEC 1",
+    [IO_BOARD_INB_TEC_2]            = "TEC 2",
+    [IO_BOARD_INB_TEC_3]            = "TEC 3",
+    [IO_BOARD_INB_TEC_4]            = "TEC 4"
 #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
     , 
-    [IO_BOARD_INB_SD_DETECT]        = "sd_detect",
-    [IO_BOARD_INB_WIFI_EN]          = "wifi on",
-    [IO_BOARD_INB_SOUND_MUTE]       = "sound mute"
+    [IO_BOARD_INB_SD_DETECT]        = "SD detect",
+    [IO_BOARD_INB_WIFI_EN]          = "WiFi enable",
+    [IO_BOARD_INB_SOUND_MUTE]       = "Sound mute"
 #endif
 };
 
 
 static const char * s_OutputBitNames[IO_BOARD_OUTB__COUNT] =
 {
-    [IO_BOARD_OUTB_LED_RGB_RED]     = "rgb red",
-    [IO_BOARD_OUTB_LED_RGB_GREEN]   = "rgb green",
-    [IO_BOARD_OUTB_LED_RGB_BLUE]    = "rgb blue",
-    [IO_BOARD_OUTB_LED_1]           = "led 1",
-    [IO_BOARD_OUTB_LED_2]           = "led 2",
-    [IO_BOARD_OUTB_LED_3]           = "led 3" 
+    [IO_BOARD_OUTB_LED_RGB_RED]     = "RGB Red",
+    [IO_BOARD_OUTB_LED_RGB_GREEN]   = "RGB Green",
+    [IO_BOARD_OUTB_LED_RGB_BLUE]    = "RGB Blue",
+    [IO_BOARD_OUTB_LED_1]           = "LED 1",
+    [IO_BOARD_OUTB_LED_2]           = "LED 2",
+    [IO_BOARD_OUTB_LED_3]           = "LED 3" 
 #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
     ,
-    [IO_BOARD_OUTB_BOARD_BACKLIGHT] = "backlight",
-    [IO_BOARD_OUTB_SD_SELECT]       = "sd select",
-    [IO_BOARD_OUTB_WIFI_EN]         = "wifi on",
-    [IO_BOARD_OUTB_SOUND_MUTE]      = "sound mute"
+    [IO_BOARD_OUTB_BOARD_BACKLIGHT] = "Backlight",
+    [IO_BOARD_OUTB_SD_SELECT]       = "SD select",
+    [IO_BOARD_OUTB_WIFI_EN]         = "WiFi enable",
+    [IO_BOARD_OUTB_SOUND_MUTE]      = "Sound mute"
 #endif
 };
 
@@ -124,7 +124,7 @@ void IO_BOARD_Attach (struct IO_BOARD *const B)
 {
     BOARD_AssertParams (B);
 
-    INPUT_SetGateway ((struct IO *)B, 0);
+    INPUT_RegisterGateway ((struct IO *)B, 0);
 
     INPUT_MAP_BIT (MAIN, A, IO_BOARD_INB_TEC_1);
     INPUT_MAP_BIT (MAIN, B, IO_BOARD_INB_TEC_2);
@@ -136,7 +136,8 @@ void IO_BOARD_Attach (struct IO_BOARD *const B)
     INPUT_MAP_BIT (CONTROL, SoundMute, IO_BOARD_INB_SOUND_MUTE);
 #endif
 
-    OUTPUT_SetGateway ((struct IO *)B, 0);
+
+    OUTPUT_RegisterGateway ((struct IO *)B, 0);
 
     OUTPUT_MAP_BIT (SIGN, Warning, IO_BOARD_OUTB_LED_1);
     OUTPUT_MAP_BIT (SIGN, Red, IO_BOARD_OUTB_LED_RGB_RED);

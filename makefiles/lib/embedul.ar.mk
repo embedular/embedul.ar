@@ -80,7 +80,10 @@ OBJS += $(LIB_EMBEDULAR)/device/board.o \
         $(LIB_EMBEDULAR)/manager/storage.o \
         $(LIB_EMBEDULAR)/manager/storage/cache.o \
 		$(LIB_EMBEDULAR)/manager/comm.o \
-        $(LIB_EMBEDULAR)/misc/hsl.o
+		$(LIB_EMBEDULAR)/manager/screen.o \
+        $(LIB_EMBEDULAR)/misc/hsl.o \
+        $(LIB_EMBEDULAR)/misc/rgb332.o \
+        $(LIB_EMBEDULAR)/misc/collide.o
 
 
 # Remove optional subsystem duplicates
@@ -110,18 +113,16 @@ ifneq ($(filter video,$(LIB_EMBEDULAR_SUBSYSTEMS)),)
     # Required base modules
     LIB_EMBEDULAR_BASE += anim
     OBJS += $(LIB_EMBEDULAR)/device/video.o \
-	        $(LIB_EMBEDULAR)/device/video/rgb332.o \
-            $(LIB_EMBEDULAR)/device/video/dotmap.o \
-            $(LIB_EMBEDULAR)/device/video/font.o \
-            $(LIB_EMBEDULAR)/device/video/font_std.o \
-            $(LIB_EMBEDULAR)/device/video/tile.o \
-            $(LIB_EMBEDULAR)/device/video/tilemap.o \
-            $(LIB_EMBEDULAR)/device/video/pixel.o \
-            $(LIB_EMBEDULAR)/device/video/line.o \
-            $(LIB_EMBEDULAR)/device/video/rect.o \
-            $(LIB_EMBEDULAR)/device/video/collide.o \
-            $(LIB_EMBEDULAR)/device/video/sprite.o \
-            $(LIB_EMBEDULAR)/device/video/fade.o
+            $(LIB_EMBEDULAR)/manager/screen/dotmap.o \
+            $(LIB_EMBEDULAR)/manager/screen/font.o \
+            $(LIB_EMBEDULAR)/manager/screen/font_std.o \
+            $(LIB_EMBEDULAR)/manager/screen/tile.o \
+            $(LIB_EMBEDULAR)/manager/screen/tilemap.o \
+            $(LIB_EMBEDULAR)/manager/screen/pixel.o \
+            $(LIB_EMBEDULAR)/manager/screen/line.o \
+            $(LIB_EMBEDULAR)/manager/screen/rect.o \
+            $(LIB_EMBEDULAR)/manager/screen/sprite.o \
+            $(LIB_EMBEDULAR)/manager/screen/fade.o
 else
     $(call emb_warning,No video subsystem. Splash screens disabled)
     LIB_EMBEDULAR_CONFIG_SPLASH_SCREENS := 0
@@ -139,7 +140,7 @@ ifeq ($(LIB_EMBEDULAR_CONFIG_SPLASH_SCREENS),1)
 			$(subst =,$(emb_space),$(LIB_EMBEDULAR_CONFIG_SPLASH_THEME_L1) $\
 								   $(LIB_EMBEDULAR_CONFIG_SPLASH_THEME_L2) $\
 								   $(LIB_EMBEDULAR_CONFIG_SPLASH_THEME_L3)))),$\
-                      $(eval OBJS += $(LIB_EMBEDULAR)/device/video/splash_themes/$(theme).o))
+                      $(eval OBJS += $(LIB_EMBEDULAR)/manager/screen/splash_themes/$(theme).o))
 endif
 
 # Sound subsystem

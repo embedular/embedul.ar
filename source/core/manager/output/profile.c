@@ -62,14 +62,14 @@ void OUTPUT_PROFILE__attach (
     if (BitMap)
     {
         memset (BitMap, IO_INVALID_CODE, sizeof(*BitMap) * BitCount);
-        P->bitMap       = BitMap;
-        P->bitCount     = BitCount;
+        P->map[IO_Type_Bit]     = BitMap;
+        P->count[IO_Type_Bit]   = BitCount;
     }
 
     if (RangeMap)
     {
         memset (RangeMap, IO_INVALID_CODE, sizeof(*RangeMap) * RangeCount);
-        P->rangeMap     = RangeMap;
-        P->rangeCount   = RangeCount;
+        P->map[IO_Type_Range]   = RangeMap;
+        P->count[IO_Type_Range] = RangeCount;
     }
 }

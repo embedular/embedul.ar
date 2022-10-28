@@ -34,4 +34,4 @@ struct VIDEO_DUALCORE
 };
 
 
-bool VIDEO_DUALCORE_Init (struct VIDEO_DUALCORE *const V);
+void VIDEO_DUALCORE_Init (struct VIDEO_DUALCORE *const V);

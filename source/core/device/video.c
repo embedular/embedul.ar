@@ -25,94 +25,66 @@
 
 #include "embedul.ar/source/core/device/video.h"
 #include "embedul.ar/source/core/device/board.h"
-#include "embedul.ar/source/core/manager/storage/cache.h"
 
 
-static struct VIDEO *s_v = NULL;
-
-
-static void clearBuffer (uint8_t *buffer, const uint8_t Color)
+inline static bool validIface (const struct VIDEO_IFACE *const Iface)
 {
-    buffer += s_v->width * s_v->clipY1 + s_v->clipX1;
-
-    for (uint32_t i = 0; i < s_v->clipHeight; ++i)
-    {
-        memset (buffer, Color, s_v->clipWidth);
-        buffer += s_v->clipWidth;
-    }
+    // Required interface elements
+    // Width and height must be multiple of 8
+    return (Iface && 
+            Iface->Width && !(Iface->Width & 0x7) &&
+            Iface->Height && !(Iface->Height & 0x7) &&
+            Iface->Description &&
+            Iface->HardwareInit &&
+            Iface->ReachedVBICount &&
+            Iface->WaitForVBI);
 }
 
 
-bool VIDEO_Init (struct VIDEO *const V, const struct VIDEO_IFACE *iface)
+static uint32_t framebufferOctets (struct VIDEO *const V)
 {
-    BOARD_AssertState  (!s_v);
-    BOARD_AssertParams (V && iface);
+    return (V->iface->Width * V->iface->Height);
+}
 
-    // Required interface elements
-    BOARD_AssertInterface (iface->Description
-                            && iface->HardwareInit
-                            && iface->ReachedVBICount
-                            && iface->WaitForVBI);
+
+void VIDEO_Init (struct VIDEO *const V, const struct VIDEO_IFACE *const Iface,
+                 uint8_t *const FramebufferA, uint8_t *const FramebufferB)
+{
+    BOARD_AssertParams      (V && FramebufferA);
+    BOARD_AssertInterface   (validIface(Iface));
+
     OBJECT_Clear (V);
 
-    V->iface            = iface;
+    V->iface            = Iface;
     V->frameStartTicks  = BOARD_TicksNow ();
-    V->scanlines        = 0;
-
-    // Default font
-    VIDEO_FONT_Init (&V->font, NULL);
-
-    // Default color gradient for drawing primitives
-    VIDEO_RGB332_GradientCopy (&V->gradient, &VIDEO_RGB332_GRADIENT_DEFAULT);
-
     // Scanlines effect off
-    V->scanlines = 0;
-
+    V->scanlines        = 0;
     // Default raster lines op values
-    V->showAnd  = VIDEO_SOP_DEFAULT_SHOW_AND;
-    V->showOr   = VIDEO_SOP_DEFAULT_SHOW_OR;
-    V->scanAnd  = VIDEO_SOP_DEFAULT_SCAN_AND;
-    V->scanOr   = VIDEO_SOP_DEFAULT_SCAN_OR;
-
+    V->showAnd          = VIDEO_SOP_DEFAULT_SHOW_AND;
+    V->showOr           = VIDEO_SOP_DEFAULT_SHOW_OR;
+    V->scanAnd          = VIDEO_SOP_DEFAULT_SCAN_AND;
+    V->scanOr           = VIDEO_SOP_DEFAULT_SCAN_OR;
     // Full frame rate; wait for one vertical blanking interrupt
-    V->waitVbiCount = 1;
+    V->waitVbiCount     = 1;
+    // Initial front and back buffer
+    V->frontbuffer      = FramebufferA;
+    V->backbuffer       = FramebufferB? FramebufferB : FramebufferA;
 
-    // Instance required by interface methods
-    s_v = V;
-
-    LOG_ContextBegin (V, LANG_INIT);
     {
-        if (!V->iface->HardwareInit (V))
+        LOG_AutoContext (V, LANG_INIT);
+
+        memset (FramebufferA, 0, framebufferOctets(V));
+
+        if (FramebufferB)
         {
-            LOG_Warn (V, LANG_HARDWARE_INIT_FAILED);
-
-            s_v = NULL;
-            OBJECT_Clear (V);
-
-            return false;
+            memset (FramebufferB, 0, framebufferOctets(V));
         }
 
-        BOARD_AssertInitialized (V->bufferA && V->bufferB);
-
-        // width and height must have been initialized with a size multiple of 8
-        BOARD_AssertInitialized (V->width && V->height
-                                  && !(V->width & 0x7) && !(V->height & 0x7));
-
-        // Clipping rect to whole screen
-        V->clipX1       = 0;
-        V->clipY1       = 0;
-        V->clipX2       = V->width - 1;
-        V->clipY2       = V->height - 1;
-        V->clipWidth    = V->width;
-        V->clipHeight   = V->height;
-
-        // Initial front and back buffer
-        V->frontbuffer  = V->bufferA;
-        V->backbuffer   = V->bufferB;
+        V->iface->HardwareInit (V);
 
         LOG_Items (2,
-                        "framebuffer width" ,V->width,
-                        "height"            ,V->height);
+                        "framebuffer width" ,V->iface->Width,
+                        "height"            ,V->iface->Height);
 
         if (V->adapterSignal)
         {
@@ -134,476 +106,248 @@ bool VIDEO_Init (struct VIDEO *const V, const struct VIDEO_IFACE *iface)
             LOG_Items (1, LANG_BUILD, V->adapterBuild);
         }
     }
-    LOG_ContextEnd ();
-
-    return true;
 }
 
 
-uint8_t * VIDEO_Frontbuffer (void)
+bool VIDEO_IsValid (struct VIDEO *const V)
 {
-    BOARD_AssertState (s_v);
-    return s_v->frontbuffer;
+    return (V && validIface(V->iface))? true : false;
 }
 
 
-uint8_t * VIDEO_Backbuffer (void)
+uint8_t * VIDEO_Frontbuffer (struct VIDEO *const V)
 {
-    BOARD_AssertState (s_v);
-    return s_v->backbuffer;
+    BOARD_AssertParams (VIDEO_IsValid(V));
+    return V->frontbuffer;
 }
 
 
-uint8_t * VIDEO_BackbufferXY (const int32_t X, const int32_t Y)
+uint8_t * VIDEO_Backbuffer (struct VIDEO *const V)
 {
-    BOARD_AssertState  (s_v);
-    BOARD_AssertParams (X >= 0 && X < s_v->width && Y >= 0 && Y < s_v->height);
-
-    return &s_v->backbuffer[Y * s_v->width + X];
+    BOARD_AssertParams (VIDEO_IsValid(V));
+    return V->backbuffer;
 }
 
 
-uint32_t VIDEO_BackbufferOctets (void)
+uint8_t * VIDEO_BackbufferXY (struct VIDEO *const V, const int32_t X,
+                              const int32_t Y)
 {
-    BOARD_AssertState (s_v);
-    return s_v->width * s_v->height;
+    BOARD_AssertParams (VIDEO_IsValid(V));
+    BOARD_AssertParams (X >= 0 && X < V->iface->Width &&
+                        Y >= 0 && Y < V->iface->Height);
+
+    return &V->backbuffer[Y * V->iface->Width + X];
 }
 
 
-uint16_t VIDEO_Width (void)
+uint16_t VIDEO_Width (struct VIDEO *const V)
 {
-    BOARD_AssertState (s_v);
-    return s_v->width;
+    BOARD_AssertParams (VIDEO_IsValid(V));
+    return V->iface->Width;
 }
 
 
-uint16_t VIDEO_Height (void)
+uint16_t VIDEO_Height (struct VIDEO *const V)
 {
-    BOARD_AssertState (s_v);
-    return s_v->height;
+    BOARD_AssertParams (VIDEO_IsValid(V));
+    return V->iface->Height;
 }
 
 
-void VIDEO_SetWaitVBICount (const uint32_t Count)
+uint32_t VIDEO_GetBufferOctets (struct VIDEO *const V)
 {
-    BOARD_AssertState (s_v);
-    s_v->waitVbiCount = Count;
+    BOARD_AssertParams (VIDEO_IsValid(V));
+    return framebufferOctets (V);
 }
 
 
-void VIDEO_SetScanlines (const uint8_t Scanlines)
+void VIDEO_SetWaitVBICount (struct VIDEO *const V, const uint32_t Count)
 {
-    BOARD_AssertState (s_v);
-    s_v->scanlines = Scanlines;
+    BOARD_AssertParams (VIDEO_IsValid(V));
+    V->waitVbiCount = Count;
 }
 
 
-void VIDEO_SetScanlineOp (const enum VIDEO_SOP Op, const uint8_t Value)
+void VIDEO_SetScanlines (struct VIDEO *const V, const uint8_t Scanlines)
 {
-    BOARD_AssertState (s_v);
+    BOARD_AssertParams (VIDEO_IsValid(V));
+    V->scanlines = Scanlines;
+}
+
+
+void VIDEO_SetScanlineOp (struct VIDEO *const V, const enum VIDEO_SOP Op,
+                          const uint8_t Value)
+{
+    BOARD_AssertParams (VIDEO_IsValid(V));
 
     switch (Op)
     {
         case VIDEO_SOP_ShowAnd:
-            s_v->showAnd = Value;
+            V->showAnd = Value;
             break;
 
         case VIDEO_SOP_ShowOr:
-            s_v->showOr = Value;
+            V->showOr = Value;
             break;
 
         case VIDEO_SOP_ScanAnd:
-            s_v->scanAnd = Value;
+            V->scanAnd = Value;
             break;
 
         case VIDEO_SOP_ScanOr:
-            s_v->scanOr = Value;
+            V->scanOr = Value;
             break;
     }
 }
 
 
-void VIDEO_ResetScanlineOp (const enum VIDEO_SOP Op)
+void VIDEO_ResetScanlineOp (struct VIDEO *const V, const enum VIDEO_SOP Op)
 {
     switch (Op)
     {
         case VIDEO_SOP_ShowAnd:
-            VIDEO_SetScanlineOp (Op, VIDEO_SOP_DEFAULT_SHOW_AND);
+            VIDEO_SetScanlineOp (V, Op, VIDEO_SOP_DEFAULT_SHOW_AND);
             break;
 
         case VIDEO_SOP_ShowOr:
-            VIDEO_SetScanlineOp (Op, VIDEO_SOP_DEFAULT_SHOW_OR);
+            VIDEO_SetScanlineOp (V, Op, VIDEO_SOP_DEFAULT_SHOW_OR);
             break;
 
         case VIDEO_SOP_ScanAnd:
-            VIDEO_SetScanlineOp (Op, VIDEO_SOP_DEFAULT_SCAN_AND);
+            VIDEO_SetScanlineOp (V, Op, VIDEO_SOP_DEFAULT_SCAN_AND);
             break;
 
         case VIDEO_SOP_ScanOr:
-            VIDEO_SetScanlineOp (Op, VIDEO_SOP_DEFAULT_SCAN_OR);
+            VIDEO_SetScanlineOp (V, Op, VIDEO_SOP_DEFAULT_SCAN_OR);
             break;
     }
 }
 
 
-void VIDEO_ResetAllScanlineOps (void)
+void VIDEO_ResetAllScanlineOps (struct VIDEO *const V)
 {
-    VIDEO_ResetScanlineOp (VIDEO_SOP_ShowAnd);
-    VIDEO_ResetScanlineOp (VIDEO_SOP_ShowOr);
-    VIDEO_ResetScanlineOp (VIDEO_SOP_ScanAnd);
-    VIDEO_ResetScanlineOp (VIDEO_SOP_ScanOr);
+    VIDEO_ResetScanlineOp (V, VIDEO_SOP_ShowAnd);
+    VIDEO_ResetScanlineOp (V, VIDEO_SOP_ShowOr);
+    VIDEO_ResetScanlineOp (V, VIDEO_SOP_ScanAnd);
+    VIDEO_ResetScanlineOp (V, VIDEO_SOP_ScanOr);
 }
 
 
 // Dont swap buffers (on current frame only)
-void VIDEO_SwapOverride (void)
+void VIDEO_SwapOverride (struct VIDEO *const V)
 {
-    BOARD_AssertState (s_v);
-    s_v->swapOverride = true;
+    BOARD_AssertParams (VIDEO_IsValid(V));
+    V->swapOverride = true;
 }
 
 
 // Copy last backbuffer to the next backbuffer (on current frame only)
-void VIDEO_CopyFrame (void)
+void VIDEO_CopyFrame (struct VIDEO *const V)
 {
-    BOARD_AssertState (s_v);
-    s_v->copyFrame = true;
+    BOARD_AssertParams (VIDEO_IsValid(V));
+    V->copyFrame = true;
 }
 
 
-/*
-    replaces the entire backbuffer with an equally-sized cached element.
-    TODO: restrict drawing to the screen clipping region?
-*/
-void VIDEO_CopyCachedFrame (const uint32_t CachedElement)
+bool VIDEO_ReachedVBICount (struct VIDEO *const V)
 {
-    BOARD_AssertState (s_v);
-
-    s_v->copyFrame = true;
-
-    if (!STORAGE_ValidVolume (STORAGE_Role_LinearCache))
-    {
-        LOG_WarnDebug (s_v, LANG_NO_LINEAR_CACHE);
-
-        // Yellow = no valid volume
-        clearBuffer (s_v->backbuffer, 0xFC);
-        return;
-    }
-
-    // No element to fulfill the request
-    if (CachedElement >= STORAGE_CachedElementsCount())
-    {
-        LOG_WarnDebug (s_v, LANG_CACHED_ELEMENT_NOT_FOUND);
-        LOG_Items (1, LANG_CACHED_ELEMENT, CachedElement);
-
-        // Violet = invalid element
-        clearBuffer (s_v->backbuffer, 0xE3);
-        return;
-    }
-
-    // Using backbuffer as a sector buffer. Its entire contents should be
-    // overwritten by the cached element.
-    struct STORAGE_CACHE_ElementInfo info;
-
-    if (STORAGE_CACHE_ElementInfo(&info, CachedElement, s_v->backbuffer, 1)
-        == RAWSTOR_Status_Result_Ok)
-    {
-        BOARD_AssertParams (info.octets == s_v->width * s_v->height);
-
-        if (STORAGE_CACHE_ElementData(&info, 0, 0, s_v->backbuffer, 1)
-            == RAWSTOR_Status_Result_Ok)
-        {
-            return;
-        }
-    }
-
-    // Red = cache read error
-    clearBuffer (s_v->backbuffer, 0xE0);
+    BOARD_AssertParams (VIDEO_IsValid(V));
+    return V->iface->ReachedVBICount (V);
 }
 
 
-bool VIDEO_ReachedVBICount (void)
+void VIDEO_WaitForVBI (struct VIDEO *const V)
 {
-    BOARD_AssertState (s_v);
-    return s_v->iface->ReachedVBICount (s_v);
+    BOARD_AssertParams (VIDEO_IsValid(V));
+    V->iface->WaitForVBI (V);
 }
 
 
-void VIDEO_WaitForVBI (void)
+void VIDEO_NextFrame (struct VIDEO *const V)
 {
-    BOARD_AssertState (s_v);
-    s_v->iface->WaitForVBI (s_v);
-}
-
-
-void VIDEO_NextFrame (void)
-{
-    BOARD_AssertState (s_v);
+    BOARD_AssertParams (VIDEO_IsValid(V));
 
     // frameEnd/Transition/Begin are interface optional notifications
-    if (s_v->iface->FrameEnd)
+    if (V->iface->FrameEnd)
     {
-        s_v->iface->FrameEnd (s_v);
+        V->iface->FrameEnd (V);
     }
 
-    s_v->lastFrameBusy = BOARD_TicksNow() - s_v->frameStartTicks;
+    V->lastFrameBusy = BOARD_TicksNow() - V->frameStartTicks;
 
     // Required interface implementation
-    s_v->iface->WaitForVBI (s_v);
+    V->iface->WaitForVBI (V);
 
-    const uint8_t * LastFront = s_v->frontbuffer;
-    const uint8_t * LastBack = s_v->backbuffer;
+    const uint8_t * LastFront = V->frontbuffer;
+    const uint8_t * LastBack = V->backbuffer;
     (void) LastFront;
 
-    // Swap buffers
-    if (s_v->swapOverride)
+    // Swap buffers override
+    if (V->swapOverride)
     {
-        // Swap override and copy valid on requested frame only
-        s_v->swapOverride = false;
+        // Request valid on current frame only
+        V->swapOverride = false;
     }
     else
     {
-        uint8_t *const B = s_v->frontbuffer;
-        s_v->frontbuffer = s_v->backbuffer;
-        s_v->backbuffer = B;
+        // Swap buffers
+        uint8_t *const B = V->frontbuffer;
+        V->frontbuffer = V->backbuffer;
+        V->backbuffer = B;
     }
 
-    s_v->lastFramePeriod = BOARD_TicksNow() - s_v->frameStartTicks;
-    s_v->frameStartTicks = BOARD_TicksNow();
+    V->lastFramePeriod = BOARD_TicksNow() - V->frameStartTicks;
+    V->frameStartTicks = BOARD_TicksNow();
 
-    if (s_v->iface->FrameTransition)
+    if (V->iface->FrameTransition)
     {
-        s_v->iface->FrameTransition (s_v);
+        V->iface->FrameTransition (V);
     }
     else 
     {
-        ++ s_v->frameNumber;
+        ++ V->frameNumber;
     }
 
-    if (s_v->copyFrame)
+    if (V->copyFrame)
     {
-        memcpy (s_v->backbuffer, LastBack, s_v->width * s_v->height);
-        s_v->copyFrame = false;
+        V->copyFrame = false;
+
+        if (V->backbuffer != LastBack)
+        {
+            memcpy (V->backbuffer, LastBack, framebufferOctets(V));
+        }
     }
 
-    if (s_v->iface->FrameBegin)
+
+    if (V->iface->FrameBegin)
     {
-        s_v->iface->FrameBegin (s_v);
+        V->iface->FrameBegin (V);
     }
 }
 
 
-uint32_t VIDEO_FrameNumber (void)
+uint32_t VIDEO_FrameNumber (struct VIDEO *const V)
 {
-    BOARD_AssertState (s_v);
-    return s_v->frameNumber;
+    BOARD_AssertParams (VIDEO_IsValid(V));
+    return V->frameNumber;
 }
 
 
-void VIDEO_ClearBack (const uint8_t Color)
+void VIDEO_Shutdown (struct VIDEO *const V)
 {
-    BOARD_AssertState (s_v);
-    clearBuffer (s_v->backbuffer, Color);
-}
+    BOARD_AssertParams (VIDEO_IsValid(V));
 
-
-void VIDEO_ClearFront (const uint8_t Color)
-{
-    BOARD_AssertState (s_v);
-    clearBuffer (s_v->frontbuffer, Color);
-}
-
-
-void VIDEO_Zap (const uint8_t Color)
-{
-    VIDEO_ClearFront (Color);
-    VIDEO_ClearBack  (Color);
-}
-
-
-const struct VIDEO_FONT * VIDEO_Font (void)
-{
-    BOARD_AssertState (s_v);
-    return &s_v->font;
-}
-
-
-const struct VIDEO_RGB332_Gradient * VIDEO_Gradient (void)
-{
-    BOARD_AssertState (s_v);
-    return &s_v->gradient;
-}
-
-
-void VIDEO_GradientShift (const int8_t Delta)
-{
-    BOARD_AssertState (s_v);
-    VIDEO_RGB332_GradientShift (&s_v->gradient, Delta);
-}
-
-
-void VIDEO_ClippingRect (const uint16_t X1, const uint16_t Y1,
-                         const uint16_t X2, const uint16_t Y2)
-{
-    BOARD_AssertState  (s_v);
-    BOARD_AssertParams (X1 <= X2 && X2 < s_v->width &&
-                         Y1 <= Y2 && Y2 < s_v->height);
-    
-    s_v->clipX1     = X1;
-    s_v->clipY1     = Y1;
-    s_v->clipX2     = X2;
-    s_v->clipY2     = Y2;
-    s_v->clipWidth  = X2 - X1 + 1;
-    s_v->clipHeight = Y2 - Y1 + 1;
-}
-
-
-uint16_t VIDEO_ClipWidth (void)
-{
-    BOARD_AssertState (s_v);
-    return s_v->clipWidth;
-}
-
-
-uint16_t VIDEO_ClipHeight (void)
-{
-    BOARD_AssertState (s_v);
-    return s_v->clipHeight;
-}
-
-
-uint16_t VIDEO_ClipX1 (void)
-{
-    BOARD_AssertState (s_v);
-    return s_v->clipX1;
-}
-
-
-uint16_t VIDEO_ClipX2 (void)
-{
-    BOARD_AssertState (s_v);
-    return s_v->clipX2;
-}
-
-
-uint16_t VIDEO_ClipY1 (void)
-{
-    BOARD_AssertState (s_v);
-    return s_v->clipY1;
-}
-
-
-uint16_t VIDEO_ClipY2 (void)
-{
-    BOARD_AssertState (s_v);
-    return s_v->clipY2;
-}
-
-
-bool VIDEO_ScreenPointClipped (const int32_t X, const int32_t Y)
-{
-    BOARD_AssertState (s_v);
-
-    if (X < s_v->clipX1 || X > s_v->clipX2 ||
-        Y < s_v->clipY1 || Y > s_v->clipY2)
+    if (V->iface->Shutdown)
     {
-        return true;
+        V->iface->Shutdown (V);
     }
 
-    return false;
+    V->iface = NULL;
 }
 
 
-int32_t VIDEO_ScreenToClipX (const int32_t X)
+const char * VIDEO_Description (struct VIDEO *const V)
 {
-    BOARD_AssertState (s_v);
-    return (X - s_v->clipX1);
-}
-
-
-int32_t VIDEO_ScreenToClipY (const int32_t Y)
-{
-    BOARD_AssertState (s_v);
-    return (Y - s_v->clipY1);
-}
-
-
-int32_t VIDEO_ClipToScreenX (const int32_t Cx)
-{
-    BOARD_AssertState (s_v);
-    return (Cx + s_v->clipX1);
-}
-
-
-int32_t VIDEO_ClipToScreenY (const int32_t Cy)
-{
-    BOARD_AssertState (s_v);
-    return (Cy + s_v->clipY1);
-}
-
-
-bool VIDEO_ClipIsInside (const int32_t Cx, const int32_t Cy,
-                         const uint16_t Width, const uint16_t Height)
-{
-    BOARD_AssertState (s_v);
-
-    if (Cx <= -(int32_t)Width  || Cx >= s_v->clipWidth ||
-        Cy <= -(int32_t)Height || Cy >= s_v->clipHeight)
-    {
-        return false;
-    }
-
-    return true;
-}
-
-
-bool VIDEO_Clip (const int32_t Cx, const int32_t Cy,
-                 const uint16_t Width, const uint16_t Height,
-                 struct VIDEO_Clip *c)
-{
-    c->cx           = Cx;
-    c->cy           = Cy;
-    c->xLeft        = 0;
-    c->xRight       = Width;
-    c->yTop         = 0;
-    c->yBottom      = Height;
-    c->flags        = 0;
-
-    if (Cx < 0)
-    {
-        c->xLeft    = -Cx;
-        c->cx       = 0;
-        c->flags    |= VIDEO_CLIP_LEFT;
-    }
-
-    if (Cx > VIDEO_ClipWidth() - Width)
-    {
-        c->xRight   = VIDEO_ClipWidth() - Cx;
-        c->flags    |= VIDEO_CLIP_RIGHT;
-    }
-
-    if (Cy < 0)
-    {
-        c->yTop     = -Cy;
-        c->cy       = 0;
-        c->flags    |= VIDEO_CLIP_TOP;
-    }
-
-    if (Cy > VIDEO_ClipHeight() - Height)
-    {
-        c->yBottom  = VIDEO_ClipHeight() - Cy;
-        c->flags    |= VIDEO_CLIP_BOTTOM;
-    }
-
-    c->cWidth  = c->xRight - c->xLeft;
-    c->cHeight = c->yBottom - c->yTop;
-
-    return c->flags? true : false;
-}
-
-
-const char * VIDEO_Description (void)
-{
-    BOARD_AssertState (s_v && s_v->iface && s_v->iface->Description);
-    return s_v->iface->Description;
+    BOARD_AssertParams (VIDEO_IsValid(V));
+    return V->iface->Description;
 }

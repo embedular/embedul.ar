@@ -35,10 +35,13 @@
 
 #define OUTPUT_MAX_GATEWAYS      LIB_EMBEDULAR_CONFIG_OUTPUT_MAX_GATEWAYS
 
+#define OUTPUT_PARAMS(_pname,_ptype,_pid) \
+    OUTPUT_PROFILE_Type_ ## _pname, \
+    IO_Type_ ## _ptype, \
+    OUTPUT_PROFILE_ ## _pname ## _ ## _ptype ## _ ## _pid
+
 #define OUTPUT_MAP(_pname,_ptype,_pid,_drv_index) \
-    OUTPUT_Map ## _ptype (OUTPUT_PROFILE_Type_ ## _pname, \
-                    OUTPUT_PROFILE_ ## _pname ## _ ## _ptype ## _ ## _pid, \
-                    _drv_index)
+    OUTPUT_Map (OUTPUT_PARAMS(_pname,_ptype,_pid), _drv_index)
 
 #define OUTPUT_MAP_BIT(_pname,_pid,_drv_index) \
     OUTPUT_MAP (_pname,Bit,_pid,_drv_index)
@@ -46,16 +49,17 @@
 #define OUTPUT_MAP_RANGE(_pname,_pid,_drv_index) \
     OUTPUT_MAP (_pname,Range,_pid,_drv_index)
 
+#define OUTPUT_IS_MAPPED(_pname,_ptype,_pid) \
+    OUTPUT_IsMapped (OUTPUT_PARAMS(_pname,_ptype,_pid))
+
 #define OUTPUT_BIT_IS_MAPPED(_pname,_pid) \
     OUTPUT_IS_MAPPED(_pname,Bit,_pid)
 
 #define OUTPUT_RANGE_IS_MAPPED(_pname,_pid) \
     OUTPUT_IS_MAPPED(_pname,Range,_pid)
 
-#define OUTPUT_SET(_pname,_ptype,_update,_pid,_value) \
-    OUTPUT_Set ## _ptype ## _update (OUTPUT_PROFILE_Type_ ## _pname, \
-                    OUTPUT_PROFILE_ ## _pname ## _ ## _ptype ## _ ## _pid, \
-                    _value)
+#define OUTPUT_SET(_pname,_ptype,_when,_pid,_value) \
+    OUTPUT_Set ## _when (OUTPUT_PARAMS(_pname,_ptype,_pid),_value)
 
 #define OUTPUT_SET_BIT_NOW(_pname,_pid,_value) \
     OUTPUT_SET(_pname,Bit,Now,_pid,_value)
@@ -75,55 +79,57 @@ struct OUTPUT
     struct OUTPUT_PROFILE   profiles    [OUTPUT_PROFILE_Type__COUNT];
     struct IO_Gateway       gateways    [OUTPUT_MAX_GATEWAYS];
     IO_GatewayId            nextGatewayId;
+    enum IO_MapAction       currentMapAction;
 };
 
 
 enum OUTPUT_UpdateValue
 {
-    OUTPUT_UpdateValue_Now = 0,
-    OUTPUT_UpdateValue_Defer
+    OUTPUT_UpdateValue_Now = IO_UpdateValue_Now,
+    OUTPUT_UpdateValue_Defer = IO_UpdateValue_Async
 };
 
 
 void            OUTPUT_Init             (struct OUTPUT *const O);
-void            OUTPUT_SetGateway       (struct IO *const Driver,
+void            OUTPUT_RegisterGateway  (struct IO *const Driver,
                                          const IO_Port DriverPort);
+void            OUTPUT_CurrentMapAction (const enum IO_MapAction MapAction);
 bool            OUTPUT_HasProfile       (const enum OUTPUT_PROFILE_Type
                                          ProfileType);
-uint32_t        OUTPUT_ProfileBits      (const enum OUTPUT_PROFILE_Type
-                                         ProfileType);
-uint32_t        OUTPUT_ProfileRanges    (const enum OUTPUT_PROFILE_Type
-                                         ProfileType);
-void            OUTPUT_MapBit           (const enum OUTPUT_PROFILE_Type
-                                         ProfileType, const IO_Code ProfileCode,
-                                         const IO_Code DriverCode);
-void            OUTPUT_MapRange         (const enum OUTPUT_PROFILE_Type
-                                         ProfileType, const IO_Code ProfileCode,
-                                         const IO_Code DriverCode);
-void            OUTPUT_SetBit           (const enum OUTPUT_PROFILE_Type
-                                         ProfileType, const IO_Code ProfileCode,
-                                         const uint32_t Value,
-                                         const enum OUTPUT_UpdateValue When);
-void            OUTPUT_SetBitNow        (const enum OUTPUT_PROFILE_Type
-                                         ProfileType, const IO_Code ProfileCode,
-                                         const uint32_t Value);
-void            OUTPUT_SetBitDefer      (const enum OUTPUT_PROFILE_Type
-                                         ProfileType, const IO_Code ProfileCode,
-                                         const uint32_t Value);
-void            OUTPUT_SetRange         (const enum OUTPUT_PROFILE_Type
-                                         ProfileType, const IO_Code ProfileCode,
-                                         const uint32_t Value,
-                                         const enum OUTPUT_UpdateValue When);
-void            OUTPUT_SetRangeNow      (const enum OUTPUT_PROFILE_Type
-                                         ProfileType, const IO_Code ProfileCode,
-                                         const uint32_t Value);
-void            OUTPUT_SetRangeDefer    (const enum OUTPUT_PROFILE_Type
-                                         ProfileType, const IO_Code ProfileCode,
-                                         const uint32_t Value);
-const char *    OUTPUT_MappedBitName    (const enum OUTPUT_PROFILE_Type
+uint32_t        OUTPUT_ProfileCodes     (const enum OUTPUT_PROFILE_Type
                                          ProfileType,
+                                         const enum IO_Type IoType);
+bool            OUTPUT_IsMapped         (const enum OUTPUT_PROFILE_Type
+                                         ProfileType, const enum IO_Type IoType,
                                          const IO_Code ProfileCode);
-const char *    OUTPUT_MappedRangeName  (const enum OUTPUT_PROFILE_Type
-                                         ProfileType, 
+void            OUTPUT_Map              (const enum OUTPUT_PROFILE_Type
+                                         ProfileType, const enum IO_Type IoType,
+                                         const IO_Code ProfileCode,
+                                         const IO_Code DriverCode);
+void            OUTPUT_Set              (const enum OUTPUT_PROFILE_Type
+                                         ProfileType, const enum IO_Type IoType,
+                                         const IO_Code ProfileCode,
+                                         const IO_Value Value,
+                                         const enum OUTPUT_UpdateValue When);
+void            OUTPUT_SetNow           (const enum OUTPUT_PROFILE_Type
+                                         ProfileType, const enum IO_Type IoType,
+                                         const IO_Code ProfileCode,
+                                         const IO_Value Value);
+void            OUTPUT_SetDefer         (const enum OUTPUT_PROFILE_Type
+                                         ProfileType, const enum IO_Type IoType,
+                                         const IO_Code ProfileCode,
+                                         const IO_Value Value);
+const char *    OUTPUT_MappedName       (const enum OUTPUT_PROFILE_Type
+                                         ProfileType, const enum IO_Type IoType,
                                          const IO_Code ProfileCode);
 void            OUTPUT_Update           (void);
+IO_Code         OUTPUT__isMappedByDriver
+                                        (const enum OUTPUT_PROFILE_Type
+                                         ProfileType, const enum IO_Type IoType,
+                                         const IO_Code ProfileCode,
+                                         const struct IO *const Driver);
+struct IO_ConstGateway
+                OUTPUT__getMappedGateway
+                                        (const enum OUTPUT_PROFILE_Type
+                                         ProfileType, const enum IO_Type IoType,
+                                         const IO_Code ProfileCode);

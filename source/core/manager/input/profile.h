@@ -141,6 +141,7 @@ enum INPUT_PROFILE_SelectFlag
     INPUT_PROFILE_SelectFlag_GP2        = 0x04,
     INPUT_PROFILE_SelectFlag_LIGHTDEV   = 0x08,
     INPUT_PROFILE_SelectFlag_MAIN       = 0x10,
+    INPUT_PROFILE_SelectFlag__ALL       = 0x1F,
     INPUT_PROFILE_SelectFlag__BUTTONS
                                         = (INPUT_PROFILE_SelectFlag_GP1 |
                                            INPUT_PROFILE_SelectFlag_GP2 |
@@ -164,11 +165,9 @@ extern const char * INPUT_PROFILE_TypeString[INPUT_PROFILE_Type__COUNT];
 
 struct INPUT_PROFILE
 {
-    struct IO_PROFILE_Map   * bitMap;
+    struct IO_PROFILE_Map   * map[IO_Type__COUNT];
     struct INPUT_ACTION     * bitAction;
-    struct IO_PROFILE_Map   * rangeMap;
-    uint16_t                bitCount;
-    uint16_t                rangeCount;
+    uint16_t                count[IO_Type__COUNT];
 };
 
 
@@ -176,7 +175,8 @@ const char * INPUT_PROFILE_GetTypeName (enum INPUT_PROFILE_Type ProfileType);
 
 
 void INPUT_PROFILE__attach (
-    struct INPUT_PROFILE ProfilesArray[static const INPUT_PROFILE_Type__COUNT],
+    struct INPUT_PROFILE ProfilesArray
+        [static const INPUT_PROFILE_Type__COUNT],
     const enum INPUT_PROFILE_Type ProfileType,
     struct IO_PROFILE_Map *const BitMap,
     struct INPUT_ACTION *const BitAction,

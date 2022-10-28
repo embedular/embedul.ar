@@ -55,8 +55,7 @@ void INPUT_PROFILE__attach (
     BOARD_AssertParams (ProfilesArray &&
                         ProfileType < INPUT_PROFILE_Type__COUNT);
 
-    BOARD_AssertParams ((BitAction && (BitMap && BitCount)) ||
-                        !BitAction);
+    BOARD_AssertParams ((BitAction && (BitMap && BitCount)) || !BitAction);
 
     BOARD_AssertParams ((BitMap && BitCount) || (RangeMap && RangeCount));
 
@@ -66,20 +65,20 @@ void INPUT_PROFILE__attach (
     if (BitMap)
     {
         memset (BitMap, IO_INVALID_CODE, sizeof(*BitMap) * BitCount);
-        P->bitMap       = BitMap;
-        P->bitCount     = BitCount;
+        P->map[IO_Type_Bit]     = BitMap;
+        P->count[IO_Type_Bit]   = BitCount;
     }
 
     if (BitAction)
     {
         memset (BitAction, 0, sizeof(*BitAction) * BitCount);
-        P->bitAction    = BitAction;
+        P->bitAction = BitAction;
     }
 
     if (RangeMap)
     {
         memset (RangeMap, IO_INVALID_CODE, sizeof(*RangeMap) * RangeCount);
-        P->rangeMap     = RangeMap;
-        P->rangeCount   = RangeCount;
+        P->map[IO_Type_Range]   = RangeMap;
+        P->count[IO_Type_Range] = RangeCount;
     }
 }

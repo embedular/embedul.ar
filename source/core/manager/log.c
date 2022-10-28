@@ -613,7 +613,7 @@ uint32_t LOG_ProgressBegin (const enum LOG_ProgressType Type)
 
 
 uint32_t LOG_ProgressUpdate (const uint32_t OutColumn,
-                                    const uint32_t Progress)
+                             const uint32_t Progress)
 {
     BOARD_AssertInitialized (s_l);
     BOARD_AssertParams (Progress <= LOG_ProgressMax());

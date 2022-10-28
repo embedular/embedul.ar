@@ -180,7 +180,7 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
         }
 
         case BOARD_Stage_InitIOLevel1Drivers:
-        {   
+        {
             IO_BOARD_Init   (&R->ioBoard);
             IO_BOARD_Attach (&R->ioBoard);
             break;
@@ -225,8 +225,9 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
 
         case BOARD_Stage_InitIOLevel2Drivers:
         {
-            LOG_ContextBegin (B, "available expansion modules");
             {
+                LOG_AutoContext (B, "available expansion modules");
+
                 LOG_PendingBegin (B, "genesis module");
                 if (Board_DetectedStackPortModules (BOARD_SP_GENESIS))
                 {
@@ -280,17 +281,14 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
                     LOG_PendingEndFail ();
                 }
             }
-            LOG_ContextEnd ();
-
             break;
         }
 
-        case BOARD_Stage_InitVideoDriver:
+        case BOARD_Stage_InitScreenDrivers:
         {
-            if (VIDEO_DUALCORE_Init (&R->videoDualcore))
-            {
-                return &R->videoDualcore;
-            }
+            VIDEO_DUALCORE_Init (&R->videoDualcore);
+            SCREEN_RegisterDevice (SCREEN_Role_Primary,
+                                    (struct VIDEO *)&R->videoDualcore);
             break;
         }
 
@@ -302,12 +300,17 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
             return &R->soundPcm5100;
         }
 
+        case BOARD_Stage_InitIOLevel3Drivers:
+        {
+            break;
+        }
+
         case BOARD_Stage_Ready:
         {
             break;
         }
 
-        case BOARD_Stage_Shutdown:
+        case BOARD_Stage_ShutdownHardware:
         {
             while (1)
             {

@@ -84,7 +84,7 @@ struct STORAGE_FailedRequests
 struct STORAGE
 {
     struct STORAGE_Volume               volume[STORAGE_Role__COUNT];
-    uint32_t                            volumesSet;
+    uint32_t                            registeredVolumes;
     struct STORAGE_RWSectorRequests     rwRequests;
     struct STORAGE_FailedRequests       failedRequests;
     uint32_t                            cachedElementsCount;
@@ -97,10 +97,10 @@ struct STORAGE
 
 void        STORAGE_Init                (struct STORAGE *const S);
 void        STORAGE_SetDevice           (struct RAWSTOR *const Driver);
-void        STORAGE_SetVolume           (const enum STORAGE_Role Role,
+void        STORAGE_RegisterVolume           (const enum STORAGE_Role Role,
                                          struct RAWSTOR *const Driver,
                                          const uint8_t PartitionNr);
-uint32_t    STORAGE_VolumesSet          (void);
+uint32_t    STORAGE_RegisteredVolumes          (void);
 bool        STORAGE_ValidVolume         (const enum STORAGE_Role Role);
 struct STORAGE_VolumeInfo
             STORAGE_VolumeInfo          (const enum STORAGE_Role Role);
