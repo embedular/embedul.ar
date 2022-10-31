@@ -70,3 +70,5 @@ else
     # No video framebuffer
     LDFLAGS += -T $(LD_ROOT)/lpc4337jbd144_memory.ld
 endif
+
+OBJS += $(TARGET_ARCH)/shared/syscalls.o

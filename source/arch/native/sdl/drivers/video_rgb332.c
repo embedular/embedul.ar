@@ -162,8 +162,11 @@ static void updateScreen (struct VIDEO *const V)
 
     unlockSurface (S->displayBuffer);
 
-    SDL_BlitSurface         (S->displayBuffer, NULL, S->displaySurface, NULL);
-    SDL_UpdateWindowSurface (S->displayWindow);
+    SDL_BlitSurface (S->displayBuffer, NULL, S->displaySurface, NULL);
+    
+    const int Result = SDL_UpdateWindowSurface (S->displayWindow);
+
+    BOARD_AssertState (!Result);
 }
 
 

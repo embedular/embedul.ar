@@ -270,8 +270,9 @@ IO_Value INPUT_GetNow (const enum INPUT_PROFILE_Type ProfileType,
 }
 
 
-IO_Value INPUT_GetBuffer (const enum INPUT_PROFILE_Type ProfileType,
-                          const enum IO_Type IoType, const IO_Code ProfileCode)
+IO_Value INPUT_GetBuffered (const enum INPUT_PROFILE_Type ProfileType,
+                            const enum IO_Type IoType,
+                            const IO_Code ProfileCode)
 {
     return INPUT_Get (ProfileType, IoType, ProfileCode,
                       INPUT_UpdateValue_Buffer);
@@ -374,7 +375,7 @@ void INPUT_Update (void)
         {
             for (uint32_t pcode = 0; pcode < P->count[IO_Type_Bit]; ++pcode)
             {
-                const bool Status = INPUT_GetBuffer(t, IO_Type_Bit, pcode)?
+                const bool Status = INPUT_GetBuffered(t, IO_Type_Bit, pcode)?
                                                     true : false;
                 INPUT_ACTION_Update (&P->bitAction[pcode], Status);
             }

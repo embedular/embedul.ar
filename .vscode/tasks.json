@@ -52,6 +52,7 @@
             "type": "pickString",
             "description": "Framework example",
             "options": [
+                "freertos_book_2_6",
                 "log_hello_world",
                 "log_functions",
                 "log_context",

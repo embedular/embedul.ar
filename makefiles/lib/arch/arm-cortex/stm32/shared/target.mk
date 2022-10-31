@@ -42,3 +42,5 @@ FLASH_TOOL ?= openocd-elf
 
 # OpenOCD configuration file
 OPENOCD_CFG := $(TARGET_FAMILY)/openocd/$(TARGET_BOARD).cfg
+
+OBJS += $(TARGET_ARCH)/shared/syscalls.o

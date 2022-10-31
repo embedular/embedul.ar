@@ -87,7 +87,7 @@ bool SEQUENCE_Update (struct SEQUENCE *const S)
                     break;
 
                 case SEQUENCE_InputType_Bit:
-                    exitStage = INPUT_GetBuffer (Stage->input.profileType,
+                    exitStage = INPUT_GetBuffered (Stage->input.profileType,
                                                  IO_Type_Bit,
                                                  Stage->input.profileCode);
                     break;
@@ -107,7 +107,7 @@ bool SEQUENCE_Update (struct SEQUENCE *const S)
 
                 case SEQUENCE_InputType_Range:
                 {
-                    IO_Value Value = INPUT_GetBuffer (Stage->input.profileType,
+                    IO_Value Value = INPUT_GetBuffered (Stage->input.profileType,
                                                       IO_Type_Range,
                                                       Stage->input.profileCode);
                     exitStage = (Value >= Stage->input.rangeMin &&

@@ -416,7 +416,7 @@ bool BOARD_INIT_InputCountdown (const enum INPUT_PROFILE_Type ProfileType,
             lastOutColumn = LOG_ProgressUpdate (lastOutColumn, Col);
         }
 
-        lastBitBuffer = INPUT_GetBuffer(ProfileType, IO_Type_Bit, ProfileCode);
+        lastBitBuffer = INPUT_GetBuffered(ProfileType, IO_Type_Bit, ProfileCode);
     }
     while (!lastBitBuffer && Timeout > BOARD_TicksNow());
 

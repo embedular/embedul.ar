@@ -8,10 +8,12 @@ $(call emb_need_var,EXAMPLE)
 $(call emb_need_dir,./examples/$(EXAMPLE),'$(EXAMPLE)' example)
 $(call emb_info,Compiling example '$(EXAMPLE)')
 
-# Optional example Makefile params
--include ./examples/$(EXAMPLE)/config.mk
-
 APP_OBJS += \
     ./examples/$(EXAMPLE)/main.o
+
+#$(CONFIG)
+
+# Optional example Makefile params
+-include ./examples/$(EXAMPLE)/example.mk
 
 $(BUILD)

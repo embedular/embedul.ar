@@ -77,7 +77,7 @@
 #define INPUT_GET_BIT_NOW(_pname,_pid) \
     INPUT_GET(_pname,Bit,Now,_pid)
 
-#define INPUT_GET_BIT_BUFFER(_pname,_pid) \
+#define INPUT_GET_BIT_BUFFERED(_pname,_pid) \
     INPUT_GET(_pname,Bit,Buffer,_pid)
 
 #define INPUT_GET_BIT_ACTION(_pname,_pid) \
@@ -137,7 +137,7 @@ IO_Value        INPUT_Get               (const enum INPUT_PROFILE_Type
 IO_Value        INPUT_GetNow            (const enum INPUT_PROFILE_Type
                                          ProfileType, const enum IO_Type IoType, 
                                          const IO_Code ProfileCode);
-IO_Value        INPUT_GetBuffer         (const enum INPUT_PROFILE_Type
+IO_Value        INPUT_GetBuffered       (const enum INPUT_PROFILE_Type
                                          ProfileType, const enum IO_Type IoType,
                                          const IO_Code ProfileCode);
 #if (LIB_EMBEDULAR_CONFIG_INPUT_ACTION == 1)

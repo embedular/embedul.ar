@@ -63,7 +63,11 @@ ifneq ($(findstring cortex-m,$(CPU_MODEL)),)
 else
     ifeq ($(CPU_MODEL),generic)
         LIB_FREERTOS_PORT := ThirdParty/GCC/Posix
-	else
+        CFLAGS += -I$(LIB_FREERTOS_PORT)/utils
+        CFLAGS += -D'projCOVERAGE_TEST=0'
+        OBJS += $(LIB_FREERTOS)/portable/$(LIB_FREERTOS_PORT)/utils/wait_for_event.o
+        LDFLAGS += -lpthread
+    else
         $(call emb_error,Unknown architecture for CPU_MODEL '$(CPU_MODEL)')
 	endif
 endif
