@@ -29,6 +29,7 @@ $(call emb_must_precede,Makefile build.mk)
 VERBOSE ?= no
 DEBUG ?= yes
 OLEVEL ?= 0
+GLEVEL ?= 
 
 # Framework base directory, environment variable.
 $(call emb_need_var,LIB_EMBEDULAR_PATH)

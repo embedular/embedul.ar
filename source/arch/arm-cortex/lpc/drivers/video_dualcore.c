@@ -392,13 +392,13 @@ static bool loadVideoAdapter (struct VIDEO *const V)
 
     // Wait for 5 vbi cycles in less than 200 ms to confirm adapter execution
     // Timeout must account for time spent at adapter initialization.
-    const TIMER_Ticks Timeout = BOARD_TicksNow() + 200;
+    const TIMER_Ticks Timeout = TICKS_Now() + 200;
 
     do
     {
         __WFI ();
 
-        if (BOARD_TicksNow() >= Timeout)
+        if (TICKS_Now() >= Timeout)
         {
             LOG_Warn (V, VIDEO_ADAPTER_MALFUNCTION_STR);
 

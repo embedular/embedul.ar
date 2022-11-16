@@ -174,12 +174,12 @@ static bool waitForCardReady (struct RAWSTOR_SD_1BIT *const S, uint32_t timeout)
 {
 	uint8_t d;
     
-	timeout += BOARD_TicksNow();
+	timeout += TICKS_Now();
 	do
     {
 		d = recvOctet (S);
     }
-	while (d != 0xFF && BOARD_TicksNow() < timeout);
+	while (d != 0xFF && TICKS_Now() < timeout);
 
 	return (d == 0xFF)? true : false;
 }
@@ -250,7 +250,7 @@ static bool powerStatus (struct RAWSTOR_SD_1BIT *const S)
 static bool recvCardDatablock (struct RAWSTOR_SD_1BIT *const S, 
                                uint8_t *const Data, const uint32_t Size)
 {
-    const TIMER_Ticks Timeout = BOARD_TicksNow() + DATASTART_TOKEN_TIMEOUT;
+    const TIMER_Ticks Timeout = TICKS_Now() + DATASTART_TOKEN_TIMEOUT;
 	uint8_t token;
 
     // Wait until DataStart token or timeout
@@ -258,7 +258,7 @@ static bool recvCardDatablock (struct RAWSTOR_SD_1BIT *const S,
     {
 		token = recvOctet (S);
 	} 
-    while (token == 0xFF && BOARD_TicksNow() < Timeout);
+    while (token == 0xFF && TICKS_Now() < Timeout);
 
     // Function fails if invalid DataStart token or timeout
 	if (token != 0xFE)
@@ -436,8 +436,8 @@ static RAWSTOR_Status_Result mediaInit (struct RAWSTOR *const R)
 	powerOn (P);
     // After supply voltage reached 2.2 volts, wait for one millisecond at 
     // least.
-    TIMER_Ticks timeout = BOARD_TicksNow() + 20;
-    while (BOARD_TicksNow() < timeout)
+    TIMER_Ticks timeout = TICKS_Now() + 20;
+    while (TICKS_Now() < timeout)
     {
         __WFI ();
     }
@@ -472,7 +472,7 @@ static RAWSTOR_Status_Result mediaInit (struct RAWSTOR *const R)
                             RAWSTOR_SD_STATUS_MEDIA_INITIALIZING__P1_IDLE,
                             0);
 
-        timeout = BOARD_TicksNow() + INITIALIZATION_TIMEOUT;
+        timeout = TICKS_Now() + INITIALIZATION_TIMEOUT;
         
         // SD_CMD8 "Send Interface Condition Command".
         // 0x0AA = Check pattern. 0x100 = 2.7-3.6V
@@ -490,12 +490,12 @@ static RAWSTOR_Status_Result mediaInit (struct RAWSTOR *const R)
                 // bit 30 HCS: "Host Capacity Support" 1b: SDHC or SDXC 
                 // Supported. Wait for leaving idle state (SD_ACMD41 with
                 // HCS bit)
-				while (BOARD_TicksNow() < timeout &&
+				while (TICKS_Now() < timeout &&
                        sendCardCommand (P, SD_ACMD41, 1UL << 30))
                 {
                 }
 
-                if (BOARD_TicksNow() < timeout &&
+                if (TICKS_Now() < timeout &&
                         sendCardCommand (P, SD_CMD58, 0) == 0)
                 {	
                     // Check CCS bit in the OCR
@@ -525,11 +525,11 @@ static RAWSTOR_Status_Result mediaInit (struct RAWSTOR *const R)
             }
             
             // Wait for leaving idle state
-			while (BOARD_TicksNow() < timeout &&
+			while (TICKS_Now() < timeout &&
                    sendCardCommand (P, cmd, 0));
             
             // Set R/W block length to 512
-			if (BOARD_TicksNow() >= timeout ||
+			if (TICKS_Now() >= timeout ||
                     sendCardCommand (P, SD_CMD16, 512) != 0)
             {
 				ty = 0;

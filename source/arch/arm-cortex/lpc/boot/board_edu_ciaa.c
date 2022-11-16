@@ -23,8 +23,18 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/board_edu_ciaa.h"
-#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/board_shared/iface_methods.h"
+
+#include "embedul.ar/source/core/device/board.h"
+#include "embedul.ar/source/drivers/random_sfmt.h"
+#include "embedul.ar/source/drivers/packet_esp32at_tcp_server.h"
+#include "embedul.ar/source/drivers/rawstor_sd_1bit.h"
+#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/io_board_edu_ciaa.h"
+#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/stream_usart.h"
+#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/packet_ssp.h"
+#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/io_dual_nes_videoex.h"
+#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/video_dualcore.h"
+#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/sound_pcm5100.h"
+#include "embedul.ar/source/arch/arm-cortex/lpc/boot/shared_iface.h"
 #include "embedul.ar/source/arch/arm-cortex/lpc/18xx_43xx/lpcopen/boards/edu_ciaa/board.h"
 #include "embedul.ar/source/arch/arm-cortex/lpc/18xx_43xx/lpcopen/shared/seed.h"
 
@@ -36,13 +46,13 @@
 #define BOARD_LOGO_5            "`F2088`P1488`P5d8YaaaaY8b  8b`L"
 #define BOARD_LOGO_6            "`F20Y8,`P1388    d8\"\"\"\"\"\"\"\"8b  8b`L"
 #define BOARD_LOGO_7            "`F21Y8a.`P4.a8P   88   d8'`P8``8b ``8b`L"
-#define BOARD_LOGO_8            "`F22``\"Y8888Y\"'    88  d8'`P10``8b ``8b`L2"
+#define BOARD_LOGO_8            "`F22``\"Y8888Y\"'    88  d8'`P10``8b ``8b`L1"
 
 #define BOARD_INFO_FMT          "`M40`0`L1" \
                                 "`M40`1`L1" \
-                                "`M40`2`L2" \
+                                "`M40`2`L1" \
                                 "`M40`3`L1" \
-                                "`M40`4`L2"
+                                "`M40`4`L1"
 
 #define BOARD_INFO_0_NAME_1     "proyecto ciaa"
 #define BOARD_INFO_1_NAME_2     "computadora industrial abierta argentina"
@@ -64,6 +74,41 @@
 #endif
 
 
+struct BOARD_IO_PROFILES
+{
+    struct INPUT_PROFILE_MAIN               inMain;
+    struct OUTPUT_PROFILE_SIGN              outSign;
+#ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
+    struct INPUT_PROFILE_GP1                inGp1;
+    struct INPUT_PROFILE_GP2                inGp2;
+    struct INPUT_PROFILE_CONTROL            inControl;
+    struct OUTPUT_PROFILE_CONTROL           outControl;
+#endif
+};
+
+
+struct BOARD_EDU_CIAA
+{
+    struct BOARD                            device;
+    struct IO_BOARD_EDU_CIAA                ioBoard;
+    struct RANDOM_SFMT                      randomSfmt;
+    struct STREAM_USART                     streamDebugUsart;
+    struct STREAM_USART                     streamExtUsart;
+    struct PACKET_SSP                       packetSsp;
+#ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
+    struct IO_DUAL_NES_VIDEOEX              ioDualNes;
+    struct PACKET_ESP32AT_TCP_SERVER        packetEsp32Tcp;
+    struct RAWSTOR_SD_1BIT                  rawstorSd1Bit;
+    struct VIDEO_DUALCORE                   videoDualcore;
+    struct SOUND_PCM5100                    soundPcm5100;
+    uint8_t                                 tcpServerInBuffer[64];
+    uint8_t                                 tcpServerOutBuffer[1024];
+#endif
+    uint8_t                                 debugInBuffer[16];
+    uint8_t                                 debugOutBuffer[16];
+};
+
+
 #ifdef BSS_SECTION_BOARD
 BSS_SECTION_BOARD
 #endif
@@ -82,26 +127,25 @@ static const struct BOARD_IFACE BOARD_EDU_CIAA_IFACE =
 {
     .Description    = BOARD_DESCRIPTION,
     .StageChange    = stageChange,
-    .Assert         = assertFunc,
-    .SetTickFreq    = setTickFreq,
-    .SetTickHook    = setTickHook,
-    .TicksNow       = ticksNow,
-    .Rtc            = UNSUPPORTED,
-    .Delay          = delay,
-    .Update         = UNSUPPORTED
+    .Assert         = assertFunc
 };
 
 
-void BOARD_Boot (struct BOARD_RIG *const R)
+struct BOARD * BOARD__boot (const int Argc, const char **const Argv,
+                            struct BOARD_RIG *const R)
 {
     SystemCoreClockUpdate ();
 
-    const char *const ErrorMsg = BOARD_Init ((struct BOARD *)&s_board_edu_ciaa,
-                                             &BOARD_EDU_CIAA_IFACE, R);
+    struct BOARD *const B = (struct BOARD *)&s_board_edu_ciaa;
+
+    const char *const ErrorMsg = BOARD_Init (B, &BOARD_EDU_CIAA_IFACE,
+                                             Argc, Argv, R);
     if (ErrorMsg)
     {
         Board_Panic (ErrorMsg);
     }
+
+    return B;
 }
 
 
@@ -135,10 +179,14 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
 
     switch (Stage)
     {
-        case BOARD_Stage_InitHardware:
+        case BOARD_Stage_InitPreTicksHardware:
         {
             Board_Init ();
-            BOARD_SetTickFreq (1000);
+            break;
+        }
+
+        case BOARD_Stage_InitPostTicksHardware:
+        {
             break;
         }
 
@@ -180,8 +228,8 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
 
         case BOARD_Stage_InitIOLevel1Drivers:
         {
-            IO_BOARD_Init   (&E->ioBoard);
-            IO_BOARD_Attach (&E->ioBoard);
+            IO_BOARD_EDU_CIAA_Init      (&E->ioBoard);
+            IO_BOARD_EDU_CIAA_Attach    (&E->ioBoard);
         #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
             IO_DUAL_NES_VIDEOEX_Init    (&E->ioDualNes);
             IO_DUAL_NES_VIDEOEX_Attach  (&E->ioDualNes);
@@ -271,6 +319,7 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
         {
             while (1)
             {
+                __WFI ();
             }
         }
     }

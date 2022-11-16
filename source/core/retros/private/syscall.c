@@ -282,7 +282,7 @@ static enum OS_Result taskWaitForSignal (struct OS_TaskWaitForSignal *wfs)
     wfs->task->sigWaitResult    = OS_Result_Waiting;
     wfs->task->suspendedUntil   = (wfs->timeout == OS_WaitForever)
                                         ? OS_WaitForever
-                                        : BOARD_TicksNow() + wfs->timeout;
+                                        : TICKS_Now() + wfs->timeout;
     OS_SchedulerSetPending ();
 
     return OS_Result_Waiting;
@@ -325,7 +325,7 @@ static enum OS_Result taskPeriodicDelay (TIMER_Ticks *ticks)
     // Zero ticks causes a lastSuspension reset with current ticks.
     if (*ticks == 0)
     {
-        g_OS->currentTask->lastSuspension = BOARD_TicksNow ();
+        g_OS->currentTask->lastSuspension = TICKS_Now ();
         return OS_Result_OK;
     }
 
@@ -395,7 +395,7 @@ enum OS_Result taskSleep (struct OS_TaskControl *task)
         wfs.task        = task;
         wfs.sigType     = OS_TaskSignalType_SemaphoreAcquire;
         wfs.sigObject   = &task->sleep;
-        wfs.start       = BOARD_TicksNow ();
+        wfs.start       = TICKS_Now ();
         wfs.timeout     = OS_WaitForever;
 
         return taskWaitForSignal (&wfs);
@@ -554,7 +554,7 @@ static enum OS_Result taskTerminate (struct OS_TaskTerminate *tt)
 
     tt->tc->retValue        = tt->retVal;
     tt->tc->state           = OS_TaskState_Terminated;
-    tt->tc->terminatedAt    = BOARD_TicksNow ();
+    tt->tc->terminatedAt    = TICKS_Now ();
 
     // If there is no current task, it is assumed that the current running task
     // has been terminated itself (see above), so the scheduler needs to be
@@ -584,7 +584,7 @@ enum OS_Result osTerminate ()
         return OS_Result_InvalidOperation;
     }
 
-    g_OS->terminatedAt = BOARD_TicksNow ();
+    g_OS->terminatedAt = TICKS_Now ();
 
     OS_SchedulerSetPending ();
 

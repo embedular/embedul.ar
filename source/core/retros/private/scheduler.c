@@ -322,7 +322,7 @@ uint32_t OS_Scheduler (const uint32_t CurrentSp, const uint32_t TaskCycles)
 
     // Avoid getting different tick readings along the scheduling process
     // (May vary depending on external interrupts preempting PendSV).
-    const TIMER_Ticks Now = BOARD_TicksNow ();
+    const TIMER_Ticks Now = TICKS_Now ();
 
     // First scheduler run
     if (!CurrentSp)

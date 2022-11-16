@@ -26,10 +26,9 @@
 #pragma once
 
 #include "embedul.ar/source/core/device/io.h"
-#include "embedul.ar/source/arch/arm-cortex/stm32/drivers/board_nucleo_144/bsp.h"
 
 
-#define IO_BOARD_PORT_COUNT             1
+#define IO_BOARD_NUCLEO_144_PORT_COUNT             1
 
 /*
     ST NUCLEO-144 human interface input (x) and output [x] layout.
@@ -51,42 +50,42 @@
 */
 
 
-enum IO_BOARD_INB
+enum IO_BOARD_NUCLEO_144_INB
 {
-    IO_BOARD_INB_USER = 0,
-    IO_BOARD_INB__COUNT
+    IO_BOARD_NUCLEO_144_INB_USER = 0,
+    IO_BOARD_NUCLEO_144_INB__COUNT
 };
 
 
-enum IO_BOARD_OUTB
+enum IO_BOARD_NUCLEO_144_OUTB
 {
-    IO_BOARD_OUTB_LED_GREEN = 0,
-    IO_BOARD_OUTB_LED_BLUE,
-    IO_BOARD_OUTB_LED_RED,
-    IO_BOARD_OUTB__COUNT
+    IO_BOARD_NUCLEO_144_OUTB_LED_GREEN = 0,
+    IO_BOARD_NUCLEO_144_OUTB_LED_BLUE,
+    IO_BOARD_NUCLEO_144_OUTB_LED_RED,
+    IO_BOARD_NUCLEO_144_OUTB__COUNT
 };
 
 
-enum IO_BOARD_INR
+enum IO_BOARD_NUCLEO_144_INR
 {
-    IO_BOARD_INR__COUNT
+    IO_BOARD_NUCLEO_144_INR__COUNT
 };
 
 
-enum IO_BOARD_OUTR
+enum IO_BOARD_NUCLEO_144_OUTR
 {
-    IO_BOARD_OUTR__COUNT
+    IO_BOARD_NUCLEO_144_OUTR__COUNT
 };
 
 
-struct IO_BOARD
+struct IO_BOARD_NUCLEO_144
 {
     struct IO           device;
-    struct IO_PortInfo  portInfo[IO_BOARD_PORT_COUNT];
+    struct IO_PortInfo  portInfo[IO_BOARD_NUCLEO_144_PORT_COUNT];
     uint32_t            inbData;
     uint32_t            outbData;
 };
 
 
-void IO_BOARD_Init      (struct IO_BOARD *const B);
-void IO_BOARD_Attach    (struct IO_BOARD *const B);
+void IO_BOARD_NUCLEO_144_Init   (struct IO_BOARD_NUCLEO_144 *const B);
+void IO_BOARD_NUCLEO_144_Attach (struct IO_BOARD_NUCLEO_144 *const B);

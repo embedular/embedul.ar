@@ -97,7 +97,7 @@ void STREAM_OUT_ToBuffer (struct STREAM *const S, uint8_t *const Buffer,
         return;
     }
 
-    const TIMER_Ticks Timeout = BOARD_TicksNow() + S->outTimeout;
+    const TIMER_Ticks Timeout = TICKS_Now() + S->outTimeout;
 
     do
     {
@@ -105,7 +105,7 @@ void STREAM_OUT_ToBuffer (struct STREAM *const S, uint8_t *const Buffer,
                                 &Buffer[S->lastOut], Octets - S->lastOut);
         if (!OutCount)
         {
-            if (Timeout <= BOARD_TicksNow())
+            if (Timeout <= TICKS_Now())
             {
                 break;
             }
@@ -135,7 +135,7 @@ uint8_t STREAM_OUT_ToOctet (struct STREAM *const S)
 
 static void streamToStream (struct STREAM *const In, struct STREAM *const Out)
 {
-    const TIMER_Ticks   Now         = BOARD_TicksNow ();
+    const TIMER_Ticks   Now         = TICKS_Now ();
     const TIMER_Ticks   OutTimeout  = Now + Out->outTimeout;
     const TIMER_Ticks   InTimeout   = Now + In->inTimeout;
     bool                retryIn     = false;
@@ -152,7 +152,7 @@ static void streamToStream (struct STREAM *const In, struct STREAM *const Out)
             const uint32_t OutCount = Out->iface->DataOut (Out, &octet, 1);
             if (!OutCount)
             {
-                if (OutTimeout <= BOARD_TicksNow())
+                if (OutTimeout <= TICKS_Now())
                 {
                     break;
                 }
@@ -170,7 +170,7 @@ static void streamToStream (struct STREAM *const In, struct STREAM *const Out)
         {
             retryIn = true;
 
-            if (InTimeout <= BOARD_TicksNow())
+            if (InTimeout <= TICKS_Now())
             {
                 break;
             }
@@ -243,7 +243,7 @@ void STREAM_IN_FromBuffer (struct STREAM *const S, const uint8_t *const Data,
         return;
     }
 
-    const TIMER_Ticks Timeout = BOARD_TicksNow() + S->inTimeout;
+    const TIMER_Ticks Timeout = TICKS_Now() + S->inTimeout;
 
     do 
     {
@@ -251,7 +251,9 @@ void STREAM_IN_FromBuffer (struct STREAM *const S, const uint8_t *const Data,
                                                         Octets - S->lastIn);
         if (!InCount)
         {
-            if (Timeout <= BOARD_TicksNow())
+            const TIMER_Ticks Now = TICKS_Now ();
+
+            if (Timeout <= Now)
             {
                 break;
             }
@@ -335,10 +337,10 @@ void STREAM_IN_FromStream (struct STREAM *const S, struct STREAM *const Out)
 
 void STREAM_IN_OctetRetry (struct STREAM *const S)
 {
-    const TIMER_Ticks Timeout = BOARD_TicksNow() + S->inTimeout;
+    const TIMER_Ticks Timeout = TICKS_Now() + S->inTimeout;
 
     while (!(S->lastIn = S->iface->DataIn(S, &S->octetInRetry, 1)) && 
-           Timeout > BOARD_TicksNow())
+           Timeout > TICKS_Now())
     {
     }
 }

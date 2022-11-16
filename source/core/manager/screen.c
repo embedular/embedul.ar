@@ -104,8 +104,6 @@ void SCREEN_Init (struct SCREEN *const S)
     #endif
 
         s_s = S;
-
-        LOG_Items (1, LANG_DEVICE_ROLES, (uint32_t)STORAGE_Role__COUNT);
     }
 }
 

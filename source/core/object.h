@@ -33,12 +33,14 @@
 
 #define OBJECT_IsValid(_p) \
     _Generic((_p), \
+        struct OSWRAP *         : 1, \
         struct IO *             : 1, \
         struct RAWSTOR *        : 1, \
         struct STREAM *         : 1, \
         struct PACKET *         : 1, \
         struct RANDOM *         : 1, \
         struct SOUND *          : 1, \
+        struct TICKS *          : 1, \
         struct VIDEO *          : 1, \
         struct BOARD *          : 1, \
         struct LOG *            : 1, \
@@ -81,12 +83,14 @@
 
 #define OBJECT_Type(_p) \
     _Generic((_p), \
+        struct OSWRAP *         : "dev" OBJECT_TYPE_SEPARATOR "oswrap", \
         struct IO *             : "dev" OBJECT_TYPE_SEPARATOR "io", \
         struct RAWSTOR *        : "dev" OBJECT_TYPE_SEPARATOR "rawstor", \
         struct STREAM *         : "dev" OBJECT_TYPE_SEPARATOR "stream", \
         struct PACKET *         : "dev" OBJECT_TYPE_SEPARATOR "packet", \
         struct RANDOM *         : "dev" OBJECT_TYPE_SEPARATOR "random", \
         struct SOUND *          : "dev" OBJECT_TYPE_SEPARATOR "sound", \
+        struct TICKS *          : "dev" OBJECT_TYPE_SEPARATOR "ticks", \
         struct VIDEO *          : "dev" OBJECT_TYPE_SEPARATOR "video", \
         struct BOARD *          : "dev" OBJECT_TYPE_SEPARATOR "board", \
         struct LOG *            : "manager", \
@@ -120,12 +124,14 @@
 
 #define OBJECT_Description(_p) \
     _Generic((_p), \
+        struct OSWRAP *         : OSWRAP_Description(), \
         struct IO *             : IO_Description((struct IO *)_p), \
         struct RAWSTOR *        : RAWSTOR_Description((struct RAWSTOR *)_p), \
         struct STREAM *         : STREAM_Description((struct STREAM *)_p), \
         struct PACKET *         : PACKET_Description((struct PACKET *)_p), \
         struct RANDOM *         : RANDOM_Description(), \
         struct SOUND *          : SOUND_Description(), \
+        struct TICKS *          : TICKS_Description(), \
         struct VIDEO *          : VIDEO_Description((struct VIDEO *)_p), \
         struct BOARD *          : BOARD_Description(), \
         struct LOG *            : "log", \
@@ -159,12 +165,14 @@
 
 #define OBJECT_Ptr(_p) \
     _Generic((_p), \
+        struct OSWRAP *         : _p, \
         struct IO *             : _p, \
         struct RAWSTOR *        : _p, \
         struct STREAM *         : _p, \
         struct PACKET *         : _p, \
         struct RANDOM *         : _p, \
         struct SOUND *          : _p, \
+        struct TICKS *          : _p, \
         struct VIDEO *          : _p, \
         struct BOARD *          : _p, \
         struct LOG *            : _p, \

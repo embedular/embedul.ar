@@ -1,13 +1,12 @@
-#include "embedul.ar/source/core/device/board.h"
+#include "embedul.ar/source/core/main.h"
 
 
 const char *const Text = "The quick brown fox jumps over the lazy dog";
 
 
-int EMBEDULAR_Main (const int Argc, const char *const Argv[])
+void EMBEDULAR_Main (void *param)
 {
-    (void) Argc;
-    (void) Argv;
+    (void) param;
 
     LOG_Newline ();
     LOG (NOBJ, "LOG()");
@@ -43,6 +42,4 @@ int EMBEDULAR_Main (const int Argc, const char *const Argv[])
     LOG (NOBJ, "LOG_BinaryDump()");
     LOG_BinaryDump (NOBJ, "Text", (const uint8_t *)Text,
                     (uint32_t)strlen(Text) + 1);
-
-    return 0;
 }

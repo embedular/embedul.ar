@@ -1,7 +1,7 @@
 /*
   embedul.ar™ embedded systems framework - http://embedul.ar
   
-  [CORE] managed program entry point.
+  [CORE] framework managed program entry point.
 
   Copyright 2018-2022 Santiago Germino
   <sgermino@embedul.ar> https://www.linkedin.com/in/royconejo
@@ -29,5 +29,4 @@
 
 
 struct BOARD_RIG *  EMBEDULAR_Board_Rig     (void);
-int                 EMBEDULAR_Main          (const int Argc,
-                                             const char *const Argv[]);
+void                EMBEDULAR_Main          (void *param);

@@ -23,57 +23,57 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/board_edu_ciaa/io_board.h"
+#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/io_board_edu_ciaa.h"
 #include "embedul.ar/source/arch/arm-cortex/lpc/18xx_43xx/lpcopen/boards/edu_ciaa/board.h"
 #include "embedul.ar/source/core/device/board.h"
 
 
 #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
-    #define IO_BOARD_DESCRIPTION        "edu-ciaa w/retro board io"
+    #define IO_BOARD_EDU_CIAA_DESCRIPTION       "edu-ciaa w/retro board io"
 #else
-    #define IO_BOARD_DESCRIPTION        "edu-ciaa board io"
+    #define IO_BOARD_EDU_CIAA_DESCRIPTION       "edu-ciaa board io"
 #endif
 
 
 #define GET_SWITCH_STATE(_n) \
     B->inbData |= BOARD_SWITCH_GET_STATE(_n)? \
-                            (1 << IO_BOARD_INB_##_n) : 0;
+                            (1 << IO_BOARD_EDU_CIAA_INB_##_n) : 0;
 
 #define SET_GPIO_STATE(_n) \
-    (B->outbData & (1 << IO_BOARD_OUTB_##_n))? \
+    (B->outbData & (1 << IO_BOARD_EDU_CIAA_OUTB_##_n))? \
                             BOARD_GPIO_SET_STATE(OUT_##_n, ENABLED) : \
                             BOARD_GPIO_SET_STATE(OUT_##_n, DISABLED);
 
 
-static const char * s_InputBitNames[IO_BOARD_INB__COUNT] =
+static const char * s_InputBitNames[IO_BOARD_EDU_CIAA_INB__COUNT] =
 {
-    [IO_BOARD_INB_TEC_1]            = "TEC 1",
-    [IO_BOARD_INB_TEC_2]            = "TEC 2",
-    [IO_BOARD_INB_TEC_3]            = "TEC 3",
-    [IO_BOARD_INB_TEC_4]            = "TEC 4"
+    [IO_BOARD_EDU_CIAA_INB_TEC_1]            = "TEC 1",
+    [IO_BOARD_EDU_CIAA_INB_TEC_2]            = "TEC 2",
+    [IO_BOARD_EDU_CIAA_INB_TEC_3]            = "TEC 3",
+    [IO_BOARD_EDU_CIAA_INB_TEC_4]            = "TEC 4"
 #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
     , 
-    [IO_BOARD_INB_SD_DETECT]        = "SD detect",
-    [IO_BOARD_INB_WIFI_EN]          = "WiFi enable",
-    [IO_BOARD_INB_SOUND_MUTE]       = "Sound mute"
+    [IO_BOARD_EDU_CIAA_INB_SD_DETECT]        = "SD detect",
+    [IO_BOARD_EDU_CIAA_INB_WIFI_EN]          = "WiFi enable",
+    [IO_BOARD_EDU_CIAA_INB_SOUND_MUTE]       = "Sound mute"
 #endif
 };
 
 
-static const char * s_OutputBitNames[IO_BOARD_OUTB__COUNT] =
+static const char * s_OutputBitNames[IO_BOARD_EDU_CIAA_OUTB__COUNT] =
 {
-    [IO_BOARD_OUTB_LED_RGB_RED]     = "RGB Red",
-    [IO_BOARD_OUTB_LED_RGB_GREEN]   = "RGB Green",
-    [IO_BOARD_OUTB_LED_RGB_BLUE]    = "RGB Blue",
-    [IO_BOARD_OUTB_LED_1]           = "LED 1",
-    [IO_BOARD_OUTB_LED_2]           = "LED 2",
-    [IO_BOARD_OUTB_LED_3]           = "LED 3" 
+    [IO_BOARD_EDU_CIAA_OUTB_LED_RGB_RED]     = "RGB Red",
+    [IO_BOARD_EDU_CIAA_OUTB_LED_RGB_GREEN]   = "RGB Green",
+    [IO_BOARD_EDU_CIAA_OUTB_LED_RGB_BLUE]    = "RGB Blue",
+    [IO_BOARD_EDU_CIAA_OUTB_LED_1]           = "LED 1",
+    [IO_BOARD_EDU_CIAA_OUTB_LED_2]           = "LED 2",
+    [IO_BOARD_EDU_CIAA_OUTB_LED_3]           = "LED 3" 
 #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
     ,
-    [IO_BOARD_OUTB_BOARD_BACKLIGHT] = "Backlight",
-    [IO_BOARD_OUTB_SD_SELECT]       = "SD select",
-    [IO_BOARD_OUTB_WIFI_EN]         = "WiFi enable",
-    [IO_BOARD_OUTB_SOUND_MUTE]      = "Sound mute"
+    [IO_BOARD_EDU_CIAA_OUTB_BOARD_BACKLIGHT] = "Backlight",
+    [IO_BOARD_EDU_CIAA_OUTB_SD_SELECT]       = "SD select",
+    [IO_BOARD_EDU_CIAA_OUTB_WIFI_EN]         = "WiFi enable",
+    [IO_BOARD_EDU_CIAA_OUTB_SOUND_MUTE]      = "Sound mute"
 #endif
 };
 
@@ -96,9 +96,9 @@ static const char * outputName          (struct IO *const Io,
                                          const IO_Code DriverCode);
 
 
-static const struct IO_IFACE IO_BOARD_IFACE =
+static const struct IO_IFACE IO_BOARD_EDU_CIAA_IFACE =
 {
-    IO_IFACE_DECLARE(IO_BOARD_DESCRIPTION, BOARD),
+    IO_IFACE_DECLARE(IO_BOARD_EDU_CIAA_DESCRIPTION, BOARD_EDU_CIAA),
     .Update         = update,
     .GetInput       = getInput,
     .SetOutput      = setOutput,
@@ -107,54 +107,54 @@ static const struct IO_IFACE IO_BOARD_IFACE =
 };
 
 
-void IO_BOARD_Init (struct IO_BOARD *B)
+void IO_BOARD_EDU_CIAA_Init (struct IO_BOARD_EDU_CIAA *B)
 {
     BOARD_AssertParams (B);
 
     DEVICE_IMPLEMENTATION_Clear (B);
 
-    IO_INIT_STATIC_PORT_INFO (B, BOARD);
+    IO_INIT_STATIC_PORT_INFO (B, BOARD_EDU_CIAA);
 
     // Update once per frame (~60 Hz).
-    IO_Init ((struct IO *)B, &IO_BOARD_IFACE, B->portInfo, 15);
+    IO_Init ((struct IO *)B, &IO_BOARD_EDU_CIAA_IFACE, B->portInfo, 15);
 }
 
 
-void IO_BOARD_Attach (struct IO_BOARD *const B)
+void IO_BOARD_EDU_CIAA_Attach (struct IO_BOARD_EDU_CIAA *const B)
 {
     BOARD_AssertParams (B);
 
     INPUT_RegisterGateway ((struct IO *)B, 0);
 
-    INPUT_MAP_BIT (MAIN, A, IO_BOARD_INB_TEC_1);
-    INPUT_MAP_BIT (MAIN, B, IO_BOARD_INB_TEC_2);
-    INPUT_MAP_BIT (MAIN, C, IO_BOARD_INB_TEC_3);
-    INPUT_MAP_BIT (MAIN, D, IO_BOARD_INB_TEC_4);
+    INPUT_MAP_BIT (MAIN, A, IO_BOARD_EDU_CIAA_INB_TEC_1);
+    INPUT_MAP_BIT (MAIN, B, IO_BOARD_EDU_CIAA_INB_TEC_2);
+    INPUT_MAP_BIT (MAIN, C, IO_BOARD_EDU_CIAA_INB_TEC_3);
+    INPUT_MAP_BIT (MAIN, D, IO_BOARD_EDU_CIAA_INB_TEC_4);
 #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
-    INPUT_MAP_BIT (CONTROL, StorageDetect, IO_BOARD_INB_SD_DETECT);
-    INPUT_MAP_BIT (CONTROL, WirelessEnable, IO_BOARD_INB_WIFI_EN);
-    INPUT_MAP_BIT (CONTROL, SoundMute, IO_BOARD_INB_SOUND_MUTE);
+    INPUT_MAP_BIT (CONTROL, StorageDetect, IO_BOARD_EDU_CIAA_INB_SD_DETECT);
+    INPUT_MAP_BIT (CONTROL, WirelessEnable, IO_BOARD_EDU_CIAA_INB_WIFI_EN);
+    INPUT_MAP_BIT (CONTROL, SoundMute, IO_BOARD_EDU_CIAA_INB_SOUND_MUTE);
 #endif
 
 
     OUTPUT_RegisterGateway ((struct IO *)B, 0);
 
-    OUTPUT_MAP_BIT (SIGN, Warning, IO_BOARD_OUTB_LED_1);
-    OUTPUT_MAP_BIT (SIGN, Red, IO_BOARD_OUTB_LED_RGB_RED);
-    OUTPUT_MAP_BIT (SIGN, Green, IO_BOARD_OUTB_LED_RGB_GREEN);
-    OUTPUT_MAP_BIT (SIGN, Blue, IO_BOARD_OUTB_LED_RGB_BLUE);
+    OUTPUT_MAP_BIT (SIGN, Warning, IO_BOARD_EDU_CIAA_OUTB_LED_1);
+    OUTPUT_MAP_BIT (SIGN, Red, IO_BOARD_EDU_CIAA_OUTB_LED_2);
+    OUTPUT_MAP_BIT (SIGN, Green, IO_BOARD_EDU_CIAA_OUTB_LED_3);
+    OUTPUT_MAP_BIT (SIGN, Blue, IO_BOARD_EDU_CIAA_OUTB_LED_RGB_BLUE);
 #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
-    OUTPUT_MAP_BIT (CONTROL, Backlight, IO_BOARD_OUTB_BOARD_BACKLIGHT);
-    OUTPUT_MAP_BIT (CONTROL, StorageEnable, IO_BOARD_OUTB_SD_SELECT);
-    OUTPUT_MAP_BIT (CONTROL, WirelessEnable, IO_BOARD_OUTB_WIFI_EN);
-    OUTPUT_MAP_BIT (CONTROL, SoundMute, IO_BOARD_OUTB_SOUND_MUTE);
+    OUTPUT_MAP_BIT (CONTROL, Backlight, IO_BOARD_EDU_CIAA_OUTB_BOARD_BACKLIGHT);
+    OUTPUT_MAP_BIT (CONTROL, StorageEnable, IO_BOARD_EDU_CIAA_OUTB_SD_SELECT);
+    OUTPUT_MAP_BIT (CONTROL, WirelessEnable, IO_BOARD_EDU_CIAA_OUTB_WIFI_EN);
+    OUTPUT_MAP_BIT (CONTROL, SoundMute, IO_BOARD_EDU_CIAA_OUTB_SOUND_MUTE);
 #endif
 }
 
 
 void update (struct IO *const Io)
 {
-    struct IO_BOARD *const B = (struct IO_BOARD *) Io;
+    struct IO_BOARD_EDU_CIAA *const B = (struct IO_BOARD_EDU_CIAA *) Io;
 
     B->inbData = 0;
 
@@ -173,7 +173,7 @@ void update (struct IO *const Io)
     SET_GPIO_STATE(LED_2);
     SET_GPIO_STATE(LED_3);
 #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
-    Board_SetLCDBacklight (B->outbData & (1 << IO_BOARD_OUTB_BOARD_BACKLIGHT));
+    Board_SetLCDBacklight (B->outbData & (1 << IO_BOARD_EDU_CIAA_OUTB_BOARD_BACKLIGHT));
     SET_GPIO_STATE(SD_SELECT)
 #endif
 }
@@ -185,7 +185,7 @@ uint32_t getInput (struct IO *const Io, const enum IO_Type IoType,
     (void) Port;
     (void) IoType;
 
-    struct IO_BOARD *const B = (struct IO_BOARD *) Io;
+    struct IO_BOARD_EDU_CIAA *const B = (struct IO_BOARD_EDU_CIAA *) Io;
 
     return (B->inbData & (1 << DriverCode));
 }
@@ -195,7 +195,7 @@ void setOutput (struct IO *const Io, const enum IO_Type IoType,
                 const IO_Code DriverCode, const IO_Port Port,
                 const uint32_t Value)
 {
-    struct IO_BOARD *const B = (struct IO_BOARD *) Io;
+    struct IO_BOARD_EDU_CIAA *const B = (struct IO_BOARD_EDU_CIAA *) Io;
 
     (void) Port;
     (void) IoType;

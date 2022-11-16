@@ -34,6 +34,8 @@ TARGET_DRIVERS := $(TARGET_MFR)/drivers
 TARGET_BSP := $(TARGET_FAMILY)/cube
 TARGET_BSP_BOARD := $(TARGET_MFR)/$(CHIP_FAMILY)/boards/$(TARGET_NAME)
 
+CFLAGS += -I$(TARGET_MFR)/boot
+
 # Common target init and checks
 $(call emb_include,target/check.mk)
 
@@ -43,4 +45,4 @@ FLASH_TOOL ?= openocd-elf
 # OpenOCD configuration file
 OPENOCD_CFG := $(TARGET_FAMILY)/openocd/$(TARGET_BOARD).cfg
 
-OBJS += $(TARGET_ARCH)/shared/syscalls.o
+OBJS += $(TARGET_ARCH)/syscalls.o

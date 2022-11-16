@@ -23,8 +23,20 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/board_retro_ciaa.h"
-#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/board_shared/iface_methods.h"
+#include "embedul.ar/source/core/device/board.h"
+#include "embedul.ar/source/drivers/random_sfmt.h"
+#include "embedul.ar/source/drivers/io_dual_genesis_pca9673.h"
+#include "embedul.ar/source/drivers/io_lp5036.h"
+#include "embedul.ar/source/drivers/io_huewheel.h"
+#include "embedul.ar/source/drivers/io_pca9956b.h"
+#include "embedul.ar/source/drivers/packet_esp32at_tcp_server.h"
+#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/io_board_retro_ciaa.h"
+#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/stream_usart.h"
+#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/packet_i2c_controller.h"
+#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/rawstor_sd_sdmmc.h"
+#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/video_dualcore.h"
+#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/sound_pcm5100.h"
+#include "embedul.ar/source/arch/arm-cortex/lpc/boot/shared_iface.h"
 #include "embedul.ar/source/arch/arm-cortex/lpc/18xx_43xx/lpcopen/boards/retro_ciaa/board.h"
 #include "embedul.ar/source/arch/arm-cortex/lpc/18xx_43xx/lpcopen/shared/seed.h"
 
@@ -52,6 +64,48 @@
                                     "`M40`2`L1" \
                                     "`M40`3`L1" \
                                     "`M40`4`L1"
+
+
+struct BOARD_IO_PROFILES
+{
+    struct INPUT_PROFILE_CONTROL            inControl;
+    struct INPUT_PROFILE_GP1                inGp1;
+    struct INPUT_PROFILE_GP2                inGp2;
+    struct INPUT_PROFILE_LIGHTDEV           inLightdev;
+    struct INPUT_PROFILE_MAIN               inMain;
+    struct OUTPUT_PROFILE_CONTROL           outControl;
+    struct OUTPUT_PROFILE_LIGHTDEV          outLightdev;
+    struct OUTPUT_PROFILE_MARQUEE           outMarquee;
+    struct OUTPUT_PROFILE_SIGN              outSign;
+};
+
+
+struct BOARD_RETRO_CIAA
+{
+    struct BOARD                            device;
+    struct IO_BOARD_RETRO_CIAA              ioBoard;
+    struct RANDOM_SFMT                      randomSfmt;
+    struct STREAM_USART                     streamDebugUsart;
+#ifndef BOARD_RETRO_CIAA_DISABLE_TCP_SERVER
+    struct STREAM_USART                     streamEsp32atUsart;
+    struct PACKET_ESP32AT_TCP_SERVER        packetEsp32Tcp;
+#endif
+    struct PACKET_I2C_CONTROLLER            packetI2cExpController;
+    struct IO_DUAL_GENESIS_PCA9673          ioDualGenesis;
+    struct IO_LP5036                        ioLp5036;
+    struct IO_HUEWHEEL                      ioHuewheel;
+    struct IO_PCA9956B                      ioPca9956BDeviceA;
+    struct IO_PCA9956B                      ioPca9956BDeviceB;
+    struct RAWSTOR_SD_SDMMC                 rawstorSdmmc;
+    struct VIDEO_DUALCORE                   videoDualcore;
+    struct SOUND_PCM5100                    soundPcm5100;
+    uint8_t                                 debugInBuffer[16];
+    uint8_t                                 debugOutBuffer[16];
+#ifndef BOARD_RETRO_CIAA_DISABLE_TCP_SERVER
+    uint8_t                                 tcpServerInBuffer[64];
+    uint8_t                                 tcpServerOutBuffer[1024];
+#endif
+};
 
 
 #ifdef BSS_SECTION_BOARD
@@ -89,27 +143,25 @@ static const struct BOARD_IFACE BOARD_RETROCIAA_IFACE =
 {
     .Description    = "retro-ciaa",
     .StageChange    = stageChange,
-    .Assert         = assertFunc,
-    .SetTickFreq    = setTickFreq,
-    .SetTickHook    = setTickHook,
-    .TicksNow       = ticksNow,
-    .Rtc            = UNSUPPORTED,
-    .Delay          = delay,
-    .Update         = UNSUPPORTED
+    .Assert         = assertFunc
 };
 
 
-void BOARD_Boot (struct BOARD_RIG *const R)
+struct BOARD * BOARD__boot (const int Argc, const char **const Argv,
+                            struct BOARD_RIG *const R)
 {
     SystemCoreClockUpdate ();
 
-    const char *const ErrorMsg = BOARD_Init (
-                                        (struct BOARD *)&s_board_retro_ciaa,
-                                        &BOARD_RETROCIAA_IFACE, R);
+    struct BOARD *const B = (struct BOARD *)&s_board_retro_ciaa;
+
+    const char *const ErrorMsg = BOARD_Init (B, &BOARD_RETROCIAA_IFACE,
+                                             Argc, Argv, R);
     if (ErrorMsg)
     {
         Board_Panic (ErrorMsg);
     }
+
+    return B;
 }
 
 
@@ -135,10 +187,14 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
 
     switch (Stage)
     {
-        case BOARD_Stage_InitHardware:
+        case BOARD_Stage_InitPreTicksHardware:
         {
             Board_Init ();
-            BOARD_SetTickFreq (1000);
+            break;
+        }
+
+        case BOARD_Stage_InitPostTicksHardware:
+        {
             break;
         }
 
@@ -181,8 +237,8 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
 
         case BOARD_Stage_InitIOLevel1Drivers:
         {
-            IO_BOARD_Init   (&R->ioBoard);
-            IO_BOARD_Attach (&R->ioBoard);
+            IO_BOARD_RETRO_CIAA_Init    (&R->ioBoard);
+            IO_BOARD_RETRO_CIAA_Attach  (&R->ioBoard);
             break;
         }
 
@@ -314,6 +370,7 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
         {
             while (1)
             {
+                __WFI ();
             }
         }
     }

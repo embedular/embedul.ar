@@ -29,7 +29,7 @@
 #include "embedul.ar/source/arch/arm-cortex/lpc/18xx_43xx/lpcopen/boards/retro_ciaa/board.h"
 
 
-#define IO_BOARD_PORT_COUNT             1
+#define IO_BOARD_RETRO_CIAA_PORT_COUNT             1
 
 /*
     RETRO-CIAA Standalone human interface input (x) and output [x] layout.
@@ -48,45 +48,45 @@
 */
 
 
-enum IO_BOARD_INB
+enum IO_BOARD_RETRO_CIAA_INB
 {
-    IO_BOARD_INB_ISP = 0,
-    IO_BOARD_INB_WAKEUP,
-    IO_BOARD_INB_BOARD_BACKLIGHT,
-    IO_BOARD_INB_SD_POW,
-    IO_BOARD_INB_WIFI_EN,
-    IO_BOARD_INB_SOUND_MUTE,
-    IO_BOARD_INB__COUNT
+    IO_BOARD_RETRO_CIAA_INB_ISP = 0,
+    IO_BOARD_RETRO_CIAA_INB_WAKEUP,
+    IO_BOARD_RETRO_CIAA_INB_BOARD_BACKLIGHT,
+    IO_BOARD_RETRO_CIAA_INB_SD_POW,
+    IO_BOARD_RETRO_CIAA_INB_WIFI_EN,
+    IO_BOARD_RETRO_CIAA_INB_SOUND_MUTE,
+    IO_BOARD_RETRO_CIAA_INB__COUNT
 };
 
 
-enum IO_BOARD_OUTB
+enum IO_BOARD_RETRO_CIAA_OUTB
 {
-    IO_BOARD_OUTB_LED_WARN = 0,
-    IO_BOARD_OUTB_BOARD_BACKLIGHT,
-    IO_BOARD_OUTB_SD_POW,
-    IO_BOARD_OUTB_WIFI_EN,
-    IO_BOARD_OUTB_SOUND_MUTE,
-    IO_BOARD_OUTB__COUNT
+    IO_BOARD_RETRO_CIAA_OUTB_LED_WARN = 0,
+    IO_BOARD_RETRO_CIAA_OUTB_BOARD_BACKLIGHT,
+    IO_BOARD_RETRO_CIAA_OUTB_SD_POW,
+    IO_BOARD_RETRO_CIAA_OUTB_WIFI_EN,
+    IO_BOARD_RETRO_CIAA_OUTB_SOUND_MUTE,
+    IO_BOARD_RETRO_CIAA_OUTB__COUNT
 };
 
 
-enum IO_BOARD_INR
+enum IO_BOARD_RETRO_CIAA_INR
 {
-    IO_BOARD_INR__COUNT
+    IO_BOARD_RETRO_CIAA_INR__COUNT
 };
 
 
-enum IO_BOARD_OUTR
+enum IO_BOARD_RETRO_CIAA_OUTR
 {
-    IO_BOARD_OUTR__COUNT
+    IO_BOARD_RETRO_CIAA_OUTR__COUNT
 };
 
 
-struct IO_BOARD
+struct IO_BOARD_RETRO_CIAA
 {
     struct IO           device;
-    struct IO_PortInfo  portInfo[IO_BOARD_PORT_COUNT];
+    struct IO_PortInfo  portInfo[IO_BOARD_RETRO_CIAA_PORT_COUNT];
     uint32_t            inbData;
     uint32_t            outbData;
     volatile enum CHIP_EVRT_SRC_ACTIVE
@@ -95,5 +95,5 @@ struct IO_BOARD
 
 
 
-void IO_BOARD_Init      (struct IO_BOARD *const B);
-void IO_BOARD_Attach    (struct IO_BOARD *const B);
+void IO_BOARD_RETRO_CIAA_Init       (struct IO_BOARD_RETRO_CIAA *const B);
+void IO_BOARD_RETRO_CIAA_Attach     (struct IO_BOARD_RETRO_CIAA *const B);

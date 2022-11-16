@@ -28,7 +28,7 @@
 #include "embedul.ar/source/core/device/io.h"
 
 
-#define IO_BOARD_PORT_COUNT             1
+#define IO_BOARD_EDU_CIAA_PORT_COUNT             1
 
 /*
     EDU-CIAA-NXP input (x) and output [x] layout
@@ -51,6 +51,10 @@
          | TEC_1 TEC_2 TEC_3 TEC_4 |
          |                         |
          +-------------------------+
+
+    LED_1 = Yellow
+    LED_2 = Red
+    LED_3 = Bright Green
 
 
     RETRO-CIAA expansion output [x] layout
@@ -76,59 +80,59 @@
          +-------------------------+ 
 */
 
-enum IO_BOARD_INB
+enum IO_BOARD_EDU_CIAA_INB
 {
-    IO_BOARD_INB_TEC_1 = 0,
-    IO_BOARD_INB_TEC_2,
-    IO_BOARD_INB_TEC_3,
-    IO_BOARD_INB_TEC_4,
+    IO_BOARD_EDU_CIAA_INB_TEC_1 = 0,
+    IO_BOARD_EDU_CIAA_INB_TEC_2,
+    IO_BOARD_EDU_CIAA_INB_TEC_3,
+    IO_BOARD_EDU_CIAA_INB_TEC_4,
 #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
-    IO_BOARD_INB_SD_DETECT,
-    IO_BOARD_INB_WIFI_EN,
-    IO_BOARD_INB_SOUND_MUTE,
+    IO_BOARD_EDU_CIAA_INB_SD_DETECT,
+    IO_BOARD_EDU_CIAA_INB_WIFI_EN,
+    IO_BOARD_EDU_CIAA_INB_SOUND_MUTE,
 #endif
-    IO_BOARD_INB__COUNT
+    IO_BOARD_EDU_CIAA_INB__COUNT
 };
 
 
-enum IO_BOARD_OUTB
+enum IO_BOARD_EDU_CIAA_OUTB
 {
-    IO_BOARD_OUTB_LED_RGB_RED = 0,
-    IO_BOARD_OUTB_LED_RGB_GREEN,
-    IO_BOARD_OUTB_LED_RGB_BLUE,
-    IO_BOARD_OUTB_LED_1,
-    IO_BOARD_OUTB_LED_2,
-    IO_BOARD_OUTB_LED_3,
+    IO_BOARD_EDU_CIAA_OUTB_LED_RGB_RED = 0,
+    IO_BOARD_EDU_CIAA_OUTB_LED_RGB_GREEN,
+    IO_BOARD_EDU_CIAA_OUTB_LED_RGB_BLUE,
+    IO_BOARD_EDU_CIAA_OUTB_LED_1,
+    IO_BOARD_EDU_CIAA_OUTB_LED_2,
+    IO_BOARD_EDU_CIAA_OUTB_LED_3,
 #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
-    IO_BOARD_OUTB_BOARD_BACKLIGHT,
-    IO_BOARD_OUTB_SD_SELECT,
-    IO_BOARD_OUTB_WIFI_EN,
-    IO_BOARD_OUTB_SOUND_MUTE,
+    IO_BOARD_EDU_CIAA_OUTB_BOARD_BACKLIGHT,
+    IO_BOARD_EDU_CIAA_OUTB_SD_SELECT,
+    IO_BOARD_EDU_CIAA_OUTB_WIFI_EN,
+    IO_BOARD_EDU_CIAA_OUTB_SOUND_MUTE,
 #endif
-    IO_BOARD_OUTB__COUNT
+    IO_BOARD_EDU_CIAA_OUTB__COUNT
 };
 
 
-enum IO_BOARD_INR
+enum IO_BOARD_EDU_CIAA_INR
 {
-    IO_BOARD_INR__COUNT
+    IO_BOARD_EDU_CIAA_INR__COUNT
 };
 
 
-enum IO_BOARD_OUTR
+enum IO_BOARD_EDU_CIAA_OUTR
 {
-    IO_BOARD_OUTR__COUNT
+    IO_BOARD_EDU_CIAA_OUTR__COUNT
 };
 
 
-struct IO_BOARD
+struct IO_BOARD_EDU_CIAA
 {
     struct IO           device;
-    struct IO_PortInfo  portInfo[IO_BOARD_PORT_COUNT];
+    struct IO_PortInfo  portInfo[IO_BOARD_EDU_CIAA_PORT_COUNT];
     uint32_t            inbData;
     uint32_t            outbData;
 };
 
 
-void IO_BOARD_Init      (struct IO_BOARD *const B);
-void IO_BOARD_Attach    (struct IO_BOARD *const B);
+void IO_BOARD_EDU_CIAA_Init     (struct IO_BOARD_EDU_CIAA *const B);
+void IO_BOARD_EDU_CIAA_Attach   (struct IO_BOARD_EDU_CIAA *const B);

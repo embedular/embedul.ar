@@ -151,7 +151,8 @@ void INPUT_Init (struct INPUT *const I)
 
 void INPUT_RegisterGateway (struct IO *const Driver, const IO_Port DriverPort)
 {
-    BOARD_AssertParams (s_i->nextGatewayId < INPUT_MAX_GATEWAYS && Driver);
+    BOARD_AssertParams  (s_i->nextGatewayId < INPUT_MAX_GATEWAYS && Driver);
+    BOARD_AssertState   (BOARD_CurrentStage() < BOARD_Stage_Ready);
 
     s_i->gateways[s_i->nextGatewayId].driver     = Driver;
     s_i->gateways[s_i->nextGatewayId].driverPort = DriverPort;
@@ -202,6 +203,8 @@ void INPUT_Map (const enum INPUT_PROFILE_Type ProfileType,
 {
     BOARD_AssertParams (ProfileType < INPUT_PROFILE_Type__COUNT &&
                         IoType < IO_Type__COUNT);
+    // Static mapping (albeith overwrittable) at initialization stage only
+    BOARD_AssertState   (BOARD_CurrentStage() < BOARD_Stage_Ready);
 
     struct IO_PROFILE_Map *const Map =
         getMapping (ProfileType, IoType, ProfileCode);
@@ -376,7 +379,7 @@ void INPUT_Update (void)
             for (uint32_t pcode = 0; pcode < P->count[IO_Type_Bit]; ++pcode)
             {
                 const bool Status = INPUT_GetBuffered(t, IO_Type_Bit, pcode)?
-                                                    true : false;
+                                                      true : false;
                 INPUT_ACTION_Update (&P->bitAction[pcode], Status);
             }
         }

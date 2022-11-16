@@ -1,7 +1,7 @@
 /*
   embedul.ar™ embedded systems framework - http://embedul.ar
   
-  [RANDOM] random number generator device driver interface.
+  [RANDOM] random number generator device driver interface (singleton).
 
   Copyright 2018-2022 Santiago Germino
   <sgermino@embedul.ar> https://www.linkedin.com/in/royconejo

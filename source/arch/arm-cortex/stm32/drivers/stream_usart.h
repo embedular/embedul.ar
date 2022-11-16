@@ -26,7 +26,7 @@
 #pragma once
 
 #include "embedul.ar/source/core/device/stream.h"
-#include "embedul.ar/source/arch/arm-cortex/stm32/drivers/bsp.h"
+#include "embedul.ar/source/arch/arm-cortex/stm32/hal.h"
 #include "embedul.ar/source/core/cyclic.h"
 
 

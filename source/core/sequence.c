@@ -64,7 +64,7 @@ bool SEQUENCE_Update (struct SEQUENCE *const S)
     BOARD_AssertParams (S);
     BOARD_AssertState  (S->currentStage < S->stagesCount);
 
-    const TIMER_Ticks Now = BOARD_TicksNow ();
+    const TIMER_Ticks Now = TICKS_Now ();
 
     const struct SEQUENCE_Stage *const Stage = &S->stages[S->currentStage];
 

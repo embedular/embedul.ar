@@ -105,7 +105,7 @@ void PACKET_Send (struct PACKET *const P, const uint8_t *const Data,
         return;
     }
 
-    const TIMER_Ticks Timeout = BOARD_TicksNow() + P->sendTimeout;
+    const TIMER_Ticks Timeout = TICKS_Now() + P->sendTimeout;
 
     do
     {
@@ -115,7 +115,7 @@ void PACKET_Send (struct PACKET *const P, const uint8_t *const Data,
         {
             break;
         }
-        else if (Timeout <= BOARD_TicksNow() && P->error == PACKET_Errors_None)
+        else if (Timeout <= TICKS_Now() && P->error == PACKET_Errors_None)
         {
             P->error = PACKET_Errors_Timedout;
         }
@@ -166,7 +166,7 @@ uint32_t PACKET_PeekRecvSize (struct PACKET *const P, const uint32_t MaxOctets)
         return P->recvSize;
     }
 
-    const TIMER_Ticks Timeout = BOARD_TicksNow() + P->recvTimeout;
+    const TIMER_Ticks Timeout = TICKS_Now() + P->recvTimeout;
 
     do
     {
@@ -177,7 +177,7 @@ uint32_t PACKET_PeekRecvSize (struct PACKET *const P, const uint32_t MaxOctets)
             P->recvSize = Rs;
             break;
         }
-        else if (Timeout <= BOARD_TicksNow() && P->error == PACKET_Errors_None)
+        else if (Timeout <= TICKS_Now() && P->error == PACKET_Errors_None)
         {
             P->error = PACKET_Errors_Timedout;
         }
@@ -220,7 +220,7 @@ void PACKET_Recv (struct PACKET *const P, uint8_t *const Buffer,
         BOARD_AssertParams (false);
     }
 
-    const TIMER_Ticks Timeout = BOARD_TicksNow() + P->recvTimeout;
+    const TIMER_Ticks Timeout = TICKS_Now() + P->recvTimeout;
 
     do
     {
@@ -230,7 +230,7 @@ void PACKET_Recv (struct PACKET *const P, uint8_t *const Buffer,
         {
             break;
         }
-        else if (Timeout <= BOARD_TicksNow() && P->error == PACKET_Errors_None)
+        else if (Timeout <= TICKS_Now() && P->error == PACKET_Errors_None)
         {
             P->error = PACKET_Errors_Timedout;
         }
@@ -280,7 +280,7 @@ void PACKET_Bidir (struct PACKET *const P,
         return;
     }
 
-    const TIMER_Ticks Timeout = BOARD_TicksNow() + P->sendTimeout;
+    const TIMER_Ticks Timeout = TICKS_Now() + P->sendTimeout;
 
     do
     {
@@ -296,7 +296,7 @@ void PACKET_Bidir (struct PACKET *const P,
         {
             break;
         }
-        else if (Timeout <= BOARD_TicksNow() && P->error == PACKET_Errors_None)
+        else if (Timeout <= TICKS_Now() && P->error == PACKET_Errors_None)
         {
             P->error = PACKET_Errors_Timedout;
         }

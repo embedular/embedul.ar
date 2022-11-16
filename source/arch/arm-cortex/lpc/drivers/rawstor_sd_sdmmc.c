@@ -111,8 +111,8 @@ void RAWSTOR_SD_SDMMC_Init (struct RAWSTOR_SD_SDMMC *const M)
 // Delay callback for timed SDIF/SDMMC functions
 static void sdmmc_waitms (uint32_t time)
 {
-    TIMER_Ticks timeout = BOARD_TicksNow() + time;
-    while (BOARD_TicksNow() < timeout);
+    TIMER_Ticks timeout = TICKS_Now() + time;
+    while (TICKS_Now() < timeout);
 
     return;
 }
@@ -175,7 +175,7 @@ static void powerOn (struct RAWSTOR_SD_SDMMC *const M)
     OUTPUT_SET_BIT_NOW (CONTROL, StoragePower, 1);
 
     // Wait a couple of milliseconds for power to stabilize
-    BOARD_Delay (200);
+    TICKS_Delay (200);
 }
 
 
@@ -186,7 +186,7 @@ static void powerOff (struct RAWSTOR_SD_SDMMC *const M)
     OUTPUT_SET_BIT_NOW (CONTROL, StoragePower, 0);
 
     // Wait a couple of milliseconds for power to stabilize
-    BOARD_Delay (200);
+    TICKS_Delay (200);
 }
 
 
@@ -210,8 +210,8 @@ static bool cardReadyWait (struct RAWSTOR *const R, uint32_t time)
 {
     (void) R;
 
-    TIMER_Ticks timeout = BOARD_TicksNow() + time;
-    while (BOARD_TicksNow() < timeout
+    TIMER_Ticks timeout = TICKS_Now() + time;
+    while (TICKS_Now() < timeout
            && Chip_SDMMC_GetState(LPC_SDMMC) != -1);
 
     return (Chip_SDMMC_GetState(LPC_SDMMC) == -1)? false : true;

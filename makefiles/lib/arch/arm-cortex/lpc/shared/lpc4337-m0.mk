@@ -66,7 +66,7 @@ ifneq ($(filter video-adapter,$(TARGET_SUBSYSTEMS)),)
 
     # Video adapter
     OBJS += \
-        $(TARGET_ARCH)/shared/m0_instdelay.o \
+        $(TARGET_ARCH)/m0_instdelay.o \
         $(TARGET_MFR)/video_dualcore_adapter/adapter.o \
         $(TARGET_DRIVERS)/board_$(TARGET_BOARD)/video_dualcore_adapter/$(VIDEO_ADAPTER_LINEOUT).o
 

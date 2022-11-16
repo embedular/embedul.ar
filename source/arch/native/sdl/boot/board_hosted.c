@@ -23,9 +23,15 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "embedul.ar/source/arch/native/sdl/drivers/board_hosted.h"
-#include "embedul.ar/source/arch/native/sdl/drivers/io_keyboard.h"
 #include "embedul.ar/source/core/device/board.h"
+#include "embedul.ar/source/drivers/random_sfmt.h"
+#include "embedul.ar/source/arch/native/sdl/drivers/io_keyboard.h"
+#include "embedul.ar/source/arch/native/sdl/drivers/io_gui.h"
+#include "embedul.ar/source/arch/native/sdl/drivers/video_rgb332_adapter_sim.h"
+#include "embedul.ar/source/arch/native/sdl/drivers/video_rgb332_vgafb.h"
+#include "embedul.ar/source/arch/native/sdl/drivers/sound_sdlmixer.h"
+#include "embedul.ar/source/arch/native/sdl/drivers/stream_file.h"
+#include "embedul.ar/source/arch/native/sdl/drivers/rawstor_file.h"
 
 
 #define DEBUG_STREAM_FILE       "stderr"
@@ -36,13 +42,43 @@
 #define BOARD_LOGO_3            "`F25``Y88888b. 88`P0588 88`L"
 #define BOARD_LOGO_4            "`F25`P6``8b 88`P0588 88`L"
 #define BOARD_LOGO_5            "`F25d8'   .8P 88`P4.8P 88`L"
-#define BOARD_LOGO_6            "`F25 Y88888P  8888888P  88888888P`L2"
+#define BOARD_LOGO_6            "`F25 Y88888P  8888888P  88888888P`L1"
 
 #define BOARD_INFO_FMT          "`M40`0`L1" \
-                                "`M40`1`L2"
+                                "`M40`1`L1"
 
 #define BOARD_INFO_0_NAME       "simple directmedia layer"
 #define BOARD_INFO_1_VER        "version " LIB_SDL_VERSION_STR
+
+
+struct BOARD_IO_PROFILES
+{
+    struct INPUT_PROFILE_CONTROL    inControl;
+    struct INPUT_PROFILE_GP1        inGp1;
+    struct INPUT_PROFILE_GP2        inGp2;
+    struct INPUT_PROFILE_LIGHTDEV   inLightdev;
+    struct INPUT_PROFILE_MAIN       inMain;
+    struct OUTPUT_PROFILE_CONTROL   outControl;
+    struct OUTPUT_PROFILE_LIGHTDEV  outLightdev;
+    struct OUTPUT_PROFILE_MARQUEE   outMarquee;
+    struct OUTPUT_PROFILE_SIGN      outSign;
+};
+
+
+struct BOARD_HOSTED
+{
+    struct BOARD                    device;
+    struct RANDOM_SFMT              randomSfmt;
+    struct VIDEO_RGB332_ADAPTER_SIM videoAdapterSim;
+    struct VIDEO_RGB332_VGAFB       videoVgafbMenu;
+    //struct VIDEO_RGB332_VGAFB       videoVgafbConsole;
+    struct SOUND_SDLMIXER           soundSdlmixer;
+    struct IO_KEYBOARD              ioKeyboard;
+    struct IO_GUI                   ioGui;
+    struct STREAM_FILE              streamDebugFile;
+    struct RAWSTOR_FILE             rsImageFile;
+    uint32_t                        screenToWindowId[SCREEN_Role__COUNT];
+};
 
 
 #ifdef BSS_SECTION_BOARD
@@ -60,9 +96,6 @@ static void *       initComponent   (struct BOARD *const B,
                                      const enum BOARD_Stage Component);
 static void         assertFunc      (struct BOARD *const B,
                                      const bool Condition);
-static TIMER_Ticks  ticksNow        (struct BOARD *const B);
-static void         delay           (struct BOARD *const B,
-                                     const TIMER_Ticks Ticks);
 static void         update          (struct BOARD *const B);
 
 
@@ -71,21 +104,24 @@ static const struct BOARD_IFACE BOARD_HOSTED_SDL_IFACE =
     .Description    = "sdl hosted",
     .StageChange    = initComponent,
     .Assert         = assertFunc,
-    .TicksNow       = ticksNow,
-    .Delay          = delay,
     .Update         = update
 };
 
 
-void BOARD_Boot (struct BOARD_RIG *const R)
+struct BOARD * BOARD__boot (const int Argc, const char **const Argv,
+                            struct BOARD_RIG *const R)
 {
-    const char * ErrorMsg = BOARD_Init ((struct BOARD *)&s_board_host,
-                                        &BOARD_HOSTED_SDL_IFACE, R);
+    struct BOARD *const B = (struct BOARD *)&s_board_host;
+
+    const char * ErrorMsg = BOARD_Init (B, &BOARD_HOSTED_SDL_IFACE,
+                                        Argc, Argv, R);
     if (ErrorMsg)
     {
         fprintf (stderr, "BOARD_Init() failed: %s.", ErrorMsg);
         exit (1);
     }
+
+    return B;
 }
 
 
@@ -110,11 +146,8 @@ void * initComponent (struct BOARD *const B,
 
     switch (Component)
     {
-        case BOARD_Stage_InitHardware:
+        case BOARD_Stage_InitPreTicksHardware:
         {
-            // SDL_GetTicks uses a fixed tick duration of 1 ms
-            B->tickFrequency = 1000;
-
             // initialize SDL
             if (SDL_InitSubSystem (SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
             {
@@ -129,6 +162,11 @@ void * initComponent (struct BOARD *const B,
             atexit (SDL_Quit);
 
             SDL_EventState (SDL_MOUSEMOTION, SDL_IGNORE);
+            break;
+        }
+
+        case BOARD_Stage_InitPostTicksHardware:
+        {
             break;
         }
 
@@ -251,23 +289,6 @@ void assertFunc (struct BOARD *const B, const bool Condition)
     (void) B;
 
     assert (Condition);
-}
-
-
-TIMER_Ticks ticksNow (struct BOARD *const B)
-{
-    (void) B;
-
-    return (TIMER_Ticks) SDL_GetTicks ();
-}
-
-
-void delay (struct BOARD *const B, const TIMER_Ticks Ticks)
-{
-    (void) B;
-
-    // 1 Tick = 1 millisecond
-    SDL_Delay ((uint32_t)Ticks);
 }
 
 

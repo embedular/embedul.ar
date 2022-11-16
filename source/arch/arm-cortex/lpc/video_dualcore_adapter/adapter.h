@@ -30,7 +30,7 @@
 #include "embedul.ar/source/core/cc.h"
 // Modeline selected by the project makefile
 #include CC_ExpStr(VIDEO_ADAPTER_MODELINE)
-#include "embedul.ar/source/arch/arm-cortex/shared/m0_instdelay.h"
+#include "embedul.ar/source/arch/arm-cortex/m0_instdelay.h"
 #include "embedul.ar/source/arch/arm-cortex/lpc/drivers/video_dualcore/exchange.h"
 #include "embedul.ar/source/core/misc/modeline.h"
 #include <stdbool.h>

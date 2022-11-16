@@ -23,9 +23,8 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/board_shared/iface_methods.h"
+#include "embedul.ar/source/arch/arm-cortex/lpc/boot/shared_iface.h"
 #include "embedul.ar/source/arch/arm-cortex/lpc/18xx_43xx/lpcopen/chip_18xx_43xx/chip.h"
-#include "embedul.ar/source/arch/arm-cortex/shared/systick.h"
 #include "embedul.ar/source/arch/arm-cortex/lpc/18xx_43xx/lpcopen/shared/panic.h"
 
 
@@ -37,30 +36,6 @@ void assertFunc (struct BOARD *const B, const bool Condition)
     {
         Board_Panic (NULL);
     }
-}
-
-
-void setTickFreq (struct BOARD *const B, const uint32_t Hz)
-{
-    (void) B;
-    // Cortex-M CMSIS function
-    SysTick_Config (SystemCoreClock / Hz);
-}
-
-
-TIMER_TickHookFunc setTickHook (struct BOARD *const B,
-                                TIMER_TickHookFunc const Func,
-                                const enum BOARD_TickHookFuncSlot Slot)
-{
-    (void) B;
-    return ARM_CM_SysTickSetHook (Func, Slot);
-}
-
-
-TIMER_Ticks ticksNow (struct BOARD *const B)
-{
-    (void) B;
-    return ARM_CM_SysTickTime ();
 }
 
 
@@ -81,17 +56,4 @@ struct BOARD_RealTimeClock rtc (struct BOARD *const B)
         .minute     = rtcTime.time[RTC_TIMETYPE_MINUTE],
         .second     = rtcTime.time[RTC_TIMETYPE_SECOND]
     };
-}
-
-
-void delay (struct BOARD *const B, const TIMER_Ticks Ticks)
-{
-    (void) B;
-
-    const TIMER_Ticks Timeout = BOARD_TicksNow() + Ticks;
-
-    while (Timeout > BOARD_TicksNow())
-    {
-        __WFI ();
-    }
 }

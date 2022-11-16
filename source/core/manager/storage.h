@@ -33,7 +33,7 @@
 
 enum STORAGE_Role
 {
-    STORAGE_Role_LinearCache = 0,
+    STORAGE_Role_LinearCache,
     STORAGE_Role_LinearPersistent,
 #ifdef LIB_EMBEDULAR_HAS_FILESYSTEM
     STORAGE_Role_FatFsDrive0,   // Volume 0 (0:)
@@ -97,10 +97,10 @@ struct STORAGE
 
 void        STORAGE_Init                (struct STORAGE *const S);
 void        STORAGE_SetDevice           (struct RAWSTOR *const Driver);
-void        STORAGE_RegisterVolume           (const enum STORAGE_Role Role,
+void        STORAGE_RegisterVolume      (const enum STORAGE_Role Role,
                                          struct RAWSTOR *const Driver,
                                          const uint8_t PartitionNr);
-uint32_t    STORAGE_RegisteredVolumes          (void);
+uint32_t    STORAGE_RegisteredVolumes   (void);
 bool        STORAGE_ValidVolume         (const enum STORAGE_Role Role);
 struct STORAGE_VolumeInfo
             STORAGE_VolumeInfo          (const enum STORAGE_Role Role);

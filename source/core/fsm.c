@@ -46,13 +46,13 @@ void FSM_SetStateInfo (struct FSM *const F, const char *const Info)
 
 bool FSM_StateTimeout (struct FSM *const F, const TIMER_Ticks Timeout)
 {
-    return (F && F->stateStartTicks + Timeout >= BOARD_TicksNow());
+    return (F && F->stateStartTicks + Timeout >= TICKS_Now());
 }
 
 
 bool FSM_StageTimeout (struct FSM *const F, const TIMER_Ticks Timeout)
 {
-    return (F && F->stageStartTicks + Timeout <= BOARD_TicksNow());
+    return (F && F->stageStartTicks + Timeout <= TICKS_Now());
 }
 
 
@@ -60,13 +60,13 @@ bool FSM_StateCountdown (struct FSM *const F, const TIMER_Ticks Timeout)
 {
     BOARD_AssertParams (F);
 
-    const TIMER_Ticks NextTimeout = BOARD_TicksNow() + Timeout;
+    const TIMER_Ticks NextTimeout = TICKS_Now() + Timeout;
 
     if (!F->stateCountdownTicks)
     {
         F->stateCountdownTicks = NextTimeout;
     }
-    else if (BOARD_TicksNow() >= F->stateCountdownTicks)
+    else if (TICKS_Now() >= F->stateCountdownTicks)
     {
         F->stateCountdownTicks = Timeout? NextTimeout : 0;
 
@@ -86,7 +86,7 @@ TIMER_Ticks FSM_StateCountdownSeconds (struct FSM *f)
         return 0;
     }
 
-    const TIMER_Ticks Now = BOARD_TicksNow ();
+    const TIMER_Ticks Now = TICKS_Now ();
 
     if (Now >= f->stateCountdownTicks)
     {
@@ -103,7 +103,7 @@ void FSM_GotoStage (struct FSM *const F, const enum FSM_Stage NewStage)
 
     F->stage              = NewStage;
     F->stageCalls         = 0;
-    F->stageStartTicks    = BOARD_TicksNow ();
+    F->stageStartTicks    = TICKS_Now ();
 }
 
 
@@ -114,7 +114,7 @@ void FSM_StateTransition (struct FSM *const F, const FSM_StateFunc NextState)
     F->state                  = NextState;
     F->info                   = NULL;
     F->stateCalls             = 0;
-    F->stateStartTicks        = BOARD_TicksNow ();
+    F->stateStartTicks        = TICKS_Now ();
     F->stateCountdownTicks    = 0;
 
     FSM_GotoStage (F, FSM_Stage_Begin);
@@ -140,12 +140,12 @@ enum FSM_StateReturn FSM_Process (struct FSM *const F,
             BOARD_AssertState (repeatingCalls < FSM_MAX_REPEATING_CALLS);
         #endif
 
-        if (CurTimeout && BOARD_TicksNow() >= CurTimeout)
+        if (CurTimeout && TICKS_Now() >= CurTimeout)
         {
             break;
         }
 
-        ret = F->state (F, F->stage, BOARD_TicksNow());
+        ret = F->state (F, F->stage, TICKS_Now());
 
         ++ F->stateCalls;
         ++ F->stageCalls;

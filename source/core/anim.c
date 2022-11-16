@@ -66,7 +66,7 @@ void ANIM_Start (struct ANIM *const A, const enum ANIM_Type Type,
 	A->repeat	= Repeat;
 	A->vCurrent = (Phase)? VBegin : VEnd;
 
-	const TIMER_Ticks Now = BOARD_TicksNow ();
+	const TIMER_Ticks Now = TICKS_Now ();
 
 	if (!Delay)
 	{
@@ -113,7 +113,7 @@ void ANIM_Update (struct ANIM *const A)
         return;
     }
 
-	const TIMER_Ticks Now = BOARD_TicksNow() + A->delta;
+	const TIMER_Ticks Now = TICKS_Now() + A->delta;
 
 	if (A->delayStarted)
 	{

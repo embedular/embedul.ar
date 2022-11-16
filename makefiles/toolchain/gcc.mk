@@ -70,7 +70,7 @@ CFLAGS += -D_POSIX_C_SOURCE=200809L
 
 # Debug information
 ifeq ($(DEBUG),yes)
-    CFLAGS += -g -DDEBUG
+    CFLAGS += -g$(GLEVEL) -DDEBUG
 else
     # -flto
    # CFLAGS += -ffast-math

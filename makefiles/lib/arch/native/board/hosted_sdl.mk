@@ -37,6 +37,8 @@ TARGET_BSP := $(TARGET_MFR)
 TARGET_BSP_BOARD := $(TARGET_MFR)/drivers
 TARGET_DRIVERS := $(TARGET_BSP_BOARD)
 
+CFLAGS += -I$(TARGET_MFR)/boot
+
 # Common target init and checks
 $(call emb_include,target/check.mk)
 
@@ -46,7 +48,7 @@ FLASH_TOOL ?= no
 # System code
 OBJS += \
     $(LIB_EMBEDULAR_ROOT)/source/drivers/random_sfmt.o \
-    $(TARGET_BSP_BOARD)/board_hosted.o \
+    $(TARGET_MFR)/boot/board_hosted.o \
     $(TARGET_DRIVERS)/video_rgb332.o \
     $(TARGET_DRIVERS)/video_rgb332_adapter_sim.o \
     $(TARGET_DRIVERS)/video_rgb332_vgafb.o \
@@ -55,6 +57,14 @@ OBJS += \
     $(TARGET_DRIVERS)/io_gui.o \
     $(TARGET_DRIVERS)/stream_file.o \
     $(TARGET_DRIVERS)/rawstor_file.o
+
+ifneq ($(findstring freertos,$(BUILD_LIBS)),)
+    $(call emb_info,Using TICKS-OSWRAP)
+	OBJS += $(LIB_EMBEDULAR_ROOT)/source/boot/ticks_oswrap.o
+else
+    $(call emb_info,Using TICKS-SDL)
+	OBJS += $(TARGET_MFR)/boot/ticks_sdl.o
+endif
 
 LIB_EMBEDULAR_SUBSYSTEMS += $(TARGET_SUBSYSTEMS)
 

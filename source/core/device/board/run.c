@@ -23,56 +23,56 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "embedul.ar/source/core/device/board.h"
-#include "embedul.ar/source/core/manager/log.h"
+#include "embedul.ar/source/core/main.h"
 #include "embedul.ar/source/core/manager/storage/cache.h"
+#include "source/core/device/oswrap.h"
 
 
-#define GREET_LOGO_1        "`F36_________`L"
-#define GREET_LOGO_2        "`F35/\\`P7/\\`L"
-#define GREET_LOGO_3        "`F34/  \\_____/  \\`L"
-#define GREET_LOGO_4        "`F33/   /\\   '\\   \\`L"
-#define GREET_LOGO_5        "`F32/___/..\\_'__\\___\\`L"
-#define GREET_LOGO_6        "`F32\\   \\  / '  /   /`L"
-#define GREET_LOGO_7        "`F33\\   \\/___'/   /`L"
-#define GREET_LOGO_8        "`F34\\  /`P5\\  /`L"
-#define GREET_LOGO_9        "`F35\\/_______\\/`L2"
-#define GREET_LOGO_10       "`F27|`P13|`P5|`L" 
-#define GREET_LOGO_11       "`F17,---.,-.-.|---.,---.,---|.   .|`P5,---.,---.`L"
-#define GREET_LOGO_12       "`F17|---'| | ||   ||---'|   ||   ||`P5,---||`L"
-#define GREET_LOGO_13       "`F17``---'`` ' '``---'``---'``---'``---'``---'o" \
+#define GREET_FWK_LOGO_1    "`F36_________`L"
+#define GREET_FWK_LOGO_2    "`F35/\\`P7/\\`L"
+#define GREET_FWK_LOGO_3    "`F34/  \\_____/  \\`L"
+#define GREET_FWK_LOGO_4    "`F33/   /\\   '\\   \\`L"
+#define GREET_FWK_LOGO_5    "`F32/___/..\\_'__\\___\\`L"
+#define GREET_FWK_LOGO_6    "`F32\\   \\  / '  /   /`L"
+#define GREET_FWK_LOGO_7    "`F33\\   \\/___'/   /`L"
+#define GREET_FWK_LOGO_8    "`F34\\  /`P5\\  /`L"
+#define GREET_FWK_LOGO_9    "`F35\\/_______\\/`L2"
+#define GREET_FWK_LOGO_10   "`F27|`P13|`P5|`L" 
+#define GREET_FWK_LOGO_11   "`F17,---.,-.-.|---.,---.,---|.   .|`P5,---.,---.`L"
+#define GREET_FWK_LOGO_12   "`F17|---'| | ||   ||---'|   ||   ||`P5,---||`L"
+#define GREET_FWK_LOGO_13   "`F17``---'`` ' '``---'``---'``---'``---'``---'o" \
                             "``---^```L"
 
-#define GREET_FMT           "`L1" \
+#define GREET_FWK_FMT       "`L1" \
                             "`M40`0`L1" \
                             "`M40`1`L1" \
                             "`M40`2`L1" \
                             "`M40`3`L1" \
                             "`M40`4`L1"
+#define GREET_FWK_0_DESC    "embedded systems framework"
+#define GREET_FWK_1_AUTH    "© 2018-2022 santiago germino"
+#define GREET_FWK_2_WEB     "http://embedul.ar"
+#define GREET_FWK_3_BUILD   CC_BuildInfoStr
+#define GREET_FWK_4_VER     CC_VcsFwkVersionStr
 
-#define GREET_0_DESC        LOG_BASE_BOLD("embedded systems framework")
-#define GREET_1_AUTH        "© 2018-2022 santiago germino"
-#define GREET_2_WEB         "http://embedul.ar"
-#define GREET_3_BUILD       CC_BuildInfoStr
-#define GREET_4_VER         CC_VcsFwkVersionStr
+#define GREET_BOARD_FMT     "`M40`0`L1"
+#define GREET_BOARD_0       LOG_BASE_BOLD("board")
+
+#define GREET_MTOS_FMT      "`M40`0`L1" \
+                            "`M40`1`L1"
+#define GREET_MTOS_0_TITLE  LOG_BASE_BOLD("multitasking os")
 
 #define GREET_APP_FMT       "`M40`0`L1" \
                             "`M40`1`L1" \
                             "`M40`2`L1"
-
-#define GREET_APP_0_CAPTION LOG_BASE_BOLD("application name")
+#define GREET_APP_0_TITLE LOG_BASE_BOLD("application name")
 #define GREET_APP_1_NAME    CC_AppNameStr
 #define GREET_APP_2_VER     CC_VcsAppVersionStr
 
-#define GREET_APP_RIG_FMT   "`L1" \
+#define GREET_RIG_FMT       "`L1" \
                             "`M40`0`L1" \
                             "`M40`1`L1"
-
-#define GREET_APP_0_RIGGED  LOG_BASE_BOLD("rigged setup")
-
-#define GREET_BOARD_FMT     "`M40`0`L1"
-
-#define GREET_BOARD_0       LOG_BASE_BOLD("board")
+#define GREET_RIG_0_TITLE   LOG_BASE_BOLD("rigged setup")
 
 
 #define LOG_ITEM_OK_STR                     LOG_PENDING_OK_STR
@@ -168,25 +168,35 @@ static void frameworkGreetings (struct BOARD *const B)
 {
     struct STREAM *const S = B->debugStream;
 
-    STREAM_IN_FromParsedString (S, 0, 512, GREET_LOGO_1);
-    STREAM_IN_FromParsedString (S, 0, 512, GREET_LOGO_2);
-    STREAM_IN_FromParsedString (S, 0, 512, GREET_LOGO_3);
-    STREAM_IN_FromParsedString (S, 0, 512, GREET_LOGO_4);
-    STREAM_IN_FromParsedString (S, 0, 512, GREET_LOGO_5);
-    STREAM_IN_FromParsedString (S, 0, 512, GREET_LOGO_6);
-    STREAM_IN_FromParsedString (S, 0, 512, GREET_LOGO_7);
-    STREAM_IN_FromParsedString (S, 0, 512, GREET_LOGO_8);
-    STREAM_IN_FromParsedString (S, 0, 512, GREET_LOGO_9);
-    STREAM_IN_FromParsedString (S, 0, 512, GREET_LOGO_10);
-    STREAM_IN_FromParsedString (S, 0, 512, GREET_LOGO_11);
-    STREAM_IN_FromParsedString (S, 0, 512, GREET_LOGO_12);
-    STREAM_IN_FromParsedString (S, 0, 512, GREET_LOGO_13);
-    STREAM_IN_FromParsedString (S, 0, 512, GREET_FMT,
-                                           GREET_0_DESC,
-                                           GREET_1_AUTH,
-                                           GREET_2_WEB,
-                                           GREET_3_BUILD,
-                                           GREET_4_VER);
+    STREAM_IN_FromParsedString (S, 0, 512, GREET_FWK_LOGO_1);
+    STREAM_IN_FromParsedString (S, 0, 512, GREET_FWK_LOGO_2);
+    STREAM_IN_FromParsedString (S, 0, 512, GREET_FWK_LOGO_3);
+    STREAM_IN_FromParsedString (S, 0, 512, GREET_FWK_LOGO_4);
+    STREAM_IN_FromParsedString (S, 0, 512, GREET_FWK_LOGO_5);
+    STREAM_IN_FromParsedString (S, 0, 512, GREET_FWK_LOGO_6);
+    STREAM_IN_FromParsedString (S, 0, 512, GREET_FWK_LOGO_7);
+    STREAM_IN_FromParsedString (S, 0, 512, GREET_FWK_LOGO_8);
+    STREAM_IN_FromParsedString (S, 0, 512, GREET_FWK_LOGO_9);
+    STREAM_IN_FromParsedString (S, 0, 512, GREET_FWK_LOGO_10);
+    STREAM_IN_FromParsedString (S, 0, 512, GREET_FWK_LOGO_11);
+    STREAM_IN_FromParsedString (S, 0, 512, GREET_FWK_LOGO_12);
+    STREAM_IN_FromParsedString (S, 0, 512, GREET_FWK_LOGO_13);
+    STREAM_IN_FromParsedString (S, 0, 512, GREET_FWK_FMT,
+                                           GREET_FWK_0_DESC,
+                                           GREET_FWK_1_AUTH,
+                                           GREET_FWK_2_WEB,
+                                           GREET_FWK_3_BUILD,
+                                           GREET_FWK_4_VER);
+}
+
+
+static void mtosGreetings (struct BOARD *const B)
+{
+    struct STREAM *const S = B->debugStream;
+
+    STREAM_IN_FromParsedString (S, 0, 512, GREET_MTOS_FMT,
+                                           GREET_MTOS_0_TITLE,
+                                           OSWRAP_Description());
 }
 
 
@@ -195,14 +205,14 @@ static void applicationGreetings (struct BOARD *const B)
     struct STREAM *const S = B->debugStream;
 
     STREAM_IN_FromParsedString (S, 0, 512, GREET_APP_FMT,
-                                           GREET_APP_0_CAPTION,
+                                           GREET_APP_0_TITLE,
                                            GREET_APP_1_NAME,
                                            GREET_APP_2_VER);
 
     if (B->rig)
     {
-        STREAM_IN_FromParsedString (S, 0, 512, GREET_APP_RIG_FMT,
-                                               GREET_APP_0_RIGGED,
+        STREAM_IN_FromParsedString (S, 0, 512, GREET_RIG_FMT,
+                                               GREET_RIG_0_TITLE,
                                                B->rig->iface->Description);
     }
 }
@@ -391,7 +401,7 @@ bool BOARD_INIT_InputCountdown (const enum INPUT_PROFILE_Type ProfileType,
 
     LOG (NOBJ, Msg, INPUT_MappedName(ProfileType, IO_Type_Bit, ProfileCode));
 
-    const TIMER_Ticks   Timeout = BOARD_TicksNow () + Countdown;
+    const TIMER_Ticks   Timeout = TICKS_Now () + Countdown;
     const uint32_t      LPM     = LOG_ProgressMax ();
 
     uint32_t lastOutColumn = LOG_ProgressBegin (LOG_ProgressType_Timeout);
@@ -399,16 +409,16 @@ bool BOARD_INIT_InputCountdown (const enum INPUT_PROFILE_Type ProfileType,
 
     do
     {
-        BOARD_Delay (100);
-        BOARD_Update ();
+        TICKS_Delay (100);
+        BOARD_Sync ();
 
-        const TIMER_Ticks Now = BOARD_TicksNow ();
+        const TIMER_Ticks Now = TICKS_Now ();
 
         if (Timeout <= Now)
         {
             LOG_ProgressUpdate (lastOutColumn, LPM);
         }
-        else 
+        else
         {
             const int32_t   Pro = Countdown - (Timeout - Now);
             const uint32_t  Col = (Pro * LPM) / Countdown;
@@ -418,12 +428,12 @@ bool BOARD_INIT_InputCountdown (const enum INPUT_PROFILE_Type ProfileType,
 
         lastBitBuffer = INPUT_GetBuffered(ProfileType, IO_Type_Bit, ProfileCode);
     }
-    while (!lastBitBuffer && Timeout > BOARD_TicksNow());
+    while (!lastBitBuffer && Timeout > TICKS_Now());
 
     LOG_ProgressEnd ();
 
     // Timeout reached
-    if (Timeout <= BOARD_TicksNow())
+    if (Timeout <= TICKS_Now())
     {
         return true;
     }
@@ -941,9 +951,9 @@ static bool logProcessBreakFunc (void *const Param)
 {
     TIMER_Ticks *const Ticks = (TIMER_Ticks *) Param;
 
-    if (*Ticks < BOARD_TicksNow())
+    if (*Ticks < TICKS_Now())
     {
-        *Ticks = BOARD_TicksNow() + 100;
+        *Ticks = TICKS_Now() + 100;
         return true;
     }
 
@@ -1200,7 +1210,11 @@ void CC_ExpPaste(SPLASH_THEME_,LIB_EMBEDULAR_CONFIG_SPLASH_THEME_L3)(void);
 #endif
 
 
-void BOARD_INIT_Sequence (struct BOARD *const B)
+// Provided by build-system selected driver
+void TICKS__boot (void);
+
+
+static void boardInitSequence (struct BOARD *const B)
 {
     // -------------------------------------------------------------------------
     // Assert checks available, but still NO assert output or log messages
@@ -1210,7 +1224,16 @@ void BOARD_INIT_Sequence (struct BOARD *const B)
     // No assert messages output. If board initialization fails, the board
     // interface implementation itself should inform the user what went wrong
     // by using an OS function, LED or other ad-hoc method.
-    BOARD_INIT_Component    (B, BOARD_Stage_InitHardware, NOBJ);
+    // -------------------------------------------------------------------------
+    // Initialization of base hardware required to boot the build-system
+    // selected ticks driver. For example, in this stage the board initializes
+    // its main peripherals or multimedia library.
+    BOARD_INIT_Component    (B, BOARD_Stage_InitPreTicksHardware, NOBJ);
+    // Ticks driver boot
+    TICKS__boot ();
+    // Hardware and/or BSP initialization that depends on an initialized ticks
+    // driver.
+    BOARD_INIT_Component    (B, BOARD_Stage_InitPostTicksHardware, NOBJ);
     // -------------------------------------------------------------------------
     // System debug stream required for assert messages.
     // -------------------------------------------------------------------------
@@ -1224,6 +1247,8 @@ void BOARD_INIT_Sequence (struct BOARD *const B)
     frameworkGreetings      (B);
     streamOutArgs           (B, LOG_BASE_COLOR "`L", NULL, 0);
     boardGreetings          (B);
+    streamOutArgs           (B, LOG_BASE_COLOR "`L", NULL, 0);    
+    mtosGreetings           (B);
     streamOutArgs           (B, LOG_BASE_COLOR "`L", NULL, 0);
     applicationGreetings    (B);
     streamOutArgs           (B, LOG_BASE_COLOR "`L", NULL, 0);
@@ -1262,4 +1287,79 @@ void BOARD_INIT_Sequence (struct BOARD *const B)
         CC_ExpPaste(SPLASH_THEME_,LIB_EMBEDULAR_CONFIG_SPLASH_THEME_L3)();
     }
 #endif
+
+    OSWRAP_EnableAutoSync (LIB_EMBEDULAR_CONFIG_OS_AUTOSYNC_PERIOD);
+}
+
+
+static void boardShutdownSequence (struct BOARD *const B)
+{
+    LOG_Warn (B, LANG_SHUTTING_DOWN);
+
+    // Managers shutdown (will shut down their registered drivers)
+    SCREEN_Shutdown ();
+
+    // BOARD_Stage_InitHardware counterpart
+    B->iface->StageChange (B, BOARD_Stage_ShutdownHardware);
+}
+
+
+void OSWRAP__greetings              (struct STREAM *const S);
+int  OSWRAP__createRunTaskAndStart  (struct BOARD *const B,
+                                     const OSWRAP_TaskFunc RunTask);
+void OSWRAP__createMainTaskAndSync  (struct BOARD *const B,
+                                     const OSWRAP_TaskFunc MainTask);
+void OSWRAP__closeRunTaskAndEnd     (void);
+
+
+static void runTask (void *param)
+{
+    // -------------------------------------------------------------------------
+    // Assert checks available, but still NO assert output or log messages.
+    // -------------------------------------------------------------------------
+    BOARD_AssertParams (param);
+
+    struct BOARD *const B = (struct BOARD *) param;
+
+    boardInitSequence (B);
+    // -------------------------------------------------------------------------
+    // Board ready.
+    // -------------------------------------------------------------------------
+    BOARD_AssertState (BOARD_CurrentStage() == BOARD_Stage_Ready);
+
+    LOG_ContextBegin (NOBJ, LANG_APPLICATION);
+    {
+        LOG_Items (1, LANG_NAME, CC_AppNameStr);
+        LOG_Items (1, LANG_VERSION, CC_VcsAppVersionStr);
+
+        LOG_ContextBegin (NOBJ, LANG_ENTERING_APP_MAIN);
+        {
+            OSWRAP__createMainTaskAndSync (B, EMBEDULAR_Main);
+
+            LOG (NOBJ, LANG_RETURNED_FROM_APP_MAIN);
+            LOG_Items (1, LANG_RETURN_VALUE, (int64_t)BOARD_ReturnValue());
+        }
+        LOG_ContextEnd ();
+    }
+    LOG_ContextEnd ();
+
+    boardShutdownSequence (B);
+
+    // The below OSWRAP function will never be executed if an embedded system
+    // actually shut down the hardware. On targets running over an OS,
+    // boardShutdownSequence() will close the multimedia libraries, then the
+    // above function will close the application and then return a value to the
+    // OS through main().
+    OSWRAP__closeRunTaskAndEnd ();
+}
+
+
+int BOARD__run (struct BOARD *const B)
+{
+    // -------------------------------------------------------------------------
+    // Assert checks available, but still NO assert output or log messages.
+    // -------------------------------------------------------------------------
+    const int RetVal = OSWRAP__createRunTaskAndStart (B, runTask);
+
+    return RetVal;
 }

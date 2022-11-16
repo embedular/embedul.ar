@@ -1,7 +1,7 @@
 /*
   embedul.ar™ embedded systems framework - http://embedul.ar
   
-  [VIDEO] video device interface (singleton).
+  [VIDEO] video device interface.
 
   Copyright 2018-2022 Santiago Germino
   <sgermino@embedul.ar> https://www.linkedin.com/in/royconejo
@@ -56,7 +56,7 @@ void VIDEO_Init (struct VIDEO *const V, const struct VIDEO_IFACE *const Iface,
     OBJECT_Clear (V);
 
     V->iface            = Iface;
-    V->frameStartTicks  = BOARD_TicksNow ();
+    V->frameStartTicks  = TICKS_Now ();
     // Scanlines effect off
     V->scanlines        = 0;
     // Default raster lines op values
@@ -273,7 +273,7 @@ void VIDEO_NextFrame (struct VIDEO *const V)
         V->iface->FrameEnd (V);
     }
 
-    V->lastFrameBusy = BOARD_TicksNow() - V->frameStartTicks;
+    V->lastFrameBusy = TICKS_Now() - V->frameStartTicks;
 
     // Required interface implementation
     V->iface->WaitForVBI (V);
@@ -296,8 +296,8 @@ void VIDEO_NextFrame (struct VIDEO *const V)
         V->backbuffer = B;
     }
 
-    V->lastFramePeriod = BOARD_TicksNow() - V->frameStartTicks;
-    V->frameStartTicks = BOARD_TicksNow();
+    V->lastFramePeriod = TICKS_Now() - V->frameStartTicks;
+    V->frameStartTicks = TICKS_Now();
 
     if (V->iface->FrameTransition)
     {

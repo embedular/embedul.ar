@@ -1,7 +1,7 @@
 /*
   embedul.ar™ embedded systems framework - http://embedul.ar
   
-  LPC43xx common board iface methods.
+  [TICKS] device interface (singleton).
 
   Copyright 2018-2022 Santiago Germino
   <sgermino@embedul.ar> https://www.linkedin.com/in/royconejo
@@ -23,19 +23,62 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#pragma once
-
+#include "embedul.ar/source/core/device/ticks.h"
 #include "embedul.ar/source/core/device/board.h"
 
 
-void                assertFunc      (struct BOARD *const B, 
-                                     const bool Condition);
-void                setTickFreq     (struct BOARD *const B, const uint32_t Hz);
-TIMER_TickHookFunc  setTickHook     (struct BOARD *const B,
-                                     TIMER_TickHookFunc const Func,
-                                     const enum BOARD_TickHookFuncSlot Slot);
-TIMER_Ticks         ticksNow        (struct BOARD *const B);
-struct BOARD_RealTimeClock
-                    rtc             (struct BOARD *const B);
-void                delay           (struct BOARD *const B,
-                                     const TIMER_Ticks Ticks);
+static struct TICKS * s_t = NULL;
+
+
+void TICKS_Init (struct TICKS *const T,
+                 const struct TICKS_IFACE *const Iface)
+{
+    BOARD_AssertState (!s_t);
+    BOARD_AssertParams (T && Iface);
+
+    // Required interface elements
+    BOARD_AssertInterface (Iface->Description &&
+                           Iface->Now &&
+                           Iface->Delay);
+    OBJECT_Clear (T);
+
+    T->iface = Iface;
+
+    s_t = T;
+
+    if (T->iface->HardwareInit)
+    {
+        T->iface->HardwareInit (T);
+    }
+}
+
+
+TIMER_Ticks TICKS_Now (void)
+{
+    return s_t->iface->Now (s_t);
+}
+
+
+TIMER_TickHookFunc TICKS_SetHook (const TIMER_TickHookFunc Hook)
+{
+    if (s_t->iface->SetHook)
+    {
+        return s_t->iface->SetHook (s_t, Hook);
+    }
+
+    BOARD_AssertState (false);
+
+    return NULL;
+}
+
+
+void TICKS_Delay (const TIMER_Ticks Ticks)
+{
+    s_t->iface->Delay (s_t, Ticks);
+}
+
+
+const char * TICKS_Description (void)
+{
+    return s_t->iface->Description;
+}

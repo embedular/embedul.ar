@@ -139,8 +139,6 @@ ifneq ($(LIB_LPCOPEN_USB_HOST_CLASSES),)
 
     LIB_LPCOPEN_USB_HOST := $(LIB_LPCOPEN)/lpcusblib_host
     CFLAGS += -I$(LIB_LPCOPEN_USB_HOST)
-    # Now using -lnosys
-    # OBJS += $(LIB_LPCOPEN_USB_HOST)/syscalls.o
 
     # One or more of Audio, CDC, HID, MassStorage, MIDI, Printer, RNDIS, StillImage (see path contents)
     include_hostusbclass = OBJS += $(LIB_LPCOPEN_USBLIB)/Drivers/USB/Class/Host/$(1)ClassHost.o

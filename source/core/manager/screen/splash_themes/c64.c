@@ -113,6 +113,6 @@ void SPLASH_THEME_c64 (void)
 
     while (SEQUENCE_Update (&seq))
     {
-        BOARD_Update ();
+        BOARD_Sync ();
     }
 }

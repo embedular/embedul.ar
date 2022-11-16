@@ -1,7 +1,7 @@
 /*
   embedul.ar™ embedded systems framework - http://embedul.ar
   
-  [CORE] managed program entry point.
+  [CORE] framework managed program entry point.
 
   Copyright 2018-2022 Santiago Germino
   <sgermino@embedul.ar> https://www.linkedin.com/in/royconejo
@@ -34,32 +34,30 @@ struct BOARD_RIG * EMBEDULAR_Board_Rig (void)
 }
 
 
-// Provided by board driver
-void BOARD_Boot (struct BOARD_RIG *const R);
+// XXXX__boot() provided by build-system selected drivers
+struct BOARD * BOARD__boot (const int Argc, const char **const Argv,
+                            struct BOARD_RIG *const R);
+void OSWRAP__boot (void);
 
-// Board device "private" function
-void BOARD__stage_shutdown (void);
+// BOARD device interface private definition
+int BOARD__run (struct BOARD *const B);
 
 
-int main (const int Argc, const char *const Argv[])
+int main (const int Argc, const char **const Argv)
 {
-    BOARD_Boot (EMBEDULAR_Board_Rig());
+    // The build system includes the proper definition of XXXX__boot() according
+    // to the system's configuration. That function is in charge of initializing
+    // the corresponding driver interface. All drivers initialized this way are
+    // singletons.
 
-    int retVal = 0;
+    struct BOARD *const B = BOARD__boot (Argc, Argv, EMBEDULAR_Board_Rig());
+    // -------------------------------------------------------------------------
+    // Assert checks available, but still NO assert output or log messages.
+    // -------------------------------------------------------------------------
+    OSWRAP__boot ();
 
-    LOG_ContextBegin (NOBJ, LANG_APPLICATION);
-    {
-        LOG_Items (1, LANG_NAME, CC_AppNameStr);
-        LOG_Items (1, LANG_VERSION, CC_VcsAppVersionStr);
+    // BOARD init sequence, main application launch, and board shutdown at exit.
+    const int RetVal = BOARD__run (B);
 
-        LOG (NOBJ, LANG_ENTERING_APP_MAIN);
-        retVal = EMBEDULAR_Main (Argc, Argv);
-        LOG (NOBJ, LANG_RETURNED_FROM_APP_MAIN);
-        LOG_Items (1, LANG_RETURN_VALUE, (int64_t)retVal);
-    }
-    LOG_ContextEnd ();
-
-    BOARD__stage_shutdown ();
-
-    return retVal;
+    return RetVal;
 }

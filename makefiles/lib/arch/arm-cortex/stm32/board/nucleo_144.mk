@@ -49,9 +49,8 @@ CFLAGS += -I$(TARGET_BSP_BOARD)/cubemx/Core/Inc
 # Each mcu supported on NUCLEO-144 generates the same STM32CubeMX peripheral
 # board filenames.
 OBJS += \
-    $(TARGET_ARCH)/shared/systick.o \
-	$(TARGET_DRIVERS)/board_nucleo_144.o \
-	$(TARGET_DRIVERS)/board_nucleo_144/io_board.o \
+	$(TARGET_MFR)/boot/board_nucleo_144.o \
+	$(TARGET_DRIVERS)/io_board_nucleo_144.o \
 	$(TARGET_DRIVERS)/stream_usart.o \
 	$(TARGET_DRIVERS)/random_rng.o \
 	$(TARGET_BSP)/Drivers/BSP/STM32$(CHIP_FAMILY_UC)xx_Nucleo_144/stm32$(CHIP_FAMILY)xx_nucleo_144.o \
@@ -62,6 +61,14 @@ OBJS += \
 	$(TARGET_BSP_BOARD)/cubemx/Core/Src/stm32$(CHIP_FAMILY)xx_hal_msp.o \
 	$(TARGET_BSP_BOARD)/cubemx/Core/Src/usart.o \
 	$(TARGET_BSP_BOARD)/cubemx/Core/Src/usb_otg.o
+
+ifneq ($(findstring freertos,$(BUILD_LIBS)),)
+    $(call emb_info,Using TICKS-OSWRAP)
+	OBJS += $(LIB_EMBEDULAR_ROOT)/source/boot/ticks_oswrap.o
+else
+    $(call emb_info,Using TICKS-SYSTICK)
+	OBJS += $(TARGET_ARCH)/boot/ticks_systick.o
+endif
 
 LDFLAGS += -T $(TARGET_FAMILY)/ld/$(TARGET_CHIP_TMP)_flash.ld
 

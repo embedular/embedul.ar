@@ -1,7 +1,7 @@
 /*
   embedul.ar™ embedded systems framework - http://embedul.ar
   
-  low-level interface between an arm cortex systick and embedul.ar
+  [TICKS driver] arm cortex systick.
 
   Copyright 2018-2022 Santiago Germino
   <sgermino@embedul.ar> https://www.linkedin.com/in/royconejo
@@ -23,10 +23,52 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
+#include "embedul.ar/source/core/device/ticks.h"
 #include "embedul.ar/source/core/device/board.h"
+#include "SDL.h"
 
 
-TIMER_TickHookFunc  ARM_CM_SysTickSetHook   (TIMER_TickHookFunc const Func,
-                                             const enum BOARD_TickHookFuncSlot
-                                             Slot);
-TIMER_Ticks         ARM_CM_SysTickTime      (void);
+struct TICKS_SDL
+{
+    struct TICKS    device;
+};
+
+
+static struct TICKS_SDL s_ticks_sdl;
+
+
+static TIMER_Ticks      now             (struct TICKS *const T);
+static void             delay           (struct TICKS *const T,
+                                         const TIMER_Ticks Ticks);
+
+
+static const struct TICKS_IFACE TICKS_SDL_IFACE =
+{
+    .Description    = "sdl ticks",
+    .Now            = now,
+    .Delay          = delay
+};
+
+
+void TICKS__boot (void)
+{
+    TICKS_Init ((struct TICKS *)&s_ticks_sdl, &TICKS_SDL_IFACE);
+}
+
+
+static TIMER_Ticks now (struct TICKS *const T)
+{
+    (void) T;
+
+    // SDL_GetTicks uses a fixed tick duration of 1 ms
+    return (TIMER_Ticks) SDL_GetTicks ();
+}
+
+
+static void delay (struct TICKS *const T, const TIMER_Ticks Ticks)
+{
+    (void) T;
+
+    // 1 Tick = 1 millisecond
+    SDL_Delay ((uint32_t)Ticks);
+}

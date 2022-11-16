@@ -34,6 +34,20 @@
             "svdFile": "${env:LIB_EMBEDULAR_PATH}/embedul.ar/source/arch/arm-cortex/lpc/18xx_43xx/svd/LPC43xx_43Sxx.svd"
         },
         {
+            "name": "[OpenOCD] edu_ciaa-m4",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/build/binary/edu_ciaa/arm-none-eabi-gcc/debug_cortex-m4_O0/${workspaceFolderBasename}.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "numberOfProcessors": 2,
+            "targetProcessor": 0,
+            "configFiles": [
+                "${env:LIB_EMBEDULAR_PATH}/embedul.ar/source/arch/arm-cortex/lpc/18xx_43xx/openocd/edu_ciaa-ftdi.cfg"
+            ],
+            "svdFile": "${env:LIB_EMBEDULAR_PATH}/embedul.ar/source/arch/arm-cortex/lpc/18xx_43xx/svd/LPC43xx_43Sxx.svd"
+        },
+        {
             "name": "[JLink] retro_ciaa",
             "cwd": "${workspaceFolder}",
             "executable": "${workspaceFolder}/build/binary/retro_ciaa/arm-none-eabi-gcc/debug_cortex-m4_O0/${workspaceFolderBasename}.elf",

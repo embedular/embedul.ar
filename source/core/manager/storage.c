@@ -253,8 +253,10 @@ void STORAGE_RegisterVolume (const enum STORAGE_Role Role,
     uint8_t mbr[512];
     RAWSTOR_Status_Result r;
 
-    s_s->volume[Role].driver            = Driver;
-    s_s->volume[Role].info.partitionNr  = PartitionNr;
+    struct STORAGE_Volume *const V = &s_s->volume[Role];
+
+    V->driver           = Driver;
+    V->info.partitionNr = PartitionNr;
 
     // Read device MBR, if any. Any device/media must already be usable to be
     // assigned as a volume. The read is a good test of the former since it
@@ -274,18 +276,18 @@ void STORAGE_RegisterVolume (const enum STORAGE_Role Role,
     // No MBR
     if (mbr[0x01FE] != 0x55 || mbr[0x01FF] != 0xAA)
     {
-        setRawVolume (Role, &s_s->volume[Role]);
+        setRawVolume (Role, V);
     }
     // Assume there is a MBR
     else 
     {
-        setMBRVolume (Role, &s_s->volume[Role], mbr);
+        setMBRVolume (Role, V, mbr);
     }
 
 #ifdef LIB_EMBEDULAR_HAS_FILESYSTEM
     if (Role >= STORAGE_Role_FatFs__BEGIN && Role <= STORAGE_Role_FatFs__END)
     {
-        mountFilesystem (Role, &s_s->volume[Role]);
+        mountFilesystem (Role, V);
     }
 #endif
 

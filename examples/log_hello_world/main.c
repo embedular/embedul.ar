@@ -1,12 +1,9 @@
-#include "embedul.ar/source/core/device/board.h"
+#include "embedul.ar/source/core/main.h"
 
 
-int EMBEDULAR_Main (const int Argc, const char *const Argv[])
+void EMBEDULAR_Main (void *param)
 {
-    (void) Argc;
-    (void) Argv;
+    (void) param;
 
     LOG (NOBJ, "Hello world!");
-
-    return 0;
 }

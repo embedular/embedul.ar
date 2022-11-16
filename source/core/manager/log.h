@@ -27,6 +27,7 @@
 
 #include "embedul.ar/source/core/device.h"
 #include "embedul.ar/source/core/device/stream.h"
+#include "embedul.ar/source/core/device/oswrap.h"
 #include "embedul.ar/source/core/ansi.h"
 
 
@@ -61,75 +62,98 @@
 
 #define LOG(_dp,_msg,...) \
     OBJECT_AssertValid(_dp); \
-    LOG_Args (NULL, NULL, NULL, LOG_LINE_TIMING_ONLY, \
-              &OBJECT_INFO_Spawn(_dp), \
-              NULL, LOG_SUFFIX_DOT_NEWLINE_STR, \
-              _msg, VARIANT_AutoParams(__VA_ARGS__))
+    OSWRAP_SuspendScheduler(); \
+    LOG__args (NULL, NULL, NULL, LOG_LINE_TIMING_ONLY, \
+               &OBJECT_INFO_Spawn(_dp), \
+               NULL, LOG_SUFFIX_DOT_NEWLINE_STR, \
+               _msg, VARIANT_AutoParams(__VA_ARGS__)); \
+    OSWRAP_ResumeScheduler()
 
 #define LOG_ContextBegin(_dp,_msg,...) \
     OBJECT_AssertValid(_dp); \
+    OSWRAP_SuspendScheduler(); \
     LOG__contextBegin(); \
-    LOG_Args ("┌", NULL, NULL, LOG_LINE_TIMING_ONLY, \
-              &OBJECT_INFO_Spawn(_dp), \
-              NULL, LOG_SUFFIX_DOT_NEWLINE_STR, \
-              _msg, VARIANT_AutoParams(__VA_ARGS__)) \
+    LOG__args ("┌", NULL, NULL, LOG_LINE_TIMING_ONLY, \
+               &OBJECT_INFO_Spawn(_dp), \
+               NULL, LOG_SUFFIX_DOT_NEWLINE_STR, \
+               _msg, VARIANT_AutoParams(__VA_ARGS__)); \
+    OSWRAP_ResumeScheduler()
 
 #define LOG_AutoContext(_dp,_msg,...) \
+    OSWRAP_SuspendScheduler(); \
     LOG_ContextBegin(_dp,_msg,__VA_ARGS__); \
     __attribute__((cleanup(LOG__autoContextEnd))) uint32_t log_ac__ = 0; \
-    while (log_ac__) {}
+    while (log_ac__) {}; \
+    OSWRAP_ResumeScheduler()
 
 #define LOG_Debug(_dp,_msg,...) \
     OBJECT_AssertValid(_dp); \
-    LOG_Args (NULL, __func__, __FILE__, __LINE__, \
-              &OBJECT_INFO_Spawn(_dp), \
-              NULL, LOG_SUFFIX_DOT_NEWLINE_STR, \
-              _msg, VARIANT_AutoParams(__VA_ARGS__))
+    OSWRAP_SuspendScheduler(); \
+    LOG__args (NULL, __func__, __FILE__, __LINE__, \
+               &OBJECT_INFO_Spawn(_dp), \
+               NULL, LOG_SUFFIX_DOT_NEWLINE_STR, \
+               _msg, VARIANT_AutoParams(__VA_ARGS__)); \
+    OSWRAP_ResumeScheduler()
 
 #define LOG_Warn(_dp,_msg,...) \
     OBJECT_AssertValid(_dp); \
-    LOG_Args (NULL, NULL, NULL, LOG_LINE_TIMING_ONLY, \
-              &OBJECT_INFO_Spawn(_dp), \
-              LOG_PREFIX_WARNING_STR, LOG_SUFFIX_DOT_NEWLINE_STR, \
-              _msg, VARIANT_AutoParams(__VA_ARGS__))
+    OSWRAP_SuspendScheduler(); \
+    LOG__args (NULL, NULL, NULL, LOG_LINE_TIMING_ONLY, \
+               &OBJECT_INFO_Spawn(_dp), \
+               LOG_PREFIX_WARNING_STR, LOG_SUFFIX_DOT_NEWLINE_STR, \
+               _msg, VARIANT_AutoParams(__VA_ARGS__)); \
+    OSWRAP_ResumeScheduler()
 
 #define LOG_WarnDebug(_dp,_msg,...) \
     OBJECT_AssertValid(_dp); \
-    LOG_Args (NULL, __func__, __FILE__, __LINE__, \
-              &OBJECT_INFO_Spawn(_dp), \
-              LOG_PREFIX_WARNING_STR, LOG_SUFFIX_DOT_NEWLINE_STR, \
-              _msg, VARIANT_AutoParams(__VA_ARGS__))
+    OSWRAP_SuspendScheduler(); \
+    LOG__args (NULL, __func__, __FILE__, __LINE__, \
+               &OBJECT_INFO_Spawn(_dp), \
+               LOG_PREFIX_WARNING_STR, LOG_SUFFIX_DOT_NEWLINE_STR, \
+               _msg, VARIANT_AutoParams(__VA_ARGS__)); \
+    OSWRAP_ResumeScheduler()
 
 #define LOG_Plain(_msg,...) \
-    LOG_Args (NULL, NULL, NULL, LOG_LINE_NO_TIMING, \
-              NULL, \
-              NULL, LOG_SUFFIX_NEWLINE_STR, \
-              _msg, VARIANT_AutoParams(__VA_ARGS__))
-
+    OSWRAP_SuspendScheduler(); \
+    LOG__args (NULL, NULL, NULL, LOG_LINE_NO_TIMING, \
+               NULL, \
+               NULL, LOG_SUFFIX_NEWLINE_STR, \
+               _msg, VARIANT_AutoParams(__VA_ARGS__)); \
+    OSWRAP_ResumeScheduler()
 
 #define LOG_PendingBegin(_dp,_msg,...) \
     OBJECT_AssertValid(_dp); \
-    LOG_Args (NULL, NULL, NULL, LOG_LINE_TIMING_ONLY, \
-              &OBJECT_INFO_Spawn(_dp), \
-              LOG_PREFIX_PENDING_STR, LOG_SUFFIX_PENDING_STR, \
-              _msg, VARIANT_AutoParams(__VA_ARGS__))
+    OSWRAP_SuspendScheduler(); \
+    LOG__args (NULL, NULL, NULL, LOG_LINE_TIMING_ONLY, \
+               &OBJECT_INFO_Spawn(_dp), \
+               LOG_PREFIX_PENDING_STR, LOG_SUFFIX_PENDING_STR, \
+               _msg, VARIANT_AutoParams(__VA_ARGS__)); \
+    OSWRAP_ResumeScheduler()
 
 #define LOG_BinaryDump(_dp,_title,_data,_octets) \
+    OSWRAP_SuspendScheduler(); \
     LOG_ContextBegin (_dp, LOG_BINARY_DUMP_FMT, _title, _octets); \
     LOG__binaryDump (_data, _octets); \
-    LOG_ContextEnd ();
+    LOG_ContextEnd (); \
+    OSWRAP_ResumeScheduler()
 
 #define LOG_TableEntry(_t,...) \
-    LOG_TableEntryArgs (_t, VARIANT_AutoParams(__VA_ARGS__))
+    OSWRAP_SuspendScheduler(); \
+    LOG__tableEntryArgs (_t, VARIANT_AutoParams(__VA_ARGS__)); \
+    OSWRAP_ResumeScheduler()
 
 #define LOG_Items(_count,...) \
-    LOG_ItemsArg (true,_count, VARIANT_AutoParams(__VA_ARGS__))
+    OSWRAP_SuspendScheduler(); \
+    LOG__itemsArg (true,_count, VARIANT_AutoParams(__VA_ARGS__)); \
+    OSWRAP_ResumeScheduler()
 
 #define LOG_Newline() \
-    LOG_Args (NULL, NULL, NULL, LOG_LINE_TIMING_ONLY, \
-              NULL, \
-              NULL, LOG_SUFFIX_NEWLINE_STR, \
-              "", NULL, 0)
+    OSWRAP_SuspendScheduler(); \
+    LOG__args (NULL, NULL, NULL, LOG_LINE_TIMING_ONLY, \
+               NULL, \
+               NULL, LOG_SUFFIX_NEWLINE_STR, \
+               "", NULL, 0); \
+    OSWRAP_ResumeScheduler()
 
 
 #define LOG_IB_8(a,...) ((uint32_t)(a)),LOG_IB_7(__VA_ARGS__)
@@ -217,7 +241,7 @@ struct BOARD;
 
 void        LOG_Init            (struct LOG *const L, struct BOARD *const Board,
                                  struct STREAM *const DebugStream);
-void        LOG_Args            (const char *const InnerFlow,
+void        LOG__args            (const char *const InnerFlow,
                                  const char *const Func,
                                  const char *const File, const int Line,
                                  const struct OBJECT_INFO *const DevInfo,
@@ -227,12 +251,12 @@ void        LOG_Args            (const char *const InnerFlow,
                                  struct VARIANT *const ArgValues,
                                  const uint32_t ArgCount);
 void        LOG_ItemsStyle      (const struct LOG_ItemsStyle *const Style);
-void        LOG_ItemsArg        (const bool Timestamp, const uint32_t Items,
+void        LOG__itemsArg        (const bool Timestamp, const uint32_t Items,
                                  struct VARIANT *const ArgValues,
                                  const uint32_t ArgCount);
 void        LOG_TableStyle      (const struct LOG_TableStyle *const Style);
 void        LOG_TableBegin      (const struct LOG_Table *const Table);
-void        LOG_TableEntryArgs  (const struct LOG_Table *const Table,
+void        LOG__tableEntryArgs (const struct LOG_Table *const Table,
                                  struct VARIANT *const ArgValues,
                                  const uint32_t ArgCount);
 void        LOG_TableEnd        (const struct LOG_Table *const Table);

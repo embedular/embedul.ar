@@ -66,7 +66,7 @@ else
         CFLAGS += -I$(LIB_FREERTOS_PORT)/utils
         CFLAGS += -D'projCOVERAGE_TEST=0'
         OBJS += $(LIB_FREERTOS)/portable/$(LIB_FREERTOS_PORT)/utils/wait_for_event.o
-        LDFLAGS += -lpthread
+        CFLAGS += -pthread
     else
         $(call emb_error,Unknown architecture for CPU_MODEL '$(CPU_MODEL)')
 	endif
@@ -80,6 +80,6 @@ CFLAGS += -I$(LIB_FREERTOS)/include
 CFLAGS += -I$(LIB_FREERTOS)/portable/$(LIB_FREERTOS_PORT)
 
 OBJS += $(LIB_FREERTOS)/portable/$(LIB_FREERTOS_PORT)/port.o
-OBJS += $(LIB_FREERTOS)/portable/MemMang/heap_$(LIB_FREERTOS_CONFIG_HEAP_SCHEME).o
+#OBJS += $(LIB_FREERTOS)/portable/MemMang/heap_$(LIB_FREERTOS_CONFIG_HEAP_SCHEME).o
 
 $(foreach name,$(LIB_FREERTOS_SOURCES),$(eval OBJS += $(LIB_FREERTOS)/$(name).o))

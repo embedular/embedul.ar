@@ -149,7 +149,8 @@ void OUTPUT_Init (struct OUTPUT *const O)
 
 void OUTPUT_RegisterGateway (struct IO *const Driver, const IO_Port DriverPort)
 {
-    BOARD_AssertParams (s_o->nextGatewayId < OUTPUT_MAX_GATEWAYS && Driver);
+    BOARD_AssertParams  (s_o->nextGatewayId < OUTPUT_MAX_GATEWAYS && Driver);
+    BOARD_AssertState   (BOARD_CurrentStage() < BOARD_Stage_Ready);
 
     s_o->gateways[s_o->nextGatewayId].driver     = Driver;
     s_o->gateways[s_o->nextGatewayId].driverPort = DriverPort;

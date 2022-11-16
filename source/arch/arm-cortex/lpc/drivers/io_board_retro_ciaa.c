@@ -23,25 +23,25 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/board_retro_ciaa/io_board.h"
+#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/io_board_retro_ciaa.h"
 #include "embedul.ar/source/arch/arm-cortex/lpc/18xx_43xx/lpcopen/boards/retro_ciaa/board.h"
 #include "embedul.ar/source/core/device/board.h"
 
 
 #define GET_SWITCH_STATE(_n) \
     B->inbData |= BOARD_SWITCH_GET_STATE(_n)? \
-                        (1 << IO_BOARD_INB_##_n) : 0;
+                        (1 << IO_BOARD_RETRO_CIAA_INB_##_n) : 0;
 
 #define GET_GPIO_STATE(_n) \
     B->inbData |= BOARD_GPIO_GET_STATE(OUT_##_n)? \
-                        (1 << IO_BOARD_INB_##_n) : 0;
+                        (1 << IO_BOARD_RETRO_CIAA_INB_##_n) : 0;
 
 #define SET_LED_STATE(_n) \
-    (B->outbData & (1 << IO_BOARD_OUTB_LED_##_n))? \
+    (B->outbData & (1 << IO_BOARD_RETRO_CIAA_OUTB_LED_##_n))? \
                         BOARD_LED_ON(_n) : BOARD_LED_OFF(_n);
 
 #define SET_GPIO_STATE(_n) \
-    (B->outbData & (1 << IO_BOARD_OUTB_##_n))? \
+    (B->outbData & (1 << IO_BOARD_RETRO_CIAA_OUTB_##_n))? \
                         BOARD_GPIO_SET_STATE(OUT_##_n, ENABLED) : \
                         BOARD_GPIO_SET_STATE(OUT_##_n, DISABLED);
 
@@ -51,24 +51,24 @@ void EVRT_IRQHandler (void)
 }
 */
 
-static const char * s_InputBitNames[IO_BOARD_INB__COUNT] =
+static const char * s_InputBitNames[IO_BOARD_RETRO_CIAA_INB__COUNT] =
 {
-    [IO_BOARD_INB_ISP]              = "ISP",
-    [IO_BOARD_INB_WAKEUP]           = "Wake up",
-    [IO_BOARD_INB_BOARD_BACKLIGHT]  = "Backlight",
-    [IO_BOARD_INB_SD_POW]           = "SD power",
-    [IO_BOARD_INB_WIFI_EN]          = "WiFi enable",
-    [IO_BOARD_INB_SOUND_MUTE]       = "Sound mute"
+    [IO_BOARD_RETRO_CIAA_INB_ISP]               = "ISP",
+    [IO_BOARD_RETRO_CIAA_INB_WAKEUP]            = "Wake up",
+    [IO_BOARD_RETRO_CIAA_INB_BOARD_BACKLIGHT]   = "Backlight",
+    [IO_BOARD_RETRO_CIAA_INB_SD_POW]            = "SD power",
+    [IO_BOARD_RETRO_CIAA_INB_WIFI_EN]           = "WiFi enable",
+    [IO_BOARD_RETRO_CIAA_INB_SOUND_MUTE]        = "Sound mute"
 };
 
 
-static const char * s_OutputBitNames[IO_BOARD_OUTB__COUNT] =
+static const char * s_OutputBitNames[IO_BOARD_RETRO_CIAA_OUTB__COUNT] =
 {
-    [IO_BOARD_OUTB_LED_WARN]        = "Warning",
-    [IO_BOARD_OUTB_BOARD_BACKLIGHT] = "Backlight",
-    [IO_BOARD_OUTB_SD_POW]          = "SD power",
-    [IO_BOARD_OUTB_WIFI_EN]         = "WiFi enable",
-    [IO_BOARD_OUTB_SOUND_MUTE]      = "Sound mute"
+    [IO_BOARD_RETRO_CIAA_OUTB_LED_WARN]         = "Warning",
+    [IO_BOARD_RETRO_CIAA_OUTB_BOARD_BACKLIGHT]  = "Backlight",
+    [IO_BOARD_RETRO_CIAA_OUTB_SD_POW]           = "SD power",
+    [IO_BOARD_RETRO_CIAA_OUTB_WIFI_EN]          = "WiFi enable",
+    [IO_BOARD_RETRO_CIAA_OUTB_SOUND_MUTE]       = "Sound mute"
 };
 
 
@@ -90,9 +90,9 @@ static const char * outputName          (struct IO *const Io,
                                          const IO_Code DriverCode);
 
 
-static const struct IO_IFACE IO_BOARD_IFACE =
+static const struct IO_IFACE IO_BOARD_RETRO_CIAA_IFACE =
 {
-    IO_IFACE_DECLARE("retro-ciaa board io", BOARD),
+    IO_IFACE_DECLARE("retro-ciaa board io", BOARD_RETRO_CIAA),
     .Update         = update,
     .GetInput       = getInput,
     .SetOutput      = setOutput,
@@ -101,13 +101,13 @@ static const struct IO_IFACE IO_BOARD_IFACE =
 };
 
 
-void IO_BOARD_Init (struct IO_BOARD *const B)
+void IO_BOARD_RETRO_CIAA_Init (struct IO_BOARD_RETRO_CIAA *const B)
 {
     BOARD_AssertParams (B);
 
     DEVICE_IMPLEMENTATION_Clear (B);
 
-    IO_INIT_STATIC_PORT_INFO (B, BOARD);
+    IO_INIT_STATIC_PORT_INFO (B, BOARD_RETRO_CIAA);
 
     // Switch wired to WAKEUP0 is active HIGH
     B->wakeupActive = EVRT_SRC_ACTIVE_RISING_EDGE;
@@ -121,36 +121,37 @@ void IO_BOARD_Init (struct IO_BOARD *const B)
     // NVIC_EnableIRQ (EVENTROUTER_IRQn);
 
     // Update once per frame (~60 Hz).
-    IO_Init ((struct IO *)B, &IO_BOARD_IFACE, B->portInfo, 15);
+    IO_Init ((struct IO *)B, &IO_BOARD_RETRO_CIAA_IFACE, B->portInfo, 15);
 }
 
 
-void IO_BOARD_Attach (struct IO_BOARD *const B)
+void IO_BOARD_RETRO_CIAA_Attach (struct IO_BOARD_RETRO_CIAA *const B)
 {
     BOARD_AssertParams (B);
 
     INPUT_RegisterGateway ((struct IO *)B, 0);
 
-    INPUT_MAP_BIT (MAIN, A, IO_BOARD_INB_ISP);
-    INPUT_MAP_BIT (MAIN, B, IO_BOARD_INB_WAKEUP);
-    INPUT_MAP_BIT (CONTROL, Backlight, IO_BOARD_INB_BOARD_BACKLIGHT);
-    INPUT_MAP_BIT (CONTROL, StoragePower, IO_BOARD_INB_SD_POW);
-    INPUT_MAP_BIT (CONTROL, WirelessEnable, IO_BOARD_INB_WIFI_EN);
-    INPUT_MAP_BIT (CONTROL, SoundMute, IO_BOARD_INB_SOUND_MUTE);
+    INPUT_MAP_BIT (MAIN, A, IO_BOARD_RETRO_CIAA_INB_ISP);
+    INPUT_MAP_BIT (MAIN, B, IO_BOARD_RETRO_CIAA_INB_WAKEUP);
+    INPUT_MAP_BIT (CONTROL, Backlight, IO_BOARD_RETRO_CIAA_INB_BOARD_BACKLIGHT);
+    INPUT_MAP_BIT (CONTROL, StoragePower, IO_BOARD_RETRO_CIAA_INB_SD_POW);
+    INPUT_MAP_BIT (CONTROL, WirelessEnable, IO_BOARD_RETRO_CIAA_INB_WIFI_EN);
+    INPUT_MAP_BIT (CONTROL, SoundMute, IO_BOARD_RETRO_CIAA_INB_SOUND_MUTE);
 
 
     OUTPUT_RegisterGateway ((struct IO *)B, 0);
 
-    OUTPUT_MAP_BIT (SIGN, Warning, IO_BOARD_OUTB_LED_WARN);
+    OUTPUT_MAP_BIT (SIGN, Warning, IO_BOARD_RETRO_CIAA_OUTB_LED_WARN);
     // It will command the board backlight on the SSL module, if present
-    OUTPUT_MAP_BIT (CONTROL, Backlight, IO_BOARD_OUTB_BOARD_BACKLIGHT);
-    OUTPUT_MAP_BIT (CONTROL, StoragePower, IO_BOARD_OUTB_SD_POW);
-    OUTPUT_MAP_BIT (CONTROL, WirelessEnable, IO_BOARD_OUTB_WIFI_EN);
-    OUTPUT_MAP_BIT (CONTROL, SoundMute, IO_BOARD_OUTB_SOUND_MUTE);
+    OUTPUT_MAP_BIT (CONTROL, Backlight,
+                    IO_BOARD_RETRO_CIAA_OUTB_BOARD_BACKLIGHT);
+    OUTPUT_MAP_BIT (CONTROL, StoragePower, IO_BOARD_RETRO_CIAA_OUTB_SD_POW);
+    OUTPUT_MAP_BIT (CONTROL, WirelessEnable, IO_BOARD_RETRO_CIAA_OUTB_WIFI_EN);
+    OUTPUT_MAP_BIT (CONTROL, SoundMute, IO_BOARD_RETRO_CIAA_OUTB_SOUND_MUTE);
 }
 
 
-static void getWakeupState (struct IO_BOARD *const B)
+static void getWakeupState (struct IO_BOARD_RETRO_CIAA *const B)
 {
     // Wakeup state transition
     if (LPC_EVRT->STATUS & 1)
@@ -166,41 +167,41 @@ static void getWakeupState (struct IO_BOARD *const B)
     // Now detecting a falling edge, button is being pressed.
     if (B->wakeupActive == EVRT_SRC_ACTIVE_FALLING_EDGE)
     {
-        B->inbData |= 1 << IO_BOARD_INB_WAKEUP;
+        B->inbData |= 1 << IO_BOARD_RETRO_CIAA_INB_WAKEUP;
     }
 }
 
 
-static inline void getBoardBacklight (struct IO_BOARD *const B)
+static inline void getBoardBacklight (struct IO_BOARD_RETRO_CIAA *const B)
 {
     if (Board_DetectedStackPortModules (BOARD_SP_SSL))
     {
         B->inbData |= Board_GetSslModuleBacklight()? 
-                            1 << IO_BOARD_INB_BOARD_BACKLIGHT : 0;
+                            1 << IO_BOARD_RETRO_CIAA_INB_BOARD_BACKLIGHT : 0;
     }
 }
 
 
-static inline void getSdPower (struct IO_BOARD *const B)
+static inline void getSdPower (struct IO_BOARD_RETRO_CIAA *const B)
 {
     B->inbData |= Board_GetSdPower()? 
-                        1 << IO_BOARD_INB_SD_POW : 0;
+                        1 << IO_BOARD_RETRO_CIAA_INB_SD_POW : 0;
 }
 
 
-static inline void setBoardBacklight (struct IO_BOARD *const B)
+static inline void setBoardBacklight (struct IO_BOARD_RETRO_CIAA *const B)
 {
     if (Board_DetectedStackPortModules (BOARD_SP_SSL))
     {
         Board_SetSslModuleBacklight (
-                      B->outbData & (1 << IO_BOARD_OUTB_BOARD_BACKLIGHT));
+                      B->outbData & (1 << IO_BOARD_RETRO_CIAA_OUTB_BOARD_BACKLIGHT));
     }
 }
 
 
 void update (struct IO *const Io)
 {
-    struct IO_BOARD *const B = (struct IO_BOARD *) Io;
+    struct IO_BOARD_RETRO_CIAA *const B = (struct IO_BOARD_RETRO_CIAA *) Io;
 
     B->inbData = 0;
 
@@ -215,7 +216,7 @@ void update (struct IO *const Io)
     // Output
     SET_LED_STATE       (WARN);
     setBoardBacklight   (B);
-    Board_SetSdPower    (B->outbData & (1 << IO_BOARD_OUTB_SD_POW));
+    Board_SetSdPower    (B->outbData & (1 << IO_BOARD_RETRO_CIAA_OUTB_SD_POW));
     SET_GPIO_STATE      (WIFI_EN);
     SET_GPIO_STATE      (SOUND_MUTE);
 }
@@ -227,7 +228,7 @@ uint32_t getInput (struct IO *const Io, const enum IO_Type IoType,
     (void) Port;
     (void) IoType;
 
-    struct IO_BOARD *const B = (struct IO_BOARD *) Io;
+    struct IO_BOARD_RETRO_CIAA *const B = (struct IO_BOARD_RETRO_CIAA *) Io;
 
     return (B->inbData & (1 << DriverCode));
 }
@@ -240,7 +241,7 @@ void setOutput (struct IO *const Io, const enum IO_Type IoType,
     (void) Port;
     (void) IoType;
 
-    struct IO_BOARD *const B = (struct IO_BOARD *) Io;
+    struct IO_BOARD_RETRO_CIAA *const B = (struct IO_BOARD_RETRO_CIAA *) Io;
 
     if (Value)
     {

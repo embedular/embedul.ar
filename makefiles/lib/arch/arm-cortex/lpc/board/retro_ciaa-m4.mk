@@ -39,12 +39,20 @@ OBJS += \
 	$(LIB_EMBEDULAR_ROOT)/source/drivers/io_huewheel.o \
 	$(LIB_EMBEDULAR_ROOT)/source/drivers/io_pca9956b.o \
 	$(LIB_EMBEDULAR_ROOT)/source/drivers/packet_esp32at_tcp_server.o \
-    $(TARGET_DRIVERS)/board_retro_ciaa.o \
-    $(TARGET_DRIVERS)/board_shared/iface_methods.o \
+    $(TARGET_MFR)/boot/board_retro_ciaa.o \
+    $(TARGET_MFR)/boot/shared_iface.o \
     $(TARGET_DRIVERS)/stream_usart.o \
     $(TARGET_DRIVERS)/packet_i2c_controller.o \
     $(TARGET_DRIVERS)/rawstor_sd_sdmmc.o \
-    $(TARGET_DRIVERS)/board_retro_ciaa/io_board.o
+    $(TARGET_DRIVERS)/io_board_retro_ciaa.o
+
+ifneq ($(findstring freertos,$(BUILD_LIBS)),)
+    $(call emb_info,Using TICKS-OSWRAP)
+	OBJS += $(LIB_EMBEDULAR_ROOT)/source/boot/ticks_oswrap.o
+else
+    $(call emb_info,Using TICKS-SYSTICK)
+	OBJS += $(TARGET_ARCH)/boot/ticks_systick.o
+endif
 
 ifneq ($(filter video,$(TARGET_SUBSYSTEMS)),)
     OBJS += $(TARGET_DRIVERS)/video_dualcore.o

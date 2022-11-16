@@ -1,7 +1,7 @@
 /*
   embedul.ar™ embedded systems framework - http://embedul.ar
   
-  [RANDOM] random number generator device driver interface.
+  [RANDOM] random number generator device driver interface (singleton).
 
   Copyright 2018-2022 Santiago Germino
   <sgermino@embedul.ar> https://www.linkedin.com/in/royconejo
@@ -37,17 +37,18 @@ void RANDOM_Init (struct RANDOM *const R,
     BOARD_AssertParams (R && Iface);
 
     // Required interface elements
-    BOARD_AssertInterface (Iface->Description
-                           && Iface->GetUint32
-                           && Iface->GetUint64);
+    BOARD_AssertInterface (Iface->Description &&
+                           Iface->GetUint32 &&
+                           Iface->GetUint64);
     OBJECT_Clear (R);
 
     R->iface = Iface;
 
     s_r = R;
 
-    LOG_ContextBegin (R, LANG_INIT);
     {
+        LOG_AutoContext (R, LANG_INIT);
+
         if (R->iface->HardwareInit)
         {
             R->iface->HardwareInit (R);
@@ -56,7 +57,6 @@ void RANDOM_Init (struct RANDOM *const R,
         LOG_Items (1, LANG_SAMPLE_VALUE, R->iface->GetUint64(R),
                    LOG_ItemsBases(VARIANT_Base_Hex_UpperSuffix));
     }
-    LOG_ContextEnd ();
 }
 
 

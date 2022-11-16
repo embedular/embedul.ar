@@ -42,11 +42,19 @@ $(call emb_include,lib/arch/arm-cortex/lpc/shared/lpc4337-m4.mk)
 OBJS += \
     $(LIB_EMBEDULAR_ROOT)/source/drivers/random_sfmt.o \
     $(LIB_EMBEDULAR_ROOT)/source/drivers/rawstor_sd_1bit.o \
-    $(TARGET_DRIVERS)/board_edu_ciaa.o \
-    $(TARGET_DRIVERS)/board_shared/iface_methods.o \
+    $(TARGET_MFR)/boot/board_edu_ciaa.o \
+    $(TARGET_MFR)/boot/shared_iface.o \
     $(TARGET_DRIVERS)/stream_usart.o \
     $(TARGET_DRIVERS)/packet_ssp.o \
-    $(TARGET_DRIVERS)/board_edu_ciaa/io_board.o
+    $(TARGET_DRIVERS)/io_board_edu_ciaa.o
+
+ifneq ($(findstring freertos,$(BUILD_LIBS)),)
+    $(call emb_info,Using TICKS-OSWRAP)
+	OBJS += $(LIB_EMBEDULAR_ROOT)/source/boot/ticks_oswrap.o
+else
+    $(call emb_info,Using TICKS-SYSTICK)
+	OBJS += $(TARGET_ARCH)/boot/ticks_systick.o
+endif
 
 ifeq ($(TARGET_NAME), edu_ciaa_retro_poncho)
 	OBJS += $(LIB_EMBEDULAR_ROOT)/source/drivers/packet_esp32at_tcp_server.o

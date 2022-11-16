@@ -23,8 +23,10 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "embedul.ar/source/arch/arm-cortex/stm32/drivers/board_nucleo_144.h"
-#include "embedul.ar/source/arch/arm-cortex/shared/systick.h"
+#include "embedul.ar/source/core/device/board.h"
+#include "embedul.ar/source/arch/arm-cortex/stm32/drivers/io_board_nucleo_144.h"
+#include "embedul.ar/source/arch/arm-cortex/stm32/drivers/stream_usart.h"
+#include "embedul.ar/source/arch/arm-cortex/stm32/drivers/random_rng.h"
 // Selected nucleo-144 -based board
 #include "cubemx/Core/Inc/main.h"
 #include "cubemx/Core/Inc/gpio.h"
@@ -32,9 +34,8 @@
 #include "cubemx/Core/Inc/usart.h"
 #include "cubemx/Core/Inc/usb_otg.h"
 #include "cubemx/Core/Inc/rng.h"
-// BSP according to current mcu family
-#include "embedul.ar/source/arch/arm-cortex/stm32/drivers/board_nucleo_144/bsp.h"
-#include "source/core/device/board.h"
+// BSP for Nucleo-144 boards
+#include "embedul.ar/source/arch/arm-cortex/stm32/nucleo_144_bsp.h"
 
 
 #define BOARD_INFO_0_NAME           "stm32 nucleo-144 board"
@@ -42,6 +43,26 @@
 
 #define BOARD_INFO_FMT              "`M40`0`L1" \
                                     "`M40`1`L1"
+
+
+struct BOARD_IO_PROFILES
+{
+    struct INPUT_PROFILE_MAIN   inMain;
+    struct OUTPUT_PROFILE_SIGN  outSign;
+};
+
+
+struct BOARD_NUCLEO_144
+{
+    struct BOARD                device;
+    struct IO_BOARD_NUCLEO_144  ioBoard;
+    struct STREAM_USART         streamDebugUsart;
+    struct RANDOM_RNG           randomRng;
+    uint8_t                     debugInBuffer[16];
+    uint8_t                     debugOutBuffer[16];
+    uint8_t                     tcpServerInBuffer[64];
+    uint8_t                     tcpServerOutBuffer[1024];
+};
 
 
 #ifdef BSS_SECTION_BOARD
@@ -59,28 +80,13 @@ static void *               stageChange     (struct BOARD *const B,
                                              const enum BOARD_Stage Stage);
 static void                 assertFunc      (struct BOARD *const B, 
                                              const bool Condition);
-static void                 setTickFreq     (struct BOARD *const B,
-                                             const uint32_t Hz);
-static TIMER_TickHookFunc   setTickHook     (struct BOARD *const B,
-                                             TIMER_TickHookFunc const Func,
-                                             const enum BOARD_TickHookFuncSlot
-                                             Slot);
-static TIMER_Ticks          ticksNow        (struct BOARD *const B);
-static void                 delay           (struct BOARD *const B,
-                                             const TIMER_Ticks Ticks);
 
 
 static const struct BOARD_IFACE BOARD_NUCLEO_144_IFACE =
 {
     .Description    = "st nucleo-144",
     .StageChange    = stageChange,
-    .Assert         = assertFunc,
-    .SetTickFreq    = setTickFreq,
-    .SetTickHook    = setTickHook,
-    .TicksNow       = ticksNow,
-    .Rtc            = UNSUPPORTED,
-    .Delay          = delay,
-    .Update         = UNSUPPORTED
+    .Assert         = assertFunc
 };
 
 
@@ -128,15 +134,19 @@ static void panic (const char *const ErrorMsg)
 }
 
 
-void BOARD_Boot (struct BOARD_RIG *const R)
+struct BOARD * BOARD__boot (const int Argc, const char **const Argv,
+                            struct BOARD_RIG *const R)
 {
-    const char *const ErrorMsg = BOARD_Init (
-                                    (struct BOARD *)&s_board_nucleo_144,
-                                    &BOARD_NUCLEO_144_IFACE, R);
+    struct BOARD *const B = (struct BOARD *)&s_board_nucleo_144;
+
+    const char *const ErrorMsg = BOARD_Init (B, &BOARD_NUCLEO_144_IFACE,
+                                             Argc, Argv, R);
     if (ErrorMsg)
     {
         panic (ErrorMsg);
     }
+
+    return B;
 }
 
 
@@ -151,6 +161,7 @@ static void greetings (struct STREAM *const B)
 static void stm32HalTickHook (const TIMER_Ticks Ticks)
 {
     (void) Ticks;
+
     HAL_IncTick ();
 }
 
@@ -164,16 +175,19 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
 
     switch (Stage)
     {
-        case BOARD_Stage_InitHardware:
+        case BOARD_Stage_InitPreTicksHardware:
         {
             // Reset peripherals, Initializes Flash interface and Systick.
             HAL_Init ();
 
             // Configure the system clock (cubemx/Core/Inc/main.c)
             SystemClock_Config ();
+            break;
+        }
 
-            BOARD_SetTickFreq (1000);
-            BOARD_SetTickHook (stm32HalTickHook, BOARD_TickHookFuncSlot_BSP);
+        case BOARD_Stage_InitPostTicksHardware:
+        {
+            TICKS_SetHook (stm32HalTickHook);
 
             // Configure hardware pins and peripherals
             MX_GPIO_Init ();
@@ -217,8 +231,8 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
 
         case BOARD_Stage_InitIOLevel1Drivers:
         {   
-            IO_BOARD_Init   (&N->ioBoard);
-            IO_BOARD_Attach (&N->ioBoard);    
+            IO_BOARD_NUCLEO_144_Init   (&N->ioBoard);
+            IO_BOARD_NUCLEO_144_Attach (&N->ioBoard);    
             break;
         }
 
@@ -261,6 +275,7 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
         {
             while (1)
             {
+                __WFI ();
             }
         }
     }
@@ -276,41 +291,5 @@ void assertFunc (struct BOARD *const B, const bool Condition)
     if (!Condition)
     {
         panic (NULL);
-    }
-}
-
-
-void setTickFreq (struct BOARD *const B, const uint32_t Hz)
-{
-    (void) B;
-    HAL_SYSTICK_Config (HAL_RCC_GetHCLKFreq() / Hz);
-}
-
-
-TIMER_TickHookFunc setTickHook (struct BOARD *const B,
-                                TIMER_TickHookFunc const Func,
-                                const enum BOARD_TickHookFuncSlot Slot)
-{
-    (void) B;
-    return ARM_CM_SysTickSetHook (Func, Slot);
-}
-
-
-TIMER_Ticks ticksNow (struct BOARD *const B)
-{
-    (void) B;
-    return ARM_CM_SysTickTime ();
-}
-
-
-void delay (struct BOARD *const B, const TIMER_Ticks Ticks)
-{
-    (void) B;
-
-    const TIMER_Ticks Timeout = BOARD_TicksNow() + Ticks;
-
-    while (Timeout > BOARD_TicksNow())
-    {
-        __WFI ();
     }
 }

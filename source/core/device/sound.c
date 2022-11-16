@@ -245,7 +245,7 @@ static bool bgmCachedToBuffer (struct SOUND *const S, uint8_t *const Buffer,
         return false;
     }
 
-    s_a->bufferBgmReadTicks = BOARD_TicksNow ();
+    s_a->bufferBgmReadTicks = TICKS_Now ();
 
     RAWSTOR_Status_Result r =
         STORAGE_LinearRead (STORAGE_Role_LinearCache, Buffer,

@@ -239,7 +239,7 @@ enum OS_Result OS_TaskPeriodicDelay (CTICK_Qty ticks)
 
 enum OS_Result OS_TaskDelay (CTICK_Qty ticks)
 {
-    return OS_TaskDelayFrom (ticks, BOARD_TicksNow());
+    return OS_TaskDelayFrom (ticks, TICKS_Now());
 }
 
 
@@ -253,7 +253,7 @@ enum OS_Result OS_TaskWaitForSignal (enum OS_TaskSignalType sigType,
     wfs.task        = OS_TaskSelf ();
     wfs.sigType     = sigType;
     wfs.sigObject   = sigObject;
-    wfs.start       = BOARD_TicksNow ();
+    wfs.start       = TICKS_Now ();
     wfs.timeout     = timeout;
 
     // NOTE: if timeout == 0 an inmediate result will be received, either

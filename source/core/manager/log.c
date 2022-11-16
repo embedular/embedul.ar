@@ -186,12 +186,6 @@ inline static void outContextLevel (struct STREAM *const S,
     const char *const ActualOuterFlow = OuterFlow? OuterFlow : "╎";
     const char *const ActualInnerFlow = InnerFlow? InnerFlow : "│";
 
-    // No contextual indentation if there is still no log manager
-    if (!s_l)
-    {
-        return;
-    }
-
     if (s_l->contextIndent)
     {
         for (uint32_t i = 0; i < s_l->contextIndent - 1; ++i)
@@ -299,11 +293,18 @@ void LOG__assertFailed (struct STREAM *const S, const char *const Func,
                         const char *const File, const int Line,
                         const char *const Msg)
 {
+    // Cannot print an assert message if there is no log manager or the
+    // stream is invalid.
+    if (!s_l || !S)
+    {
+        return;
+    }
+
     // Visually closing current context levels, if any
     outContextLevel (S, "x", "x", true);
     outContextInfo  (S, s_l->contextIndent? " " : "[",
                         s_l->contextIndent? "╵" : "]",
-                        BOARD_TicksNow(),
+                        TICKS_Now(),
                         LOG_PREFIX_ASSERT_STR, Func, File, Line);
 
     outStr (S, LOG_BASE_COLOR);
@@ -339,7 +340,7 @@ static void logBegin (struct STREAM *const S, const char *const InnerFlow,
     // ╎╎┌┤  5450│ dev:video:sdl: init.
     if (InnerFlow)
     {
-        outContextInfo (S, "┤", "│", BOARD_TicksNow(), 
+        outContextInfo (S, "┤", "│", TICKS_Now(), 
                         Prefix, Func, File, Line);
     }
     // Current context indentation partial timings, like this:
@@ -347,7 +348,7 @@ static void logBegin (struct STREAM *const S, const char *const InnerFlow,
     else if (s_l->contextIndent)
     {
         const uint32_t I = (s_l->contextIndent - 1) % LOG_CONTEXT_TICKS_DEPTH;
-        const TIMER_Ticks Elapsed = BOARD_TicksNow() -
+        const TIMER_Ticks Elapsed = TICKS_Now() -
                                     s_l->contextStartTicks[I];
         outContextInfo (S, " ", "┊", Elapsed,
                         Prefix, Func, File, Line);
@@ -356,7 +357,7 @@ static void logBegin (struct STREAM *const S, const char *const InnerFlow,
     // [  5871] dev:board:SDL hosted: ⚠ shutting down.
     else
     {
-        outContextInfo (S, "[", "]", BOARD_TicksNow(),
+        outContextInfo (S, "[", "]", TICKS_Now(),
                         Prefix, Func, File, Line);
     }
 
@@ -379,12 +380,12 @@ inline static void logEnd (struct STREAM *const S, const char *const Suffix)
 }
 
 
-void LOG_Args (const char *const InnerFlow, const char *const Func,
-               const char *const File, const int Line, 
-               const struct OBJECT_INFO *const DevInfo, 
-               const char *const Prefix, const char *const Suffix, 
-               const char *const Msg, struct VARIANT *const ArgValues, 
-               const uint32_t ArgCount)
+void LOG__args (const char *const InnerFlow, const char *const Func,
+                const char *const File, const int Line, 
+                const struct OBJECT_INFO *const DevInfo, 
+                const char *const Prefix, const char *const Suffix, 
+                const char *const Msg, struct VARIANT *const ArgValues, 
+                const uint32_t ArgCount)
 {
     BOARD_AssertInitialized (s_l);
     BOARD_AssertParams (Msg);
@@ -473,7 +474,7 @@ void LOG_ItemsStyle (const struct LOG_ItemsStyle *const Style)
 }
 
 
-void LOG_ItemsArg (const bool Timestamp, const uint32_t ItemCount,
+void LOG__itemsArg (const bool Timestamp, const uint32_t ItemCount,
                    struct VARIANT *const ArgValues,
                    const uint32_t ArgCount)
 {
@@ -506,10 +507,10 @@ void LOG_ItemsArg (const bool Timestamp, const uint32_t ItemCount,
                                 VARIANT_ToUint(&ArgValues[i + MinItemArgs]));
         }
 
-        LOG_Args (NULL, NULL, NULL, Line, NULL,
-                  NULL, LOG_SUFFIX_NEWLINE_STR,
-                  s_l->logItemsStyle->Items[ItemIndex], 
-                  ArgValues, ArgCount);
+        LOG__args (NULL, NULL, NULL, Line, NULL,
+                   NULL, LOG_SUFFIX_NEWLINE_STR,
+                   s_l->logItemsStyle->Items[ItemIndex], 
+                   ArgValues, ArgCount);
 
         for (uint32_t i = 0; i < BaseCount; ++i)
         {
@@ -518,10 +519,10 @@ void LOG_ItemsArg (const bool Timestamp, const uint32_t ItemCount,
     }
     else
     {
-        LOG_Args (NULL, NULL, NULL, Line, NULL,
-                  NULL, LOG_SUFFIX_NEWLINE_STR,
-                  s_l->logItemsStyle->Items[ItemIndex], 
-                  ArgValues, ArgCount);
+        LOG__args (NULL, NULL, NULL, Line, NULL,
+                   NULL, LOG_SUFFIX_NEWLINE_STR,
+                   s_l->logItemsStyle->Items[ItemIndex], 
+                   ArgValues, ArgCount);
     }
 }
 
@@ -538,30 +539,34 @@ void LOG_TableBegin (const struct LOG_Table *const Table)
     BOARD_AssertInitialized (s_l);
     BOARD_AssertParams (Table);
 
-    struct STREAM *const S = s_l->debugStream;
-    const struct LOG_TableStyle *const Style = s_l->logTableStyle;
-
-    outContextLevel (S, NULL, NULL, false);
-    outStrAutoArgs  (S, 0, Style->TableBegin);
-    outContextLevel (S, NULL, NULL, false);
-    outStrAutoArgs  (S, 0, Style->TableTitle, Table->Title);
-    outTableHBorder (S, Table, 0);
-
-    struct VARIANT argValues[Table->FieldCount];
-
-    for (uint32_t i = 0; i < Table->FieldCount; ++i)
+    OSWRAP_SuspendScheduler ();
     {
-        VARIANT_SetString (&argValues[i], Table->Fields[i].Name);
-    }
+        struct STREAM *const S = s_l->debugStream;
+        const struct LOG_TableStyle *const Style = s_l->logTableStyle;
 
-    outTableEntry   (S, Table, argValues);
-    outTableHBorder (S, Table, 1);
+        outContextLevel (S, NULL, NULL, false);
+        outStrAutoArgs  (S, 0, Style->TableBegin);
+        outContextLevel (S, NULL, NULL, false);
+        outStrAutoArgs  (S, 0, Style->TableTitle, Table->Title);
+        outTableHBorder (S, Table, 0);
+
+        struct VARIANT argValues[Table->FieldCount];
+
+        for (uint32_t i = 0; i < Table->FieldCount; ++i)
+        {
+            VARIANT_SetString (&argValues[i], Table->Fields[i].Name);
+        }
+
+        outTableEntry   (S, Table, argValues);
+        outTableHBorder (S, Table, 1);
+    }
+    OSWRAP_ResumeScheduler ();
 }
 
 
-void LOG_TableEntryArgs (const struct LOG_Table *const Table,
-                         struct VARIANT *const ArgValues,
-                         const uint32_t ArgCount)
+void LOG__tableEntryArgs (const struct LOG_Table *const Table,
+                          struct VARIANT *const ArgValues,
+                          const uint32_t ArgCount)
 {
     BOARD_AssertInitialized (s_l);
     BOARD_AssertParams (Table && ArgCount >= Table->FieldCount);
@@ -575,7 +580,11 @@ void LOG_TableEnd (const struct LOG_Table *const Table)
     BOARD_AssertInitialized (s_l);
     BOARD_AssertParams (Table);
 
-    outTableHBorder (s_l->debugStream, Table, 2);
+    OSWRAP_SuspendScheduler ();
+    {
+        outTableHBorder (s_l->debugStream, Table, 2);
+    }
+    OSWRAP_ResumeScheduler ();
 }
 
 
@@ -641,14 +650,24 @@ void LOG_ProgressEnd (void)
 void LOG_PendingEndOk (void)
 {
     BOARD_AssertInitialized (s_l);
-    STREAM_IN_FromString (s_l->debugStream, LOG_PENDING_OK_STR "\r\n");
+
+    OSWRAP_SuspendScheduler ();
+    {
+        STREAM_IN_FromString (s_l->debugStream, LOG_PENDING_OK_STR "\r\n");
+    }
+    OSWRAP_ResumeScheduler ();
 }
 
 
 void LOG_PendingEndFail (void)
 {
     BOARD_AssertInitialized (s_l);
-    STREAM_IN_FromString (s_l->debugStream, LOG_PENDING_FAILED_STR "\r\n");
+
+    OSWRAP_SuspendScheduler ();
+    {
+        STREAM_IN_FromString (s_l->debugStream, LOG_PENDING_FAILED_STR "\r\n");
+    }
+    OSWRAP_ResumeScheduler ();
 }
 
 
@@ -657,7 +676,7 @@ void LOG__contextBegin (void)
     BOARD_AssertInitialized (s_l);
 
     const uint32_t I = s_l->contextIndent % LOG_CONTEXT_TICKS_DEPTH;
-    s_l->contextStartTicks[I] = BOARD_TicksNow();
+    s_l->contextStartTicks[I] = TICKS_Now();
     ++ s_l->contextIndent;
 }
 
@@ -666,23 +685,28 @@ void LOG_ContextEnd (void)
 {
     BOARD_AssertInitialized (s_l);
 
-    if (s_l->contextIndent)
+    OSWRAP_SuspendScheduler ();
     {
-        const TIMER_Ticks Elapsed =
-            BOARD_TicksNow() - s_l->contextStartTicks[s_l->contextIndent - 1];
+        if (s_l->contextIndent)
+        {
+            const TIMER_Ticks Elapsed =
+                TICKS_Now() -
+                    s_l->contextStartTicks[s_l->contextIndent - 1];
 
-        outContextLevel (s_l->debugStream, NULL, "└", true);
-        outContextInfo  (s_l->debugStream, "x", "╵", Elapsed,
-                         NULL, NULL, NULL, LOG_LINE_TIMING_ONLY);
-        outStr          (s_l->debugStream, "\r\n");
+            outContextLevel (s_l->debugStream, NULL, "└", true);
+            outContextInfo  (s_l->debugStream, "x", "╵", Elapsed,
+                            NULL, NULL, NULL, LOG_LINE_TIMING_ONLY);
+            outStr          (s_l->debugStream, "\r\n");
 
-        -- s_l->contextIndent;
+            -- s_l->contextIndent;
+        }
+        else
+        {
+            LOG_Warn (s_l, LANG_INVALID_CONTEXT_END_FMT, s_l->contextIndent);
+            BOARD_AssertState (false);
+        }
     }
-    else
-    {
-        LOG_Warn (s_l, LANG_INVALID_CONTEXT_END_FMT, s_l->contextIndent);
-        BOARD_AssertState (false);
-    }
+    OSWRAP_ResumeScheduler ();
 }
 
 

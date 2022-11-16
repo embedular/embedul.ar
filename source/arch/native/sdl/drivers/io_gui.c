@@ -41,12 +41,15 @@
     .BackOn = _bon, \
     .TextOn = _ton
 
-
 #define SET_IO_GUI_ELEMENT_DEF(_n) \
     SET_IO_GUI_ELEMENT(_n,NULL, \
         IO_GUI_ELEMENT_DEFAULT_BON, \
         IO_GUI_ELEMENT_DEFAULT_TON)
 
+#define SET_IO_GUI_ELEMENT_BON(_n,_bon) \
+    SET_IO_GUI_ELEMENT(_n, NULL, \
+        _bon, \
+        IO_GUI_ELEMENT_DEFAULT_TON)
 
 const char *const s_GUIFunctionName[IO_GUI_Function__COUNT] =
 {
@@ -285,15 +288,15 @@ const struct IO_GUI_Element s_OutputBitNames[IO_GUI_OUTB__COUNT] =
         },
     [IO_GUI_OUTB_SignRed] =
         {
-            SET_IO_GUI_ELEMENT_DEF("Red")
+            SET_IO_GUI_ELEMENT_BON("Red", 0xe0)
         },
     [IO_GUI_OUTB_SignGreen] =
         {
-            SET_IO_GUI_ELEMENT_DEF("Green")
+            SET_IO_GUI_ELEMENT_BON("Green", 0x1c)
         },
     [IO_GUI_OUTB_SignBlue] =
         {
-            SET_IO_GUI_ELEMENT_DEF("Blue")
+            SET_IO_GUI_ELEMENT_BON("Blue", 0x03)
         },
 };
 
@@ -387,11 +390,11 @@ void IO_GUI_Init (struct IO_GUI *const G, const enum SCREEN_Role Screen)
     resetShowSelectedElement (G);
 
     G->showType         = IO_Type_Bit;
-    G->showFunction     = IO_GUI_Function_Output;
-    G->showProfile[IO_GUI_Function_Output]
-                        = OUTPUT_PROFILE_Type_SIGN;
+    G->showFunction     = IO_GUI_Function_Input;
     G->showProfile[IO_GUI_Function_Input]
                         = INPUT_PROFILE_Type_MAIN;
+    G->showProfile[IO_GUI_Function_Output]
+                        = OUTPUT_PROFILE_Type_SIGN;        
 
     BITFIELD_Init (&G->inBitfield, G->inBitBuffer,
                    BITFIELD_COUNT(IO_GUI_INB__COUNT), NULL, 0);
@@ -618,30 +621,30 @@ static void updateRangeIncrement (struct IO_GUI *const G,
 {
     if (!G->lastPointerPressed)
     {
-        G->lastRangeTimeout = BOARD_TicksNow() + 1000;
+        G->lastRangeTimeout = TICKS_Now() + 1000;
         G->rangeIncrement   = 0;
 
         G->inRanges[SelfDriverCode] += 1 * Multiplier;
     }
     else
     {
-        if (G->lastRangeTimeout < BOARD_TicksNow())
+        if (G->lastRangeTimeout < TICKS_Now())
         {
             switch (G->rangeIncrement)
             {
                 case 0:
                     G->rangeIncrement = 1;
-                    G->lastRangeTimeout = BOARD_TicksNow() + 1500;
+                    G->lastRangeTimeout = TICKS_Now() + 1500;
                     break;
 
                 case 1:
                     G->rangeIncrement = 100;
-                    G->lastRangeTimeout = BOARD_TicksNow() + 2000;
+                    G->lastRangeTimeout = TICKS_Now() + 2000;
                     break;
 
                 case 100:
                     G->rangeIncrement = 10000;
-                    G->lastRangeTimeout = BOARD_TicksNow() + 2500;
+                    G->lastRangeTimeout = TICKS_Now() + 2500;
                     break;
 
                 case 10000:

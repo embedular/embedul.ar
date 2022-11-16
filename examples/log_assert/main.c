@@ -1,14 +1,13 @@
-#include "embedul.ar/source/core/device/board.h"
+#include "embedul.ar/source/core/main.h"
 
 
 const char *const Text1 = "The quick brown fox...";
 const char *const Text2 = "...jumps over the lazy dog";
 
 
-int EMBEDULAR_Main (const int Argc, const char *const Argv[])
+void EMBEDULAR_Main (void *param)
 {
-    (void) Argc;
-    (void) Argv;
+    (void) param;
 
     // Context opened and closed by calling the corresponding functions.
     LOG_ContextBegin (NOBJ, "Context level 1");
@@ -53,6 +52,4 @@ int EMBEDULAR_Main (const int Argc, const char *const Argv[])
         }
 
     LOG_ContextEnd ();
-
-    return 0;
 }

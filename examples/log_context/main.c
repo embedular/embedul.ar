@@ -1,4 +1,4 @@
-#include "embedul.ar/source/core/device/board.h"
+#include "embedul.ar/source/core/main.h"
 
 
 const char *const Text1 = "The quick brown fox...";
@@ -6,10 +6,9 @@ const char *const Text2 = "...jumps over the lazy dog";
 const char *const Text3 = "Executing a delay of 200 milliseconds...";
 
 
-int EMBEDULAR_Main (const int Argc, const char *const Argv[])
+void EMBEDULAR_Main (void *param)
 {
-    (void) Argc;
-    (void) Argv;
+    (void) param;
 
     // Context opened and closed by calling the corresponding functions.
     LOG_ContextBegin (NOBJ, "Context level 1");
@@ -53,7 +52,7 @@ int EMBEDULAR_Main (const int Argc, const char *const Argv[])
             {
                 LOG_AutoContext (NOBJ, "Context level 3.2");
 
-                BOARD_Delay (200);
+                TICKS_Delay (200);
                 LOG (NOBJ, Text3);
 
                 LOG (NOBJ, Text1);
@@ -61,11 +60,9 @@ int EMBEDULAR_Main (const int Argc, const char *const Argv[])
                 LOG (NOBJ, Text1);
             }
 
-            BOARD_Delay (200);
+            TICKS_Delay (200);
             LOG (NOBJ, Text3);
         }
 
     LOG_ContextEnd ();
-
-    return 0;
 }

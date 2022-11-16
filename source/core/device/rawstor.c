@@ -41,7 +41,7 @@ void RAWSTOR_Init (struct RAWSTOR *const R, const struct RAWSTOR_IFACE *iface)
 
     R->iface            = iface;
 
-    R->status.ticks     = BOARD_TicksNow ();
+    R->status.ticks     = TICKS_Now ();
     R->status.disk      = RAWSTOR_Status_Disk_START_VALUE;
     R->status.result    = RAWSTOR_Status_Result_Ok;
     R->status.media     = RAWSTOR_Status_Media_Undefined;
@@ -106,7 +106,7 @@ void RAWSTOR_UpdateStatus (struct RAWSTOR *const R,
     CYCLIC_IN_FromBuffer (&R->statusLog, (const uint8_t *)&R->status,
                           sizeof(struct RAWSTOR_Status));
 
-    R->status.ticks = BOARD_TicksNow ();
+    R->status.ticks = TICKS_Now ();
 
     if (Disk != RAWSTOR_Status_KEEP_VALUE)
     {

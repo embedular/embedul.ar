@@ -52,7 +52,6 @@ static const struct STREAM_IFACE STREAM_FILE_IFACE =
 {
     .Description    = "os-hosted file",
     .HardwareInit   = hardwareInit,
-    .Command        = UNSUPPORTED,
     .DataIn         = dataIn,
     .DataOut        = dataOut
 };

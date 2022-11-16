@@ -620,7 +620,7 @@ static bool waitHelloResponse (struct RnSplit *const R,
     while (!(result = sendAtCommand(R, &AT, Server, Esp32at)) && retries--)
     {
         #if ESP32AT_HELLO_RETRY_DELAY
-            BOARD_Delay (ESP32AT_HELLO_RETRY_DELAY);
+            TICKS_Delay (ESP32AT_HELLO_RETRY_DELAY);
         #endif
     }
 
@@ -699,10 +699,10 @@ static bool connect (struct PACKET *const P, struct STREAM *const Esp32AT,
         LOG_ContextBegin (P, LANG_MODULE_RESTART);
         {
             OUTPUT_SET_BIT_NOW (CONTROL, WirelessEnable, 0);
-            BOARD_Delay (ESP32AT_POWERCYCLE_OFF_DELAY);
+            TICKS_Delay (ESP32AT_POWERCYCLE_OFF_DELAY);
 
             OUTPUT_SET_BIT_NOW (CONTROL, WirelessEnable, 1);
-            BOARD_Delay (ESP32AT_POWERCYCLE_ON_DELAY);
+            TICKS_Delay (ESP32AT_POWERCYCLE_ON_DELAY);
 
             LOG (P, LANG_DEFAULT_SPEED_NO_FLOW_CTRL);
 
@@ -922,13 +922,13 @@ static enum DEVICE_CommandResult command (struct PACKET *const P,
 
         if (!E->connected && E->autoRecDelay)
         {
-            if (E->autoRecTarget < BOARD_TicksNow())
+            if (E->autoRecTarget < TICKS_Now())
             {
                 LOG (P, LANG_TRY_RECONNECT_NOW);
 
                 if (!connect (P, E->esp32at, ConnectStepFlags__ALL))
                 {
-                    E->autoRecTarget = BOARD_TicksNow() + E->autoRecDelay;
+                    E->autoRecTarget = TICKS_Now() + E->autoRecDelay;
                     LOG (&E->device, LANG_RETRYING_IN_MS_FMT, E->autoRecDelay);
                 }
                 else
@@ -1052,7 +1052,7 @@ static void atmCheckMessage (struct PACKET_ESP32AT_TCP_SERVER *const E)
 
                 if (E->autoRecDelay)
                 {
-                    E->autoRecTarget = BOARD_TicksNow() + E->autoRecDelay;
+                    E->autoRecTarget = TICKS_Now() + E->autoRecDelay;
                     LOG (&E->device, LANG_RETRYING_IN_MS_FMT, E->autoRecDelay);
                 }
             }

@@ -169,6 +169,6 @@ void SPLASH_THEME_lock_glyph (void)
 
     while (SEQUENCE_Update (&seq))
     {
-        BOARD_Update ();
+        BOARD_Sync ();
     }
 }

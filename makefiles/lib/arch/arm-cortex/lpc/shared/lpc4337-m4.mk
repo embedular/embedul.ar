@@ -34,14 +34,12 @@ $(call emb_include,lib/arch/arm-cortex/lpc/shared/lpc4337.mk)
 
 # LPCOpen board code for M4 core
 OBJS += \
-    $(TARGET_ARCH)/shared/systick.o \
     $(TARGET_BSP_BOARD)/board.o \
     $(TARGET_BSP_BOARD)/board_sysinit.o \
     $(TARGET_BSP)/shared/i2cm.o \
     $(TARGET_BSP)/shared/panic.o \
     $(TARGET_BSP)/shared/seed.o \
     $(TARGET_BSP)/shared/sysinit_util.o
-
 
 FLASH_BASE ?= 0x1A000000
 

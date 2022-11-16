@@ -28,20 +28,26 @@ $(call emb_need_var,LIB_EMBEDULAR_ROOT)
 # ------------------------------------------------------------------------------
 # Library config options (LIB_EMBEDULAR_CONFIG_*)
 # ------------------------------------------------------------------------------
-# NEED_VIDEO			: the application requires board video support,
+# NEED_VIDEO            : the application requires board video support,
 #                         will not compile otherwise.
-# NEED_SOUND			: the application requires board sound support,
+# NEED_SOUND            : the application requires board sound support,
 #                         will not compile otherwise.
-# SPLASH_SCREENS		: enables(1) or disables(0) showing up to three visual
+# SPLASH_SCREENS        : enables(1) or disables(0) showing up to three visual
 #                         splash screens right after board init. will be 
 #                         disabled automatically if the board has no video
 #                         support.
-# SPLASH_THEME_L1,L2,L3	: first, second and third splash screens. Names must
+# SPLASH_THEME_L1,L2,L3 : first, second and third splash screens. Names must
 #                         exactly match available source files (without 
 #                         extension) in source/core/misc/splash_themes/.
-# INPUT_ACTION			: enables(1) or disables(0) the processing capability of
+# INPUT_ACTION          : enables(1) or disables(0) the processing capability of
 #                         detecting and storing clicks, double clicks, holds and
 #                         releases on INPUT manager digital inputs.
+# OS_AUTOSYNC_PERIOD    : when using a multitasking OS: period, in milliseconds
+#					      used to automatically call BOARD_Sync() from RunTask.
+#						  use zero (0) to disable autosync and manually call
+#                         BOARD_Sync() from an application task at will.
+#                         This setting has no effect when not using a
+#                         multitasking OS.
 # ------------------------------------------------------------------------------
 
 $(call emb_declare_lib,$\
@@ -55,6 +61,7 @@ $(call emb_declare_lib,$\
 	SPLASH_THEME_L2=none \
 	SPLASH_THEME_L3=c64 \
 	INPUT_ACTION=1 \
+	OS_AUTOSYNC_PERIOD=20 \
 	INPUT_MAX_GATEWAYS=10U \
 	INPUT_MAX_LIGHTING_DEVICES=2U \
 	OUTPUT_MAX_GATEWAYS=10U \
@@ -64,23 +71,25 @@ $(call emb_declare_lib,$\
 
 # Miscelaneous system files
 OBJS += $(LIB_EMBEDULAR)/device/board.o \
+        $(LIB_EMBEDULAR)/device/board/run.o \
         $(LIB_EMBEDULAR)/device/stream.o \
-		$(LIB_EMBEDULAR)/device/packet.o \
-		$(LIB_EMBEDULAR)/device/packet/error_log.o \
+        $(LIB_EMBEDULAR)/device/packet.o \
+        $(LIB_EMBEDULAR)/device/packet/error_log.o \
         $(LIB_EMBEDULAR)/device/rawstor.o \
         $(LIB_EMBEDULAR)/device/random.o \
         $(LIB_EMBEDULAR)/device/io.o \
-	    $(LIB_EMBEDULAR)/device/board/init.o \
-		$(LIB_EMBEDULAR)/manager/log.o \
+        $(LIB_EMBEDULAR)/device/oswrap.o \
+        $(LIB_EMBEDULAR)/device/ticks.o \
+        $(LIB_EMBEDULAR)/manager/log.o \
         $(LIB_EMBEDULAR)/manager/input.o \
-	    $(LIB_EMBEDULAR)/manager/input/action.o \
-	    $(LIB_EMBEDULAR)/manager/input/profile.o \
+        $(LIB_EMBEDULAR)/manager/input/action.o \
+        $(LIB_EMBEDULAR)/manager/input/profile.o \
         $(LIB_EMBEDULAR)/manager/output.o \
         $(LIB_EMBEDULAR)/manager/output/profile.o \
         $(LIB_EMBEDULAR)/manager/storage.o \
         $(LIB_EMBEDULAR)/manager/storage/cache.o \
-		$(LIB_EMBEDULAR)/manager/comm.o \
-		$(LIB_EMBEDULAR)/manager/screen.o \
+        $(LIB_EMBEDULAR)/manager/comm.o \
+        $(LIB_EMBEDULAR)/manager/screen.o \
         $(LIB_EMBEDULAR)/misc/hsl.o \
         $(LIB_EMBEDULAR)/misc/rgb332.o \
         $(LIB_EMBEDULAR)/misc/collide.o
@@ -176,7 +185,19 @@ $(foreach name,$(LIB_EMBEDULAR_BASE),$(eval OBJS += $(LIB_EMBEDULAR)/$(name).o))
 $(call emb_info,Using CORE modules '$(LIB_EMBEDULAR_BASE)')
 $(call emb_info,Using SUBSYSTEMS '$(LIB_EMBEDULAR_SUBSYSTEMS)')
 
-# Dependencies with 3rd_party libraries
+# ---------------------------------------
+# Interoperation with 3rd_party libraries
+# ---------------------------------------
+ifneq ($(findstring freertos,$(BUILD_LIBS)),)
+    $(call emb_info,Using OSWRAP-FreeRTOS)
+    CFLAGS += -DLIB_EMBEDULAR_HAS_MULTITASKING_OS
+	OBJS += $(LIB_EMBEDULAR_ROOT)/source/boot/oswrap_freertos.o
+else
+    $(call emb_info,Using OSWRAP-None)
+	OBJS += $(LIB_EMBEDULAR_ROOT)/source/boot/oswrap_none.o
+endif
+
+
 ifneq ($(findstring fatfs,$(BUILD_LIBS)),)
     $(call emb_info,Using FatFs custom disks and config)
     CFLAGS += -DLIB_EMBEDULAR_HAS_FILESYSTEM

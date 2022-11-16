@@ -34,7 +34,6 @@ static uint64_t     getUint64       (struct RANDOM *const R);
 static const struct RANDOM_IFACE RANDOM_RNG_IFACE =
 {
     .Description    = "stm32 rng",
-    .HardwareInit   = UNSUPPORTED,
     .GetUint32      = getUint32,
     .GetUint64      = getUint64
 };

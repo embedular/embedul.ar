@@ -30,6 +30,8 @@
 #include "embedul.ar/source/core/ansi.h"
 #include "embedul.ar/source/core/object.h"
 #include "embedul.ar/source/core/device.h"
+#include "embedul.ar/source/core/device/oswrap.h"
+#include "embedul.ar/source/core/device/ticks.h"
 #include "embedul.ar/source/core/device/random.h"
 #include "embedul.ar/source/core/device/sound.h"
 #include "embedul.ar/source/core/manager/comm.h"
@@ -41,11 +43,6 @@
 #include "embedul.ar/source/core/lang/en.h"
 #include <string.h>
 
-
-#define UNSUPPORTED         NULL
-
-
-//#define DESCRIPTION(s)  ((s)? s : DescriptionNA)
 
 #define BOARD_Assert(_c,_s) \
     BOARD_AssertContext (__func__, __FILE__, __LINE__, _c, _s)
@@ -76,7 +73,8 @@
 
 enum BOARD_Stage
 {
-    BOARD_Stage_InitHardware,
+    BOARD_Stage_InitPreTicksHardware,
+    BOARD_Stage_InitPostTicksHardware,
     BOARD_Stage_InitDebugStreamDriver,      // STREAM
     BOARD_Stage_Greetings,
     BOARD_Stage_InitIOProfiles,
@@ -108,45 +106,23 @@ struct BOARD_RealTimeClock
 };
 
 
-enum BOARD_TickHookFuncSlot
-{
-    BOARD_TickHookFuncSlot_BSP = 0,
-    BOARD_TickHookFuncSlot_OS,
-    BOARD_TickHookFuncSlot_App,
-    BOARD_TickHookFuncSlot__COUNT
-};
-
-
 struct BOARD;
 
 typedef void *      (* BOARD_StageChangeFunc)(struct BOARD *const B,
-                                    const enum BOARD_Stage Stage);
+                                              const enum BOARD_Stage Stage);
 typedef void        (* BOARD_AssertFunc)(struct BOARD *const B,
-                                    const bool Condition);
-typedef void        (* BOARD_SetTickFreqFunc)(struct BOARD *const B,
-                                    const uint32_t Hz);
-typedef TIMER_TickHookFunc
-                    (* BOARD_SetTickHookFunc)(struct BOARD *const B,
-                                    TIMER_TickHookFunc const Func,
-                                    const enum BOARD_TickHookFuncSlot Slot);
-typedef TIMER_Ticks (* BOARD_TicksNowFunc)(struct BOARD *const B);
+                                         const bool Condition);
 typedef struct BOARD_RealTimeClock
                     (* BOARD_RealTimeClockFunc)(struct BOARD *const B);
-typedef void        (* BOARD_DelayFunc)(struct BOARD *const B,
-                                    const TIMER_Ticks Ticks);
 typedef void        (* BOARD_UpdateFunc)(struct BOARD *const B);
 
 
 struct BOARD_IFACE
 {
-    const char                      * const Description;
+    const char                      *const Description;
     const BOARD_StageChangeFunc     StageChange;
     const BOARD_AssertFunc          Assert;
-    const BOARD_SetTickFreqFunc     SetTickFreq;
-    const BOARD_SetTickHookFunc     SetTickHook;
-    const BOARD_TicksNowFunc        TicksNow;
     const BOARD_RealTimeClockFunc   Rtc;
-    const BOARD_DelayFunc           Delay;
     const BOARD_UpdateFunc          Update;
 };
 
@@ -154,20 +130,24 @@ struct BOARD_IFACE
 struct BOARD
 {
     const struct BOARD_IFACE        * iface;
+    int                             argc;
+    const char                      ** argv;
+    int                             returnValue;
+    enum BOARD_Stage                currentStage;
+    bool                            exit;
+    // Singleton device drivers
+    struct TICKS                    * ticks;
     struct BOARD_RIG                * rig;
-    TIMER_TickHookFunc              * tickHookFunc;
-    uint32_t                        tickFrequency;
     struct STREAM                   * debugStream;
     struct RANDOM                   * random;
     struct SOUND                    * sound;
-    // Already allocated managers
+    // Already allocated managers for device drivers
     struct COMM                     comm;
     struct LOG                      log;
     struct INPUT                    input;
     struct OUTPUT                   output;
     struct STORAGE                  storage;
     struct SCREEN                   screen;
-    enum BOARD_Stage                currentStage;
 };
 
 
@@ -179,7 +159,7 @@ typedef void *      (* BOARD_RIG_StageChangeFunc)(struct BOARD_RIG *const R,
 
 struct BOARD_RIG_IFACE
 {
-    const char                      * const Description;
+    const char                      *const Description;
     const BOARD_RIG_StageChangeFunc StageChange;
 };
 
@@ -192,22 +172,21 @@ struct BOARD_RIG
 
 const char *        BOARD_Init              (struct BOARD *const B,
                                              const struct BOARD_IFACE *const
-                                             Iface, struct BOARD_RIG *const R);
+                                             Iface, const int Argc,
+                                             const char **const Argv,
+                                             struct BOARD_RIG *const R);
+int                 BOARD_Argc              (void);
+const char **       BOARD_Argv              (void);
+int                 BOARD_ReturnValue       (void);
 enum BOARD_Stage    BOARD_CurrentStage      (void);
 void                BOARD_AssertContext     (const char *const Func,
                                              const char *const File,
                                              const int Line,
                                              const bool Condition,
                                              const char *const Str);
-void                BOARD_SetTickFreq       (const uint32_t Hz);
-uint32_t            BOARD_TickFreq          (void);
-TIMER_TickHookFunc  BOARD_SetTickHook       (TIMER_TickHookFunc const Func,
-                                             const enum BOARD_TickHookFuncSlot
-                                             Slot);
-TIMER_Ticks         BOARD_TicksNow          (void);
 struct BOARD_RealTimeClock
                     BOARD_RealTimeClock     (void);
-void                BOARD_Delay             (const TIMER_Ticks Ticks);
 bool                BOARD_SoundDeviceOk     (void);
+void                BOARD_Exit              (const int ReturnValue);
 const char *        BOARD_Description       (void);
-void                BOARD_Update            (void);
+void                BOARD_Sync              (void);

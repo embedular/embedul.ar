@@ -418,6 +418,6 @@ void SPLASH_THEME_nyan_cat (void)
 
     while (SEQUENCE_Update (&seq))
     {
-        BOARD_Update ();
+        BOARD_Sync ();
     }
 }

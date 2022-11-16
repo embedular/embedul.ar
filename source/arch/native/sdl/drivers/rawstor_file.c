@@ -46,7 +46,6 @@ static RAWSTOR_Status_Result    mediaIoctl      (struct RAWSTOR *const R,
 static const struct RAWSTOR_IFACE RAWSTOR_FILE_IFACE =
 {
     .Description    = "os-hosted file",
-    .HardwareInit   = UNSUPPORTED,
     .MediaInit      = mediaInit,
     .MediaRead      = mediaRead,
     .MediaWrite     = mediaWrite,

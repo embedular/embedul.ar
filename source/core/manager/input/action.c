@@ -39,7 +39,7 @@ enum INPUT_ACTION_Type INPUT_ACTION_Update (struct INPUT_ACTION *const S,
 {
     BOARD_AssertParams (S);
 
-	const TIMER_Ticks   Now         = BOARD_TicksNow ();
+	const TIMER_Ticks   Now         = TICKS_Now ();
 	const bool          LastStatus  = S->currentStatus;
 
 	S->currentStatus = NewStatus;

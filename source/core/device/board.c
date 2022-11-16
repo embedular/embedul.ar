@@ -33,16 +33,13 @@
 static struct BOARD * s_board = NULL;
 
 
-// Private definitions
-void BOARD_INIT_Sequence (struct BOARD *const B);
-
-
 const char * BOARD_Init (struct BOARD *const B,
                          const struct BOARD_IFACE *const Iface,
+                         const int Argc, const char **const Argv,
                          struct BOARD_RIG *const R)
 {
     // -------------------------------------------------------------------------
-    // NO assert checks, assert output or log available
+    // NO assert checks, assert output or log available.
     // -------------------------------------------------------------------------
     if (s_board)
     {
@@ -57,9 +54,7 @@ const char * BOARD_Init (struct BOARD *const B,
     // Required interface elements
     if (!Iface->Description ||
         !Iface->StageChange ||
-        !Iface->Assert ||
-        !Iface->TicksNow ||
-        !Iface->Delay)
+        !Iface->Assert)
     {
         return LANG_ASSERT_INVALID_INTERFACE;
     }
@@ -68,24 +63,39 @@ const char * BOARD_Init (struct BOARD *const B,
 
     s_board         = B;
     s_board->iface  = Iface;
+    s_board->argc   = Argc;
+    s_board->argv   = Argv;
     s_board->rig    = R;
     // -------------------------------------------------------------------------
-    // Assert checks available, but still NO assert output or log messages
+    // Assert checks available, but still NO assert output or log messages.
     // -------------------------------------------------------------------------
-
-    // System components init sequence
-    BOARD_INIT_Sequence (s_board);
-
     return NULL;
 }
 
 
+int BOARD_Argc (void)
+{
+    return s_board->argc;
+}
+
+
+const char ** BOARD_Argv (void)
+{
+    return s_board->argv;
+}
+
+
+int BOARD_ReturnValue (void)
+{
+    return s_board->returnValue;
+}
+
+
 // STREAM_Init() checks if the device instance being initialized is the special
-// debug stream during BOARD_INIT_Sequence. In that case, it can't log its own
-// initialization.
+// debug stream during BOARD_INIT_Sequence. In that case, it should not be able
+// to log its own initialization.
 enum BOARD_Stage BOARD_CurrentStage (void)
 {
-    BOARD_AssertParams (s_board);
     return s_board->currentStage;
 }
 
@@ -108,51 +118,6 @@ void BOARD_AssertContext (const char *const Func, const char *const File,
 }
 
 
-void BOARD_SetTickFreq (const uint32_t Hz)
-{
-    if (s_board->iface->SetTickFreq)
-    {
-        s_board->iface->SetTickFreq (s_board, Hz);
-        s_board->tickFrequency = Hz;
-    }
-}
-
-
-uint32_t BOARD_TickFreq (void)
-{
-    return s_board->tickFrequency;
-}
-
-
-TIMER_TickHookFunc BOARD_SetTickHook (TIMER_TickHookFunc const Func,
-                                      const enum BOARD_TickHookFuncSlot Slot)
-{
-    if (s_board->iface->SetTickHook)
-    {
-        const TIMER_TickHookFunc LastFunc = 
-                        s_board->iface->SetTickHook (s_board, Func, Slot);
-        return LastFunc;
-    }
-
-    return NULL;
-}
-
-
-/**
- * .. code-block:: c
- *
- *    TIMER_Ticks begin = BOARD_TicksNow ();
- *    // A hypothetical function that performs some work
- *    DoSomeWork ();
- *    TIMER_Ticks end = BOARD_TicksNow ();
- *    TIMER_Ticks elapsed = end - begin;
- */
-TIMER_Ticks BOARD_TicksNow (void)
-{
-    return s_board->iface->TicksNow (s_board);
-}
-
-
 struct BOARD_RealTimeClock BOARD_RealTimeClock (void)
 {
     if (s_board->iface->Rtc)
@@ -164,15 +129,25 @@ struct BOARD_RealTimeClock BOARD_RealTimeClock (void)
 }
 
 
-void BOARD_Delay (const TIMER_Ticks Ticks)
-{
-    s_board->iface->Delay (s_board, Ticks);
-}
-
-
 bool BOARD_SoundDeviceOk (void)
 {
     return s_board->sound? true : false;
+}
+
+
+void OSWRAP__closeMainTask (void);
+
+
+void BOARD_Exit (const int ReturnValue)
+{
+    OSWRAP_SuspendScheduler ();
+    {
+        s_board->exit           = true;
+        s_board->returnValue    = ReturnValue;
+    }
+    OSWRAP_ResumeScheduler ();
+
+    OSWRAP__closeMainTask ();
 }
 
 
@@ -182,34 +157,34 @@ const char * BOARD_Description (void)
 }
 
 
-void BOARD_Update (void)
+bool OSWRAP__syncNow (void);
+
+
+void BOARD_Sync (void)
 {
-#ifdef LIB_EMBEDULAR_HAS_SOUND
-    if (BOARD_SoundDeviceOk ())
+    if (!OSWRAP__syncNow ())
     {
-        SOUND_Mix ();
-    }
-#endif
-
-    SCREEN_Update ();
-
-    if (s_board->iface->Update)
-    {
-        s_board->iface->Update (s_board);
+        return;
     }
 
-    INPUT_Update ();
-    OUTPUT_Update ();
-}
+    OSWRAP_SuspendScheduler ();
+    {
+    #ifdef LIB_EMBEDULAR_HAS_SOUND
+        if (BOARD_SoundDeviceOk ())
+        {
+            SOUND_Mix ();
+        }
+    #endif
 
+        SCREEN_Update ();
 
-void BOARD__stage_shutdown (void)
-{
-    LOG_Warn (s_board, LANG_SHUTTING_DOWN);
+        if (s_board->iface->Update)
+        {
+            s_board->iface->Update (s_board);
+        }
 
-    // Managers shutdown (will shut down their registered drivers)
-    SCREEN_Shutdown ();
-
-    // BOARD_Stage_InitHardware counterpart
-    s_board->iface->StageChange (s_board, BOARD_Stage_ShutdownHardware);
+        INPUT_Update ();
+        OUTPUT_Update ();
+    }
+    OSWRAP_ResumeScheduler ();
 }

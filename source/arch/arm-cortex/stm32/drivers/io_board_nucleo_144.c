@@ -23,23 +23,22 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "embedul.ar/source/arch/arm-cortex/stm32/drivers/board_nucleo_144/io_board.h"
+#include "embedul.ar/source/arch/arm-cortex/stm32/drivers/io_board_nucleo_144.h"
+#include "embedul.ar/source/arch/arm-cortex/stm32/nucleo_144_bsp.h"
 #include "embedul.ar/source/core/device/board.h"
-#include "source/core/manager/input.h"
-#include "source/core/manager/output.h"
 
 
-static const char * s_InputBitNames[IO_BOARD_INB__COUNT] =
+static const char * s_InputBitNames[IO_BOARD_NUCLEO_144_INB__COUNT] =
 {
-    [IO_BOARD_INB_USER] = "User"
+    [IO_BOARD_NUCLEO_144_INB_USER] = "User"
 };
 
 
-static const char * s_OutputBitNames[IO_BOARD_OUTB__COUNT] =
+static const char * s_OutputBitNames[IO_BOARD_NUCLEO_144_OUTB__COUNT] =
 {
-    [IO_BOARD_OUTB_LED_GREEN]   = "Green LED",
-    [IO_BOARD_OUTB_LED_BLUE]    = "Blue LED",
-    [IO_BOARD_OUTB_LED_RED]     = "Red LED"
+    [IO_BOARD_NUCLEO_144_OUTB_LED_GREEN]    = "Green LED",
+    [IO_BOARD_NUCLEO_144_OUTB_LED_BLUE]     = "Blue LED",
+    [IO_BOARD_NUCLEO_144_OUTB_LED_RED]      = "Red LED"
 };
 
 
@@ -61,9 +60,9 @@ static const char * outputName          (struct IO *const Io,
                                          const IO_Code DriverCode);
 
 
-static const struct IO_IFACE IO_BOARD_IFACE =
+static const struct IO_IFACE IO_BOARD_NUCLEO_144_IFACE =
 {
-    IO_IFACE_DECLARE("st nucleo-144 board io", BOARD),
+    IO_IFACE_DECLARE("st nucleo-144 board io", BOARD_NUCLEO_144),
     .Update         = update,
     .GetInput       = getInput,
     .SetOutput      = setOutput,
@@ -72,13 +71,13 @@ static const struct IO_IFACE IO_BOARD_IFACE =
 };
 
 
-void IO_BOARD_Init (struct IO_BOARD *const B)
+void IO_BOARD_NUCLEO_144_Init (struct IO_BOARD_NUCLEO_144 *const B)
 {
     BOARD_AssertParams (B);
 
     DEVICE_IMPLEMENTATION_Clear (B);
 
-    IO_INIT_STATIC_PORT_INFO (B, BOARD);
+    IO_INIT_STATIC_PORT_INFO (B, BOARD_NUCLEO_144);
 
     BSP_PB_Init (BUTTON_USER, BUTTON_MODE_GPIO);
 
@@ -87,37 +86,39 @@ void IO_BOARD_Init (struct IO_BOARD *const B)
     BSP_LED_Init (LED_RED);
 
     // Update once per frame (~60 Hz).
-    IO_Init ((struct IO *)B, &IO_BOARD_IFACE, B->portInfo, 15);
+    IO_Init ((struct IO *)B, &IO_BOARD_NUCLEO_144_IFACE, B->portInfo, 15);
 }
 
 
-void IO_BOARD_Attach (struct IO_BOARD *const B)
+void IO_BOARD_NUCLEO_144_Attach (struct IO_BOARD_NUCLEO_144 *const B)
 {
     BOARD_AssertParams (B);
 
     INPUT_RegisterGateway ((struct IO *)B, 0);
 
-    INPUT_MAP_BIT (MAIN, A, IO_BOARD_INB_USER);
+    INPUT_MAP_BIT (MAIN, A, IO_BOARD_NUCLEO_144_INB_USER);
 
 
     OUTPUT_RegisterGateway ((struct IO *)B, 0);
 
-    OUTPUT_MAP_BIT (SIGN, Warning, IO_BOARD_OUTB_LED_RED);
-    OUTPUT_MAP_BIT (SIGN, Green, IO_BOARD_OUTB_LED_GREEN);
-    OUTPUT_MAP_BIT (SIGN, Blue, IO_BOARD_OUTB_LED_BLUE);
+    OUTPUT_MAP_BIT (SIGN, Warning, IO_BOARD_NUCLEO_144_OUTB_LED_RED);
+    OUTPUT_MAP_BIT (SIGN, Red, IO_BOARD_NUCLEO_144_OUTB_LED_RED);
+    OUTPUT_MAP_BIT (SIGN, Green, IO_BOARD_NUCLEO_144_OUTB_LED_GREEN);
+    OUTPUT_MAP_BIT (SIGN, Blue, IO_BOARD_NUCLEO_144_OUTB_LED_BLUE);
 }
 
 
-inline static void bspButtonIn (struct IO_BOARD *const B,
-                                const enum IO_BOARD_INB Inb,
+inline static void bspButtonIn (struct IO_BOARD_NUCLEO_144 *const B,
+                                const enum IO_BOARD_NUCLEO_144_INB Inb,
                                 const uint32_t Button)
 {
     B->inbData |= BSP_PB_GetState(Button)? 1 << Inb : 0;
 }
 
 
-inline static void ledOut (struct IO_BOARD *const B,
-                           const enum IO_BOARD_OUTB Outb, const uint32_t Led)
+inline static void ledOut (struct IO_BOARD_NUCLEO_144 *const B,
+                           const enum IO_BOARD_NUCLEO_144_OUTB Outb,
+                           const uint32_t Led)
 {
     (B->outbData & (1 << Outb))? BSP_LED_On(Led) : BSP_LED_Off(Led);
 }
@@ -125,17 +126,17 @@ inline static void ledOut (struct IO_BOARD *const B,
 
 void update (struct IO *const Io)
 {
-    struct IO_BOARD *const B = (struct IO_BOARD *) Io;
+    struct IO_BOARD_NUCLEO_144 *const B = (struct IO_BOARD_NUCLEO_144 *) Io;
 
     // Input
     B->inbData = 0;
 
-    bspButtonIn (B, IO_BOARD_INB_USER, BUTTON_USER);
+    bspButtonIn (B, IO_BOARD_NUCLEO_144_INB_USER, BUTTON_USER);
 
     // Output
-    ledOut (B, IO_BOARD_OUTB_LED_GREEN, LED_GREEN);
-    ledOut (B, IO_BOARD_OUTB_LED_BLUE, LED_BLUE);
-    ledOut (B, IO_BOARD_OUTB_LED_RED, LED_RED);
+    ledOut (B, IO_BOARD_NUCLEO_144_OUTB_LED_GREEN, LED_GREEN);
+    ledOut (B, IO_BOARD_NUCLEO_144_OUTB_LED_BLUE, LED_BLUE);
+    ledOut (B, IO_BOARD_NUCLEO_144_OUTB_LED_RED, LED_RED);
 }
 
 
@@ -145,7 +146,7 @@ uint32_t getInput (struct IO *const Io, const enum IO_Type IoType,
     (void) IoType;
     (void) Port;
 
-    struct IO_BOARD *const B = (struct IO_BOARD *) Io;
+    struct IO_BOARD_NUCLEO_144 *const B = (struct IO_BOARD_NUCLEO_144 *) Io;
 
     return (B->inbData & (1 << DriverCode));
 }
@@ -158,7 +159,7 @@ void setOutput (struct IO *const Io, const enum IO_Type IoType,
     (void) IoType;
     (void) Port;
 
-    struct IO_BOARD *const B = (struct IO_BOARD *) Io;
+    struct IO_BOARD_NUCLEO_144 *const B = (struct IO_BOARD_NUCLEO_144 *) Io;
 
     if (Value)
     {

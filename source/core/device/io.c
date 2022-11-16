@@ -70,10 +70,14 @@ void IO_Update (struct IO *const Io)
     BOARD_AssertParams (Io);
     BOARD_AssertState  (Io->iface && Io->iface->Update);
 
-    if (BOARD_TicksNow() >= Io->lastDeferredUpdate + Io->deferredUpdatePeriod)
+    if (TICKS_Now() >= Io->lastDeferredUpdate + Io->deferredUpdatePeriod)
     {
-        Io->iface->Update (Io);
-        Io->lastDeferredUpdate = BOARD_TicksNow ();
+        OSWRAP_SuspendScheduler ();
+        {
+            Io->iface->Update (Io);
+            Io->lastDeferredUpdate = TICKS_Now ();
+        }
+        OSWRAP_ResumeScheduler ();
     }
 }
 
@@ -138,10 +142,17 @@ IO_Value IO_GetInput (struct IO *const Io, const enum IO_Type IoType,
 
     if (When == IO_UpdateValue_Now)
     {
-        Io->iface->Update (Io);        
+        OSWRAP_SuspendScheduler ();
+        {
+            Io->iface->Update (Io);
+        }
+        OSWRAP_ResumeScheduler ();
     }
 
-    return Io->iface->GetInput (Io, IoType, DriverCode, Port);
+    const IO_Value Value =
+        Io->iface->GetInput (Io, IoType, DriverCode, Port);
+
+    return Value;
 }
 
 
@@ -154,12 +165,16 @@ void IO_SetOutput (struct IO *const Io, const enum IO_Type IoType,
     BOARD_AssertParams (DriverCode < Io->iface->OutCount[IoType] &&
                         Port < Io->iface->PortCount);
 
-    Io->iface->SetOutput (Io, IoType, DriverCode, Port, Value);
-
-    if (When == IO_UpdateValue_Now)
+    OSWRAP_SuspendScheduler ();
     {
-        Io->iface->Update (Io);
+        Io->iface->SetOutput (Io, IoType, DriverCode, Port, Value);
+
+        if (When == IO_UpdateValue_Now)
+        {
+            Io->iface->Update (Io);
+        }
     }
+    OSWRAP_ResumeScheduler ();
 }
 
 

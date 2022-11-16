@@ -40,9 +40,6 @@ static const struct SOUND_IFACE SOUND_SDL_IFACE =
 {
     .Description    = "sdl mixer",
     .HardwareInit   = hardwareInit,
-    .Mute           = UNSUPPORTED,
-    .BufferFilled   = UNSUPPORTED,
-    .BufferConsumed = UNSUPPORTED,
     .MixBegin       = mixBegin,
     .MixEnd         = mixEnd
 };
@@ -58,7 +55,8 @@ static void musicPlayer (void *udata, Uint8 *stream, int len)
         while (S->bufferFilledAvailable && len)
         {
             uint8_t     *cvData     = S->buffer[S->bufferFilledIndex];
-            uint32_t    cvAvailable = SOUND_MIXER_BUFFER_SIZE - D->currentBufferUsed;
+            uint32_t    cvAvailable = SOUND_MIXER_BUFFER_SIZE -
+                                                    D->currentBufferUsed;
 
             // Current buffer has more or same bytes than required by SDL mixer
             if (cvAvailable >= (size_t)len)
@@ -108,8 +106,8 @@ void SOUND_SDL_Init (struct SOUND_SDLMIXER *const D)
 
 void hardwareInit (struct SOUND *const S)
 {
-    if (Mix_OpenAudio (SOUND_MIXER_SAMPLE_RATE, AUDIO_S16LSB, SOUND_MIXER_CHANNELS,
-                       SOUND_MIXER_BUFFER_SIZE))
+    if (Mix_OpenAudio (SOUND_MIXER_SAMPLE_RATE, AUDIO_S16LSB,
+                       SOUND_MIXER_CHANNELS, SOUND_MIXER_BUFFER_SIZE))
     {
         LOG_Warn (S, OPENAUDIO_FAILED_STR);
         LOG_Items (1, LANG_ERROR, Mix_GetError());
