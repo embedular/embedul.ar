@@ -40,7 +40,8 @@ TARGETS = native_hosted.eva
 native_hosted.parse: \
 ../examples/log_hello_world/main.c \
 ../source/3rd_party/sfmt-1.5.1/SFMT.c \
-../source/arch/native/sdl/drivers/board_hosted.c \
+../source/arch/native/sdl/boot/board_hosted.c \
+../source/arch/native/sdl/boot/ticks_sdl.c \
 ../source/arch/native/sdl/drivers/io_gui.c \
 ../source/arch/native/sdl/drivers/io_keyboard.c \
 ../source/arch/native/sdl/drivers/rawstor_file.c \
@@ -49,14 +50,16 @@ native_hosted.parse: \
 ../source/arch/native/sdl/drivers/video_rgb332.c \
 ../source/arch/native/sdl/drivers/video_rgb332_adapter_sim.c \
 ../source/arch/native/sdl/drivers/video_rgb332_vgafb.c \
+../source/boot/oswrap_none.c \
 ../source/core/anim.c \
 ../source/core/array.c \
 ../source/core/bitfield.c \
 ../source/core/cyclic.c \
 ../source/core/device.c \
 ../source/core/device/board.c \
-../source/core/device/board/init.c \
+../source/core/device/board/run.c \
 ../source/core/device/io.c \
+../source/core/device/oswrap.c \
 ../source/core/device/packet.c \
 ../source/core/device/packet/error_log.c \
 ../source/core/device/random.c \
@@ -65,6 +68,7 @@ native_hosted.parse: \
 ../source/core/device/sound/mixer.c \
 ../source/core/device/sound/opl/fmopl.c \
 ../source/core/device/stream.c \
+../source/core/device/ticks.c \
 ../source/core/device/video.c \
 ../source/core/main.c \
 ../source/core/manager/comm.c \
