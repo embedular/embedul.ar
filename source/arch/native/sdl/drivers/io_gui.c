@@ -846,9 +846,9 @@ static void processProfileCode (
             char driverDesc[64];
 
             snprintf (driverDesc, sizeof(driverDesc),
-                        "Mapped to \"%s\", port %u",
-                        OBJECT_Description((struct IO *)Gateway.Driver),
-                        Gateway.DriverPort);
+                        "Mapped to port %u of \"%s\"",
+                        Gateway.DriverPort,
+                        OBJECT_Description((struct IO *)Gateway.Driver));
 
             drawElementBackground (G, X, Y, ProfileCode, driverDesc, 0x01);
         }

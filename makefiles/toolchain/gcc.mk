@@ -28,15 +28,6 @@ $(call emb_need_var,CPU_MODEL)
 
 $(call emb_info,GNU toolchain selected)
 
-ifneq ($(CHIP),)
-    $(call emb_info,CHIP is '$(CHIP)')
-    # Specific CHIP based directives
-    ifneq ($($(CHIP)_CFLAGS),)
-        $(call emb_info,Appending $(words $($(CHIP)_CFLAGS)) CHIP-based CFLAGS directives)
-        CFLAGS += $($(CHIP)_CFLAGS)
-    endif
-endif
-
 $(call emb_info,CPU model is '$(CPU_MODEL)')
 
 ifneq ($(findstring cortex-m,$(CPU_MODEL)),)

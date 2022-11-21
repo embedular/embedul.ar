@@ -205,6 +205,21 @@ define emb_include
     $(call emb_end)
 endef
 
+# $(1): conditional variable name from where to extract the conditional value
+#       (for example, "CHIP")
+define emb_append_conditional_cflags
+    $(call emb_info,Appending $(words $($(1)_$($(1))_CFLAGS)) '$(1)=$($(1))' conditional CFLAGS directive(s))
+	$(eval CFLAGS += $($(1)_$($(1))_CFLAGS))
+	$(eval $(foreach var,$($(1)_$($(1))_CFLAGS),$(call emb_info,Directive '$(var)')))
+endef
+
+# $(1): conditional variable name from where to extract the value
+#       (for example, "CHIP")
+define emb_test_conditional_cflags
+    $(if $($(1)_$($(1))_CFLAGS),$(call emb_append_conditional_cflags,$(1)),$\
+        $(call emb_info,No '$(1)=$($(1))' conditional CFLAGS directives))
+endef
+
 define BUILD
     $(call emb_include,build.mk)
     $(call emb_end)

@@ -37,8 +37,6 @@ TARGET_BSP := $(TARGET_MFR)
 TARGET_BSP_BOARD := $(TARGET_MFR)/drivers
 TARGET_DRIVERS := $(TARGET_BSP_BOARD)
 
-CFLAGS += -I$(TARGET_MFR)/boot
-
 # Common target init and checks
 $(call emb_include,target/check.mk)
 

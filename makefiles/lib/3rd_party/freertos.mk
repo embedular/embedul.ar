@@ -30,6 +30,8 @@ $(call emb_need_var,CPU_MODEL)
 # Library config options (LIB_FREERTOS_CONFIG_*)
 # ------------------------------------------------------------------------------
 # HEAP_SCHEME		: FreeRTOS heap allocation scheme number (see OS doc).
+#                     [This option is currentrly ignored, only static API
+#                     supported].
 # INCLUDE_SOURCES	: Base FreeRTOS sources, ommiting file extension. Should
 #					  match the enabled subsystems in FreeRTOS_Config.h
 # ------------------------------------------------------------------------------
@@ -78,6 +80,8 @@ $(call emb_info,Using sources '$(LIB_FREERTOS_SOURCES)')
 
 CFLAGS += -I$(LIB_FREERTOS)/include
 CFLAGS += -I$(LIB_FREERTOS)/portable/$(LIB_FREERTOS_PORT)
+# Location of the framework-centric FreeRTOSConfig.h
+CFLAGS += -I$(LIB_EMBEDULAR_ROOT)/source/core/freertos
 
 OBJS += $(LIB_FREERTOS)/portable/$(LIB_FREERTOS_PORT)/port.o
 #OBJS += $(LIB_FREERTOS)/portable/MemMang/heap_$(LIB_FREERTOS_CONFIG_HEAP_SCHEME).o

@@ -50,8 +50,6 @@ static const struct PACKET_IFACE PACKET_I2C_CONTROLLER_IFACE =
     .HardwareInit   = hardwareInit,
     .Command        = command,
     .Send           = send,
-    .RecvSize       = UNSUPPORTED,
-    .Recv           = UNSUPPORTED,
     .Bidir          = bidir
 };
 

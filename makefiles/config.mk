@@ -55,7 +55,7 @@ CFLAGS += -D'CC_AppNameStr=CC_Str($(APP_NAME))'
 # Access to embedul.ar framework base from headers.
 CFLAGS += -I$(LIB_EMBEDULAR_PATH)
 
-# Initialization of properties later defined by the target.
+# Default initialization of properties later defined by the target.
 TARGET_REQUIRE_BIN_IMAGE := no
 
 # Remove duplicates and prepend proper relative path.
@@ -92,5 +92,22 @@ CFLAGS += -D'EMBEDULAR_ARCH_CHIP_FAMILY=CC_Str($(CHIP_FAMILY))'
 CFLAGS += -D'EMBEDULAR_ARCH_CHIP_MODEL=CC_Str($(CHIP_MODEL))'
 CFLAGS += -D'EMBEDULAR_ARCH_CHIP_VARIANT=CC_Str($(CHIP_VARIANT))'
 CFLAGS += -D'EMBEDULAR_ARCH_CHIP=CC_Str($(CHIP))'
+
+$(call emb_test_conditional_cflags,TARGET_NAME)
+$(call emb_test_conditional_cflags,CPU_MODEL)
+$(call emb_test_conditional_cflags,CHIP)
+
+# CHIP-based directives
+#$(call emb_info,CHIP is '$(CHIP)')
+#ifneq ($(chip_$(CHIP)_CFLAGS),)
+#	$(call emb_info,Appending $(words $(chip_$(CHIP)_CFLAGS)) CHIP-based CFLAGS directives)
+#	CFLAGS += $(chip_$(CHIP)_CFLAGS)
+#endif
+
+#$(call emb_info,CPU_MODEL is '$(CPU_MODEL)')
+#ifneq ($(cpu_$(CPU_MODEL)_CFLAGS),)
+#	$(call emb_info,Appending $(words $(cpu_$(CPU_MODEL)_CFLAGS)) CPU_MODEL-based CFLAGS directives)
+#	CFLAGS += $(cpu_$(CPU_MODEL)_CFLAGS)
+#endif
 
 $(call emb_export_libs)

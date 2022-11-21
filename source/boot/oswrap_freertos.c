@@ -12,14 +12,21 @@ static volatile TIMER_TickHookFunc s_tickHook = NULL;
 // NOTE: This is the number of words the stack will hold, not the number of
 // bytes. For example, if each stack item is 32-bits, and this is set to 100,
 // then 400 bytes (100 * 32-bits) will be allocated.
-#define RunTaskStackSize            2048 + 32
+#ifndef OSWRAP_FREERTOS_RUN_TASK_STACK_WORDS
+    #define RUN_TASK_STACK_WORDS    2048
+#else
+    #define RUN_TASK_STACK_WORDS    OSWRAP_FREERTOS_RUN_TASK_STACK_WORDS
+#endif
+
+#ifndef OSWRAP_FREERTOS_MAIN_TASK_STACK_WORDS
+    #define MAIN_TASK_STACK_WORDS   2048
+#else 
+    #define MAIN_TASK_STACK_WORDS   OSWRAP_FREERTOS_MAIN_TASK_STACK_WORDS
+#endif
 
 
-#define MainTaskStackSize           2048 + 32
-
-
-#define RunTaskPriority             tskIDLE_PRIORITY + 1
-#define MainTaskPriority            tskIDLE_PRIORITY
+#define RUN_TASK_PRIORITY           tskIDLE_PRIORITY + 1
+#define MAIN_TASK_PRIORITY          tskIDLE_PRIORITY + 1
 
 
 struct OSWRAP_FREERTOS
@@ -38,12 +45,12 @@ static struct OSWRAP_FREERTOS s_oswrap_freertos;
 #ifdef BSS_SECTION_OSWRAP_FREERTOS_RUN_TASK_STACK
 BSS_SECTION_OSWRAP_FREERTOS_RUN_TASK_STACK
 #endif
-StackType_t     s_runTaskStack[RunTaskStackSize];
+StackType_t     s_runTaskStack[RUN_TASK_STACK_WORDS];
 
 #ifdef BSS_SECTION_OSWRAP_FREERTOS_MAIN_TASK_STACK
 BSS_SECTION_OSWRAP_FREERTOS_MAIN_TASK_STACK
 #endif
-StackType_t     s_mainTaskStack[MainTaskStackSize];
+StackType_t     s_mainTaskStack[MAIN_TASK_STACK_WORDS];
 
 #ifdef BSS_SECTION_OSWRAP_FREERTOS_RUN_MAIN_TCB
 BSS_SECTION_OSWRAP_FREERTOS_RUN_MAIN_TCB
@@ -52,6 +59,7 @@ StaticTask_t    s_runTaskControlBlock;
 StaticTask_t    s_mainTaskControlBlock;
 
 
+static void summary                 (struct OSWRAP *const O);
 static void createRunTaskAndStart   (struct OSWRAP *const O,
                                      const OSWRAP_TaskFunc RunTask,
                                      struct BOARD *const B);
@@ -75,6 +83,7 @@ static void delay                   (struct OSWRAP *const O,
 static const struct OSWRAP_IFACE OSWRAP_FREERTOS_IFACE =
 {
     .Description            = "freertos",
+    .Summary                = summary,
     .CreateRunTaskAndStart  = createRunTaskAndStart,
     .CreateMainTask         = createMainTask,
     .RunTaskSyncLock        = runTaskSyncLock,
@@ -105,6 +114,17 @@ void vAssertCalled (const char * const pcFileName,
 
     BOARD_AssertState (false);
 }
+
+
+#if (configCHECK_FOR_STACK_OVERFLOW != 0)
+void vApplicationStackOverflowHook (TaskHandle_t xTask, char *pcTaskName)
+{
+    (void) xTask;
+    (void) pcTaskName;
+
+    BOARD_AssertState (false);
+}
+#endif
 
 
 #if (configSUPPORT_DYNAMIC_ALLOCATION == 1)
@@ -219,6 +239,31 @@ void vApplicationGetTimerTaskMemory (StaticTask_t ** ppxTimerTaskTCBBuffer,
 #endif
 
 
+static void summaryTaskStack (struct OSWRAP *const O,
+                         const char *const TaskName,
+                         const uint32_t StackWords)
+{
+    LOG_AutoContext (O, "task: `0", TaskName);
+
+    LOG_Items (2, 
+                    "words",    StackWords,
+                    "octets",   StackWords * sizeof(StackType_t));
+}
+
+
+static void summary (struct OSWRAP *const O)
+{
+    {
+        LOG_AutoContext (O, "stack");
+
+        LOG_Items (1, "word size (in octets)", (uint32_t)sizeof(StackType_t));
+
+        summaryTaskStack (O, "run", RUN_TASK_STACK_WORDS);
+        summaryTaskStack (O, "main", MAIN_TASK_STACK_WORDS);
+    }
+}
+
+
 static void createRunTaskAndStart (struct OSWRAP *const O,
                                    const OSWRAP_TaskFunc RunTask,
                                    struct BOARD *const B)
@@ -227,8 +272,8 @@ static void createRunTaskAndStart (struct OSWRAP *const O,
 
     F->runTaskHandle = xTaskCreateStatic (RunTask,
                                           "RunTask",
-                                          RunTaskStackSize, B,
-                                          RunTaskPriority,
+                                          RUN_TASK_STACK_WORDS, B,
+                                          RUN_TASK_PRIORITY,
                                           s_runTaskStack,
                                           &s_runTaskControlBlock);
 
@@ -248,8 +293,8 @@ static void createMainTask (struct OSWRAP *const O,
 
     F->mainTaskHandle = xTaskCreateStatic (MainTask,
                                           "MainTask",
-                                          MainTaskStackSize, NULL,
-                                          RunTaskPriority,
+                                          MAIN_TASK_STACK_WORDS, NULL,
+                                          MAIN_TASK_PRIORITY,
                                           s_mainTaskStack,
                                           &s_mainTaskControlBlock);
 

@@ -118,11 +118,11 @@ const char * OSWRAP_Description (void)
 }
 
 
-void OSWRAP__greetings (struct STREAM *const S)
+void OSWRAP__summary (void)
 {
-    if (s_o->iface->Greetings)
+    if (s_o->iface->Summary)
     {
-        s_o->iface->Greetings (s_o, S);
+        s_o->iface->Summary (s_o);
     }
 }
 

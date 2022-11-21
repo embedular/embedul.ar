@@ -42,8 +42,6 @@ TARGET_DRIVERS := $(TARGET_MFR)/drivers
 TARGET_BSP := $(TARGET_FAMILY)/lpcopen
 TARGET_BSP_BOARD := $(TARGET_BSP)/boards/$(TARGET_BOARD)
 
-CFLAGS += -I$(TARGET_MFR)/boot
-
 # Common target init and checks
 $(call emb_include,target/check.mk)
 

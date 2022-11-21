@@ -149,6 +149,16 @@ void * initComponent (struct BOARD *const B,
         case BOARD_Stage_InitPreTicksHardware:
         {
             // initialize SDL
+            if (SDL_InitSubSystem (SDL_INIT_EVENTS) < 0)
+            {
+                // No log messages or assert output yet
+                fprintf (stderr, "SDL_InitSubSystem() failed: %s.\r\n",
+                         SDL_GetError());
+
+                BOARD_AssertInitialized (false);
+                break;
+            }
+
             if (SDL_InitSubSystem (SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
             {
                 // No log messages or assert output yet

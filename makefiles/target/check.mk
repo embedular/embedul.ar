@@ -40,6 +40,8 @@ $(call mk_need_dir,$(TARGET_DRIVERS),Drivers)
 $(call mk_need_dir,$(TARGET_BSP),BSP)
 $(call mk_need_dir,$(TARGET_BSP_BOARD),BSP board)
 
+# Target ARCH include paths (for example, to find freertos_target_config.h)
+CFLAGS += -I$(TARGET_ARCH)
 # Board BSP
 CFLAGS += -I$(TARGET_BSP)
 # Specific board code

@@ -36,22 +36,21 @@ struct OSWRAP;
 struct STREAM;
 struct BOARD;
 
-
-typedef void        (* OSWRAP_GreetingsFunc)(struct OSWRAP *const O,
-                                         struct STREAM *const S);
+// Logs meaningful (generally implementation-dependant) information as part
+// of the board initialization sequence.
+typedef void        (* OSWRAP_SummaryFunc)(struct OSWRAP *const O);
 
 // A.1) Create a task to excute RunTask().
 // A.2) Start the OS scheduler to start RunTask().
 //      RunTask() performs the framework initialization, calls the main
 //      application entry point -MainTask()- through OSWRAP_BootMain(),
-//      performs calls to BOARD_Sync() (if a multitasking OS is available)
-//      and ultimately shutdowns the framework and returns to main(). The latter
-//      will only happen if the OS can stop executing its scheduler after
-//      RunTask() shutdowns the framework.
+//      performs recurrent calls to BOARD_Sync() (if running on a multitasking
+//      OS) and ultimately shutdowns the framework and returns to main().
+//      The latter will only happen if the OS can stop executing its scheduler
+//      after RunTask() shutdowns the framework.
 // A.3) After MainTask() terminates, the return value should be available to
 //      RunTask() by calling BOARD_ReturnValue(). That value will be returned
 //      by main(), if closing the scheduler is an option.
-
 typedef void        (* OSWRAP_CreateRunTaskAndStartFunc)(
                                         struct OSWRAP *const O,
                                         const OSWRAP_TaskFunc RunTask,
@@ -116,7 +115,7 @@ typedef void        (* OSWRAP_DelayFunc)(struct OSWRAP *const O,
 struct OSWRAP_IFACE
 {
     const char                          *const Description;
-    const OSWRAP_GreetingsFunc          Greetings;
+    const OSWRAP_SummaryFunc            Summary;
     const OSWRAP_CreateRunTaskAndStartFunc
                                         CreateRunTaskAndStart;
     const OSWRAP_CreateMainTaskFunc     CreateMainTask;

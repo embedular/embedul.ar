@@ -25,7 +25,6 @@
 
 #include "embedul.ar/source/core/main.h"
 #include "embedul.ar/source/core/manager/storage/cache.h"
-#include "source/core/device/oswrap.h"
 
 
 #define GREET_FWK_LOGO_1    "`F36_________`L"
@@ -472,6 +471,17 @@ static void initManagers (struct BOARD *const B)
     COMM_Init       (&B->comm);
     STORAGE_Init    (&B->storage);
     SCREEN_Init     (&B->screen);
+}
+
+
+void OSWRAP__summary (void);
+
+
+static void showOswrapSummary ()
+{
+    LOG_AutoContext (NOBJ, "oswrap summary");
+
+    OSWRAP__summary ();
 }
 
 
@@ -1260,6 +1270,7 @@ static void boardInitSequence (struct BOARD *const B)
     // Log messages available.
     // -------------------------------------------------------------------------
     initManagers            (B);
+    showOswrapSummary       ();
     initIoProfiles          (B);
     initRandomDriver        (B);
     initIoLevel1Drivers     (B);
