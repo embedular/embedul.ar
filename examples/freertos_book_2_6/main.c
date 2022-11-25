@@ -82,45 +82,45 @@ static void vTaskFunction (void *argument)
 
     bool        blinking    = false;
     bool        outState    = false;
-	uint32_t    outTicks    = xTaskGetTickCount ();
-	uint32_t    inTicks     = xTaskGetTickCount ();
+    uint32_t    outTicks    = xTaskGetTickCount ();
+    uint32_t    inTicks     = xTaskGetTickCount ();
 
-	/* Print out the name of this task. */
+    /* Print out the name of this task. */
     LOG (NOBJ, STR_TaskRunningFmt, pcTaskGetName(NULL));
 
-	/* As per most tasks, this task is implemented in an infinite loop. */
-	for( ;; )
-	{
-		/* Check Input State */
+    /* As per most tasks, this task is implemented in an infinite loop. */
+    for( ;; )
+    {
+        /* Check Input State */
         const IO_Value InputEnable =
             INPUT_GetBuffered (TaskIo->InputProfile, IO_Type_Bit,
                                TaskIo->InputCode);
 
         if (InputEnable)
         {
-			/* Delay for a period using Tick Count */
-			if ((xTaskGetTickCount() - inTicks) >= TASK_MaxInputTicks)
-			{
+            /* Delay for a period using Tick Count */
+            if ((xTaskGetTickCount() - inTicks) >= TASK_MaxInputTicks)
+            {
                 /* Check, Update and Print Led Flag */
                 blinking = blinking? false : true;
 
                 LOG (NOBJ, STR_TaskBlinkStatFmt, pcTaskGetName(NULL),
                      blinking? "On" : "Off"); 
 
-				/* Update and Button Tick Counter */
-        		inTicks = xTaskGetTickCount();
+                /* Update and Button Tick Counter */
+                inTicks = xTaskGetTickCount();
 
                 taskYIELD ();
-			}
-		}
+            }
+        }
 
-		/* Check Led Flag */
-		if (blinking)
-		{
-			/* Delay for a period using Tick Count. */
-			if ((xTaskGetTickCount() - outTicks) >= TASK_MaxOutputTicks)
-			{
-				/* Check, Update and Print Led State */
+        /* Check Led Flag */
+        if (blinking)
+        {
+            /* Delay for a period using Tick Count. */
+            if ((xTaskGetTickCount() - outTicks) >= TASK_MaxOutputTicks)
+            {
+                /* Check, Update and Print Led State */
                 outState = outState? false : true;
 
                 LOG (NOBJ, STR_TaskOutputStatFmt, pcTaskGetName(NULL),
@@ -133,11 +133,11 @@ static void vTaskFunction (void *argument)
                 OUTPUT_SetDefer (TaskIo->OutputProfile, IO_Type_Bit,
                                  TaskIo->OutputCode, outState);
 
-				/* Update and Led Tick Counter */
-				outTicks = xTaskGetTickCount();
-			}
-		}
-	}
+                /* Update and Led Tick Counter */
+                outTicks = xTaskGetTickCount();
+            }
+        }
+    }
 }
 
 
