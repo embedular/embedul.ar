@@ -32,7 +32,6 @@
 #include "embedul.ar/source/core/manager/screen/tile.h"
 #include "embedul.ar/source/core/manager/screen/tilemap.h"
 #include "embedul.ar/assets/splash_themes/nyancat/source/TILEMAPS_nyancat.h"
-#include "source/core/misc/rgb332.h"
 #include <stddef.h>
 
 

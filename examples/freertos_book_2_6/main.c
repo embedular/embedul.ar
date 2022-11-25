@@ -1,8 +1,4 @@
 #include "embedul.ar/source/core/main.h"
-#include "source/core/device/oswrap.h"
-#include "source/core/manager/input/profile.h"
-#include "source/core/manager/input/profile/main.h"
-#include "source/core/manager/log.h"
 #include "FreeRTOS.h"
 #include "task.h"
 
