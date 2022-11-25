@@ -12,7 +12,7 @@
 #define STR_TaskOutputStatFmt   "`0 output '`1:`2' turn `3"
 #define STR_TaskBlinkStatFmt    "`0 blinking turn `1"
 
-#define TASK_MaxInputTicks	    500
+#define TASK_MaxInputTicks      500
 #define	TASK_MaxOutputTicks     500
 
 // Dimensions of the buffer that the task being created will use as its stack.
