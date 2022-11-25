@@ -1,9 +1,9 @@
 #include "embedul.ar/source/core/main.h"
-#include "FreeRTOS.h"
 #include "source/core/device/oswrap.h"
 #include "source/core/manager/input/profile.h"
 #include "source/core/manager/input/profile/main.h"
 #include "source/core/manager/log.h"
+#include "FreeRTOS.h"
 #include "task.h"
 
 
@@ -118,7 +118,7 @@ static void vTaskFunction (void *argument)
 		if (blinking)
 		{
 			/* Delay for a period using Tick Count. */
-			if( (xTaskGetTickCount() - outTicks) >= TASK_MaxOutputTicks )
+			if ((xTaskGetTickCount() - outTicks) >= TASK_MaxOutputTicks)
 			{
 				/* Check, Update and Print Led State */
                 outState = outState? false : true;
@@ -149,7 +149,7 @@ void EMBEDULAR_Main (void *param)
 
 
     // Create three tasks with the same function but triggering corresponding
-    // outputs from given inputs, as defined in s_TaskIO[0], [1] and [2].
+    // outputs from given inputs, as defined in s_TaskIO[0], [1], and [2].
     for (uint32_t task = 0; task < TASK_Count; ++task)
     {
         // Create the task without using any dynamic memory allocation.
