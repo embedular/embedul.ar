@@ -84,22 +84,22 @@ QueueHandle_t xQueue;
 
 typedef enum
 {
-	eSender1,
-	eSender2
+    eSender1,
+    eSender2
 } DataSource_t;
 
 /* Define the structure type that will be passed on the queue. */
 typedef struct
 {
-	uint8_t ucValue;
-	DataSource_t eDataSource;
+    uint8_t ucValue;
+    DataSource_t eDataSource;
 } Data_t;
 
 /* Declare two variables of type Data_t that will be passed on the queue. */
 static const Data_t xStructsToSend[ 2 ] =
 {
-	{ 100, eSender1 }, /* Used by Sender1. */
-	{ 200, eSender2 }  /* Used by Sender2. */
+    { 100, eSender1 }, /* Used by Sender1. */
+    { 200, eSender2 }  /* Used by Sender2. */
 };
 
 /* The variable used to hold the queue's data structure. */
@@ -118,8 +118,8 @@ void EMBEDULAR_Main( void *param )
     /* The queue is created to hold a maximum of 3 structures of type Data_t. */
     xQueue = xQueueCreateStatic( 3, sizeof( Data_t ), ucQueueStorageArea, &xStaticQueue );
 
-	if( xQueue == NULL )
-	{
+    if( xQueue == NULL )
+    {
         /* The queue could not be created. */
         BOARD_AssertState (false);
     }
@@ -142,7 +142,7 @@ void EMBEDULAR_Main( void *param )
        called vTaskStartScheduler() for us. As shown in this example, the
        application task is free to create any number of additional tasks. */
 
-	for( ;; )
+    for( ;; )
     {
         /* On the embedul.ar framework, this is the main task loop. It will be
            used to check for user input through the execution of this
@@ -166,31 +166,31 @@ static void vSenderTask( void *pvParameters )
 BaseType_t xStatus;
 const TickType_t xTicksToWait = pdMS_TO_TICKS( 100UL );
 
-	/* As per most tasks, this task is implemented within an infinite loop. */
-	for( ;; )
-	{
-		/* The first parameter is the queue to which data is being sent.  The
-		queue was created before the scheduler was started, so before this task
-		started to execute.
+    /* As per most tasks, this task is implemented within an infinite loop. */
+    for( ;; )
+    {
+        /* The first parameter is the queue to which data is being sent.  The
+        queue was created before the scheduler was started, so before this task
+        started to execute.
 
-		The second parameter is the address of the structure being sent.  The
-		address is passed in as the task parameter.
+        The second parameter is the address of the structure being sent.  The
+        address is passed in as the task parameter.
 
-		The third parameter is the Block time - the time the task should be kept
-		in the Blocked state to wait for space to become available on the queue
-		should the queue already be full.  A block time is specified as the queue
-		will become full.  Items will only be removed from the queue when both
-		sending tasks are in the Blocked state.. */
-		xStatus = xQueueSendToBack( xQueue, pvParameters, xTicksToWait );
+        The third parameter is the Block time - the time the task should be kept
+        in the Blocked state to wait for space to become available on the queue
+        should the queue already be full.  A block time is specified as the queue
+        will become full.  Items will only be removed from the queue when both
+        sending tasks are in the Blocked state.. */
+        xStatus = xQueueSendToBack( xQueue, pvParameters, xTicksToWait );
 
-		if( xStatus != pdPASS )
-		{
-			/* We could not write to the queue because it was full - this must
-			be an error as the receiving task should make space in the queue
-			as soon as both sending tasks are in the Blocked state. */
-			vPrintString( "Could not send to the queue." );
-		}
-	}
+        if( xStatus != pdPASS )
+        {
+            /* We could not write to the queue because it was full - this must
+            be an error as the receiving task should make space in the queue
+            as soon as both sending tasks are in the Blocked state. */
+            vPrintString( "Could not send to the queue." );
+        }
+    }
 }
 /*-----------------------------------------------------------*/
 
@@ -201,51 +201,51 @@ static void vReceiverTask( void *pvParameters )
 Data_t xReceivedStructure;
 BaseType_t xStatus;
 
-	/* This task is also defined within an infinite loop. */
-	for( ;; )
-	{
-		/* As this task only runs when the sending tasks are in the Blocked state,
-		and the sending tasks only block when the queue is full, this task should
-		always find the queue to be full.  3 is the queue length. */
-		if( uxQueueMessagesWaiting( xQueue ) != 3 )
-		{
-			vPrintString( "Queue should have been full!" );
-		}
+    /* This task is also defined within an infinite loop. */
+    for( ;; )
+    {
+        /* As this task only runs when the sending tasks are in the Blocked state,
+        and the sending tasks only block when the queue is full, this task should
+        always find the queue to be full.  3 is the queue length. */
+        if( uxQueueMessagesWaiting( xQueue ) != 3 )
+        {
+            vPrintString( "Queue should have been full!" );
+        }
 
-		/* The first parameter is the queue from which data is to be received.  The
-		queue is created before the scheduler is started, and therefore before this
-		task runs for the first time.
+        /* The first parameter is the queue from which data is to be received.  The
+        queue is created before the scheduler is started, and therefore before this
+        task runs for the first time.
 
-		The second parameter is the buffer into which the received data will be
-		placed.  In this case the buffer is simply the address of a variable that
-		has the required size to hold the received structure.
+        The second parameter is the buffer into which the received data will be
+        placed.  In this case the buffer is simply the address of a variable that
+        has the required size to hold the received structure.
 
-		The last parameter is the block time - the maximum amount of time that the
-		task should remain in the Blocked state to wait for data to be available
-		should the queue already be empty.  A block time is not necessary as this
-		task will only run when the queue is full so data will always be available. */
-		xStatus = xQueueReceive( xQueue, &xReceivedStructure, 0 );
+        The last parameter is the block time - the maximum amount of time that the
+        task should remain in the Blocked state to wait for data to be available
+        should the queue already be empty.  A block time is not necessary as this
+        task will only run when the queue is full so data will always be available. */
+        xStatus = xQueueReceive( xQueue, &xReceivedStructure, 0 );
 
-		if( xStatus == pdPASS )
-		{
-			/* Data was successfully received from the queue, print out the received
-			value and the source of the value. */
-			if( xReceivedStructure.eDataSource == eSender1 )
-			{
-				vPrintStringAndNumber( "From Sender 1 = ", xReceivedStructure.ucValue );
-			}
-			else
-			{
-				vPrintStringAndNumber( "From Sender 2 = ", xReceivedStructure.ucValue );
-			}
-		}
-		else
-		{
-			/* We did not receive anything from the queue.  This must be an error
-			as this task should only run when the queue is full. */
-			vPrintString( "Could not receive from the queue." );
-		}
-	}
+        if( xStatus == pdPASS )
+        {
+            /* Data was successfully received from the queue, print out the received
+            value and the source of the value. */
+            if( xReceivedStructure.eDataSource == eSender1 )
+            {
+                vPrintStringAndNumber( "From Sender 1 = ", xReceivedStructure.ucValue );
+            }
+            else
+            {
+                vPrintStringAndNumber( "From Sender 2 = ", xReceivedStructure.ucValue );
+            }
+        }
+        else
+        {
+            /* We did not receive anything from the queue.  This must be an error
+            as this task should only run when the queue is full. */
+            vPrintString( "Could not receive from the queue." );
+        }
+    }
 }
 
 

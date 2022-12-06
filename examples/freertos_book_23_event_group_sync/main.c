@@ -113,20 +113,20 @@ void EMBEDULAR_Main( void *param )
 {
 ( void ) param;
 
-	/* The tasks created in this example block for a random time.  The block
-	time is generated using rand() - seed the random number generator. */
-	prvSRand( ( uint32_t ) time( NULL ) );
+    /* The tasks created in this example block for a random time.  The block
+    time is generated using rand() - seed the random number generator. */
+    prvSRand( ( uint32_t ) time( NULL ) );
 
-	/* Before an event group can be used it must first be created. */
-	xEventGroup = xEventGroupCreateStatic( &xStaticEventGroup );
+    /* Before an event group can be used it must first be created. */
+    xEventGroup = xEventGroupCreateStatic( &xStaticEventGroup );
 
-	/* Create three instances of the task.  Each task is given a different name,
-	which is later printed out to give a visual indication of which task is
-	executing.  The event bit to use when the task reaches its synchronization
-	point is passed into the task using the task parameter. */
-	xTaskCreateStatic( vSyncingTask, "Task 1", 1000, ( void * ) mainFIRST_TASK_BIT, 1, xTask1Stack, &xTask1ControlBlock );
-	xTaskCreateStatic( vSyncingTask, "Task 2", 1000, ( void * ) mainSECOND_TASK_BIT, 1, xTask2Stack, &xTask2ControlBlock );
-	xTaskCreateStatic( vSyncingTask, "Task 3", 1000, ( void * ) mainTHIRD_TASK_BIT, 1, xTask3Stack, &xTask3ControlBlock );
+    /* Create three instances of the task.  Each task is given a different name,
+    which is later printed out to give a visual indication of which task is
+    executing.  The event bit to use when the task reaches its synchronization
+    point is passed into the task using the task parameter. */
+    xTaskCreateStatic( vSyncingTask, "Task 1", 1000, ( void * ) mainFIRST_TASK_BIT, 1, xTask1Stack, &xTask1ControlBlock );
+    xTaskCreateStatic( vSyncingTask, "Task 2", 1000, ( void * ) mainSECOND_TASK_BIT, 1, xTask2Stack, &xTask2ControlBlock );
+    xTaskCreateStatic( vSyncingTask, "Task 3", 1000, ( void * ) mainTHIRD_TASK_BIT, 1, xTask3Stack, &xTask3ControlBlock );
 
     /* On the embedul.ar framework, the above application entry point
        -EMBEDULAR_Main()- is executed in a task created at the end of the
@@ -134,7 +134,7 @@ void EMBEDULAR_Main( void *param )
        called vTaskStartScheduler() for us. As shown in this example, the
        application task is free to create any number of additional tasks. */
 
-	for( ;; )
+    for( ;; )
     {
         /* On the embedul.ar framework, this is the main task loop. It will be
            used to check for user input through the execution of this
@@ -161,49 +161,49 @@ const TickType_t xMinDelay = pdMS_TO_TICKS( 200UL );
 TickType_t xDelayTime;
 EventBits_t uxThisTasksSyncBit;
 
-	/* Three instances of this task are created - each task uses a different
-	event bit in the synchronization.  The event bit to use by this task
-	instance is passed into the task using the task's parameter.  Store it in
-	the uxThisTasksSyncBit variable. */
-	uxThisTasksSyncBit = ( EventBits_t ) pvParameters;
+    /* Three instances of this task are created - each task uses a different
+    event bit in the synchronization.  The event bit to use by this task
+    instance is passed into the task using the task's parameter.  Store it in
+    the uxThisTasksSyncBit variable. */
+    uxThisTasksSyncBit = ( EventBits_t ) pvParameters;
 
-	for( ;; )
-	{
-		/* Simulate this task taking some time to perform an action by delaying
-		for a pseudo random time.  This prevents all three instances of this
-		task from reaching the synchronization point at the same time, and
-		allows the example's behavior to be observed more easily. */
-		xDelayTime = ( prvRand() % xMaxDelay ) + xMinDelay;
-		vTaskDelay( xDelayTime );
+    for( ;; )
+    {
+        /* Simulate this task taking some time to perform an action by delaying
+        for a pseudo random time.  This prevents all three instances of this
+        task from reaching the synchronization point at the same time, and
+        allows the example's behavior to be observed more easily. */
+        xDelayTime = ( prvRand() % xMaxDelay ) + xMinDelay;
+        vTaskDelay( xDelayTime );
 
-		/* Print out a message to show this task has reached its synchronization
-		point.  pcTaskGetTaskName() is an API function that returns the name
-		assigned to the task when the task was created. */
-		vPrintTwoStrings( pcTaskGetTaskName( NULL ), "reached sync point" );
+        /* Print out a message to show this task has reached its synchronization
+        point.  pcTaskGetTaskName() is an API function that returns the name
+        assigned to the task when the task was created. */
+        vPrintTwoStrings( pcTaskGetTaskName( NULL ), "reached sync point" );
 
-		/* Wait for all the tasks to have reached their respective
-		synchronization points. */
-		xEventGroupSync( /* The event group used to synchronize. */
-						 xEventGroup,
+        /* Wait for all the tasks to have reached their respective
+        synchronization points. */
+        xEventGroupSync( /* The event group used to synchronize. */
+                         xEventGroup,
 
-						 /* The bit set by this task to indicate it has reached
-						 the synchronization point. */
-						 uxThisTasksSyncBit,
+                         /* The bit set by this task to indicate it has reached
+                         the synchronization point. */
+                         uxThisTasksSyncBit,
 
-						 /* The bits to wait for, one bit for each task taking
-						 part in the synchronization. */
-						 uxAllSyncBits,
+                         /* The bits to wait for, one bit for each task taking
+                         part in the synchronization. */
+                         uxAllSyncBits,
 
-						 /* Wait indefinitely for all three tasks to reach the
-						 synchronization point. */
-						 portMAX_DELAY );
+                         /* Wait indefinitely for all three tasks to reach the
+                         synchronization point. */
+                         portMAX_DELAY );
 
-		/* Print out a message to show this task has passed its synchronization
-		point.  As an indefinite delay was used the following line will only be
-		reached after all the tasks reached their respective synchronization
-		points. */
-		vPrintTwoStrings( pcTaskGetTaskName( NULL ), "exited sync point" );
-	}
+        /* Print out a message to show this task has passed its synchronization
+        point.  As an indefinite delay was used the following line will only be
+        reached after all the tasks reached their respective synchronization
+        points. */
+        vPrintTwoStrings( pcTaskGetTaskName( NULL ), "exited sync point" );
+    }
 }
 /*-----------------------------------------------------------*/
 
@@ -212,20 +212,20 @@ static uint32_t prvRand( void )
 const uint32_t ulMultiplier = 0x015a4e35UL, ulIncrement = 1UL;
 uint32_t ulReturn;
 
-	/* Utility function to generate a pseudo random number as the MSVC rand()
-	function has unexpected consequences. */
-	taskENTER_CRITICAL();
-		ulNextRand = ( ulMultiplier * ulNextRand ) + ulIncrement;
-		ulReturn = ( ulNextRand >> 16UL ) & 0x7fffUL;
-	taskEXIT_CRITICAL();
-	return ulReturn;
+    /* Utility function to generate a pseudo random number as the MSVC rand()
+    function has unexpected consequences. */
+    taskENTER_CRITICAL();
+        ulNextRand = ( ulMultiplier * ulNextRand ) + ulIncrement;
+        ulReturn = ( ulNextRand >> 16UL ) & 0x7fffUL;
+    taskEXIT_CRITICAL();
+    return ulReturn;
 }
 /*-----------------------------------------------------------*/
 
 static void prvSRand( uint32_t ulSeed )
 {
-	/* Utility function to seed the pseudo random number generator. */
-	ulNextRand = ulSeed;
+    /* Utility function to seed the pseudo random number generator. */
+    ulNextRand = ulSeed;
 }
 /*-----------------------------------------------------------*/
 

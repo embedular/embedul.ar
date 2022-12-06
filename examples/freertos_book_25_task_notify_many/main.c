@@ -104,24 +104,24 @@ void EMBEDULAR_Main( void *param )
 {
 ( void ) param;
 
-	/* Create the 'handler' task, which is the task to which interrupt
-	processing is deferred, and so is the task that will be synchronized
-	with the interrupt.  The handler task is created with a high priority to
-	ensure it runs immediately after the interrupt exits.  In this case a
-	priority of 3 is chosen.  The handle of the task is saved for use by the
-	ISR. */
-	xHandlerTask = xTaskCreateStatic( vHandlerTask, "Handler", 1000, NULL, 3, xHandlerStack, &xHandlerControlBlock );
+    /* Create the 'handler' task, which is the task to which interrupt
+    processing is deferred, and so is the task that will be synchronized
+    with the interrupt.  The handler task is created with a high priority to
+    ensure it runs immediately after the interrupt exits.  In this case a
+    priority of 3 is chosen.  The handle of the task is saved for use by the
+    ISR. */
+    xHandlerTask = xTaskCreateStatic( vHandlerTask, "Handler", 1000, NULL, 3, xHandlerStack, &xHandlerControlBlock );
 
-	/* Create the task that will periodically generate a software interrupt.
-	This is created with a priority below the handler task to ensure it will
-	get preempted each time the handler task exits the Blocked state. */
-	xTaskCreateStatic( vPeriodicTask, "Periodic", 1000, NULL, 1, xPeriodicStack, &xPeriodicControlBlock );
+    /* Create the task that will periodically generate a software interrupt.
+    This is created with a priority below the handler task to ensure it will
+    get preempted each time the handler task exits the Blocked state. */
+    xTaskCreateStatic( vPeriodicTask, "Periodic", 1000, NULL, 1, xPeriodicStack, &xPeriodicControlBlock );
 
-	/* Install the handler for the software interrupt.  The syntax necessary
-	to do this is dependent on the FreeRTOS port being used.  The syntax
-	shown here can only be used with the FreeRTOS Windows port, where such
-	interrupts are only simulated. */
-	vPortSetInterruptHandler( mainINTERRUPT_NUMBER, ulExampleInterruptHandler );
+    /* Install the handler for the software interrupt.  The syntax necessary
+    to do this is dependent on the FreeRTOS port being used.  The syntax
+    shown here can only be used with the FreeRTOS Windows port, where such
+    interrupts are only simulated. */
+    vPortSetInterruptHandler( mainINTERRUPT_NUMBER, ulExampleInterruptHandler );
 
     /* On the embedul.ar framework, the above application entry point
        -EMBEDULAR_Main()- is executed in a task created at the end of the
@@ -129,7 +129,7 @@ void EMBEDULAR_Main( void *param )
        called vTaskStartScheduler() for us. As shown in this example, the
        application task is free to create any number of additional tasks. */
 
-	for( ;; )
+    for( ;; )
     {
         /* On the embedul.ar framework, this is the main task loop. It will be
            used to check for user input through the execution of this
@@ -154,26 +154,26 @@ static void vHandlerTask( void *pvParameters )
 time between events. */
 const TickType_t xMaxExpectedBlockTime = xInterruptFrequency + pdMS_TO_TICKS( 10 );
 
-	/* As per most tasks, this task is implemented within an infinite loop. */
-	for( ;; )
-	{
-		/* Wait to receive a notification sent directly to this task from the
-		interrupt handler.  The xClearCountOnExit parameter is now pdFALSE, so
-		the task's notification will be decremented when ulTaskNotifyTake()
-		returns having received a notification. */
-		if( ulTaskNotifyTake( pdFALSE, xMaxExpectedBlockTime ) != 0 )
-		{
-			/* To get here the event must have occurred.  Process the event (in
-			this case just print out a message). */
-			vPrintString( "Handler task - Processing event" );
-		}
-		else
-		{
-			/* If this part of the function is reached then an interrupt did not
-			arrive within the expected time, and (in a real application) it may
-			be necessary to perform some error recovery operations. */
-		}
-	}
+    /* As per most tasks, this task is implemented within an infinite loop. */
+    for( ;; )
+    {
+        /* Wait to receive a notification sent directly to this task from the
+        interrupt handler.  The xClearCountOnExit parameter is now pdFALSE, so
+        the task's notification will be decremented when ulTaskNotifyTake()
+        returns having received a notification. */
+        if( ulTaskNotifyTake( pdFALSE, xMaxExpectedBlockTime ) != 0 )
+        {
+            /* To get here the event must have occurred.  Process the event (in
+            this case just print out a message). */
+            vPrintString( "Handler task - Processing event" );
+        }
+        else
+        {
+            /* If this part of the function is reached then an interrupt did not
+            arrive within the expected time, and (in a real application) it may
+            be necessary to perform some error recovery operations. */
+        }
+    }
 }
 /*-----------------------------------------------------------*/
 
@@ -181,27 +181,27 @@ static void ulExampleInterruptHandler( void )
 {
 BaseType_t xHigherPriorityTaskWoken;
 
-	/* The xHigherPriorityTaskWoken parameter must be initialized to pdFALSE as
-	it will get set to pdTRUE inside the interrupt safe API function if a
-	context switch is required. */
-	xHigherPriorityTaskWoken = pdFALSE;
+    /* The xHigherPriorityTaskWoken parameter must be initialized to pdFALSE as
+    it will get set to pdTRUE inside the interrupt safe API function if a
+    context switch is required. */
+    xHigherPriorityTaskWoken = pdFALSE;
 
-	/* Send a notification to the handler task multiple times.  The first will
-	unblock the task, the following 'gives' are to demonstrate that the
-	receiving task's notification value is being used to latch events - allowing
-	the task to process the events in turn. */
-	vTaskNotifyGiveFromISR( xHandlerTask, &xHigherPriorityTaskWoken );
-	vTaskNotifyGiveFromISR( xHandlerTask, &xHigherPriorityTaskWoken );
-	vTaskNotifyGiveFromISR( xHandlerTask, &xHigherPriorityTaskWoken );
+    /* Send a notification to the handler task multiple times.  The first will
+    unblock the task, the following 'gives' are to demonstrate that the
+    receiving task's notification value is being used to latch events - allowing
+    the task to process the events in turn. */
+    vTaskNotifyGiveFromISR( xHandlerTask, &xHigherPriorityTaskWoken );
+    vTaskNotifyGiveFromISR( xHandlerTask, &xHigherPriorityTaskWoken );
+    vTaskNotifyGiveFromISR( xHandlerTask, &xHigherPriorityTaskWoken );
 
-	/* Pass the xHigherPriorityTaskWoken value into portYIELD_FROM_ISR().  If
-	xHigherPriorityTaskWoken was set to pdTRUE inside vTaskNotifyGiveFromISR()
-	then calling portYIELD_FROM_ISR() will request a context switch.  If
-	xHigherPriorityTaskWoken is still pdFALSE then calling
-	portYIELD_FROM_ISR() will have no effect.  The implementation of
-	portYIELD_FROM_ISR() used by the Windows port includes a return statement,
-	which is why this function does not explicitly return a value. */
-	portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+    /* Pass the xHigherPriorityTaskWoken value into portYIELD_FROM_ISR().  If
+    xHigherPriorityTaskWoken was set to pdTRUE inside vTaskNotifyGiveFromISR()
+    then calling portYIELD_FROM_ISR() will request a context switch.  If
+    xHigherPriorityTaskWoken is still pdFALSE then calling
+    portYIELD_FROM_ISR() will have no effect.  The implementation of
+    portYIELD_FROM_ISR() used by the Windows port includes a return statement,
+    which is why this function does not explicitly return a value. */
+    portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
 }
 /*-----------------------------------------------------------*/
 
@@ -209,27 +209,27 @@ static void vPeriodicTask( void *pvParameters )
 {
 ( void ) pvParameters;
 
-	/* As per most tasks, this task is implemented within an infinite loop. */
-	for( ;; )
-	{
-		/* This task is just used to 'simulate' an interrupt.  This is done by
-		periodically generating a simulated software interrupt.  Block until it
-		is time to generate the software interrupt again. */
-		vTaskDelay( xInterruptFrequency );
+    /* As per most tasks, this task is implemented within an infinite loop. */
+    for( ;; )
+    {
+        /* This task is just used to 'simulate' an interrupt.  This is done by
+        periodically generating a simulated software interrupt.  Block until it
+        is time to generate the software interrupt again. */
+        vTaskDelay( xInterruptFrequency );
 
-		/* Generate the interrupt, printing a message both before and after
-		the interrupt has been generated so the sequence of execution is evident
-		from the output.
+        /* Generate the interrupt, printing a message both before and after
+        the interrupt has been generated so the sequence of execution is evident
+        from the output.
 
-		The syntax used to generate a software interrupt is dependent on the
-		FreeRTOS port being used.  The syntax used below can only be used with
-		the FreeRTOS Windows port, in which such interrupts are only
-		simulated. */
-		vPrintString( "Periodic task - About to generate an interrupt" );
-		vPortGenerateSimulatedInterrupt( mainINTERRUPT_NUMBER );
-		vPrintString( "Periodic task - Interrupt generated" );
+        The syntax used to generate a software interrupt is dependent on the
+        FreeRTOS port being used.  The syntax used below can only be used with
+        the FreeRTOS Windows port, in which such interrupts are only
+        simulated. */
+        vPrintString( "Periodic task - About to generate an interrupt" );
+        vPortGenerateSimulatedInterrupt( mainINTERRUPT_NUMBER );
+        vPrintString( "Periodic task - Interrupt generated" );
         vPrintString( "" );
-	}
+    }
 }
 
 

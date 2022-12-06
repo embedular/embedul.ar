@@ -92,9 +92,9 @@ static StaticTask_t xGatekeeperControlBlock;
 gatekeeper. */
 static const char *pcStringsToPrint[] =
 {
-	"Task 1 ****************************************************",
-	"Task 2 ----------------------------------------------------",
-	"Message printed from the tick hook interrupt ##############"
+    "Task 1 ****************************************************",
+    "Task 2 ----------------------------------------------------",
+    "Message printed from the tick hook interrupt ##############"
 };
 
 /*-----------------------------------------------------------*/
@@ -118,12 +118,12 @@ void EMBEDULAR_Main( void *param )
 ( void ) param;
 
     /* Before a queue is used it must be explicitly created.  The queue is created
-	to hold a maximum of 5 character pointers. */
+    to hold a maximum of 5 character pointers. */
     xPrintQueue = xQueueCreateStatic( 5, sizeof( char * ), ucPrintQueueStorageArea, &xPrintStaticQueue );
 
-	/* Check the queue was created successfully. */
-	if( xPrintQueue == NULL )
-	{
+    /* Check the queue was created successfully. */
+    if( xPrintQueue == NULL )
+    {
         BOARD_AssertState (false);
     }
 
@@ -144,7 +144,7 @@ void EMBEDULAR_Main( void *param )
        called vTaskStartScheduler() for us. As shown in this example, the
        application task is free to create any number of additional tasks. */
 
-	for( ;; )
+    for( ;; )
     {
         /* On the embedul.ar framework, this is the main task loop. It will be
            used to check for user input through the execution of this
@@ -168,23 +168,23 @@ static void prvStdioGatekeeperTask( void *pvParameters )
 ( void ) pvParameters;
 char *pcMessageToPrint;
 
-	/* This is the only task that is allowed to write to the terminal output.
-	Any other task wanting to write to the output does not access the terminal
-	directly, but instead sends the output to this task.  As only one task
-	writes to standard out there are no mutual exclusion or serialization issues
-	to consider within this task itself. */
-	for( ;; )
-	{
-		/* Wait for a message to arrive. */
-		xQueueReceive( xPrintQueue, &pcMessageToPrint, portMAX_DELAY );
+    /* This is the only task that is allowed to write to the terminal output.
+    Any other task wanting to write to the output does not access the terminal
+    directly, but instead sends the output to this task.  As only one task
+    writes to standard out there are no mutual exclusion or serialization issues
+    to consider within this task itself. */
+    for( ;; )
+    {
+        /* Wait for a message to arrive. */
+        xQueueReceive( xPrintQueue, &pcMessageToPrint, portMAX_DELAY );
 
-		/* There is no need to check the return	value as the task will block
-		indefinitely and only run again when a message has arrived.  When the
-		next line is executed there will be a message to be output. */
+        /* There is no need to check the return	value as the task will block
+        indefinitely and only run again when a message has arrived.  When the
+        next line is executed there will be a message to be output. */
         LOG( NOBJ, pcMessageToPrint );
 
-		/* Now simply go back to wait for the next message. */
-	}
+        /* Now simply go back to wait for the next message. */
+    }
 }
 /*-----------------------------------------------------------*/
 
@@ -192,19 +192,19 @@ void vApplicationTickHook( void )
 {
 static int iCount = 0;
 
-	/* Print out a message every 200 ticks.  The message is not written out
-	directly, but sent to the gatekeeper task. */
-	iCount++;
-	if( iCount >= 200 )
-	{
-		/* In this case the last parameter (xHigherPriorityTaskWoken) is not
-		actually used and is set to NULL. */
-		xQueueSendToFrontFromISR( xPrintQueue, &( pcStringsToPrint[ 2 ] ), NULL );
+    /* Print out a message every 200 ticks.  The message is not written out
+    directly, but sent to the gatekeeper task. */
+    iCount++;
+    if( iCount >= 200 )
+    {
+        /* In this case the last parameter (xHigherPriorityTaskWoken) is not
+        actually used and is set to NULL. */
+        xQueueSendToFrontFromISR( xPrintQueue, &( pcStringsToPrint[ 2 ] ), NULL );
 
-		/* Reset the count ready to print out the string again in 200 ticks
-		time. */
-		iCount = 0;
-	}
+        /* Reset the count ready to print out the string again in 200 ticks
+        time. */
+        iCount = 0;
+    }
 }
 /*-----------------------------------------------------------*/
 
@@ -212,26 +212,26 @@ static void prvPrintTask( void *pvParameters )
 {
 int iIndexToString;
 
-	/* Two instances of this task are created so the index to the string the task
-	will send to the gatekeeper task is passed in the task parameter.  Cast this
-	to the required type. */
-	iIndexToString = ( int ) ( uintptr_t) pvParameters;
+    /* Two instances of this task are created so the index to the string the task
+    will send to the gatekeeper task is passed in the task parameter.  Cast this
+    to the required type. */
+    iIndexToString = ( int ) ( uintptr_t) pvParameters;
 
-	for( ;; )
-	{
-		/* Print out the string, not directly but by passing the string to the
-		gatekeeper task on the queue.  The queue is created before the scheduler is
-		started so will already exist by the time this task executes.  A block time
-		is not specified as there should always be space in the queue. */
-		xQueueSendToBack( xPrintQueue, &( pcStringsToPrint[ iIndexToString ] ), 0 );
+    for( ;; )
+    {
+        /* Print out the string, not directly but by passing the string to the
+        gatekeeper task on the queue.  The queue is created before the scheduler is
+        started so will already exist by the time this task executes.  A block time
+        is not specified as there should always be space in the queue. */
+        xQueueSendToBack( xPrintQueue, &( pcStringsToPrint[ iIndexToString ] ), 0 );
 
-		/* Wait a pseudo random time.  Note that rand() is not necessarily
-		re-entrant, but in this case it does not really matter as the code does
-		not care what value is returned.  In a more secure application a version
-		of rand() that is known to be re-entrant should be used - or calls to
-		rand() should be protected using a critical section. */
-		vTaskDelay( ( RANDOM_GetUint32() % xMaxBlockTimeTicks ) );
-	}
+        /* Wait a pseudo random time.  Note that rand() is not necessarily
+        re-entrant, but in this case it does not really matter as the code does
+        not care what value is returned.  In a more secure application a version
+        of rand() that is known to be re-entrant should be used - or calls to
+        rand() should be protected using a critical section. */
+        vTaskDelay( ( RANDOM_GetUint32() % xMaxBlockTimeTicks ) );
+    }
 }
 
 

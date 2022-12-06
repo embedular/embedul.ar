@@ -83,12 +83,12 @@ void EMBEDULAR_Main( void *param )
 {
 ( void ) param;
 
-	/* Create the first task at priority 1... */
-	xTaskCreateStatic( vTaskFunction, "Task 1", 1000, (void*)pcTextForTask1, 1, xTask1Stack, &xTask1ControlBlock );
+    /* Create the first task at priority 1... */
+    xTaskCreateStatic( vTaskFunction, "Task 1", 1000, (void*)pcTextForTask1, 1, xTask1Stack, &xTask1ControlBlock );
 
-	/* ... and the second task at priority 2.  The priority is the second to
-	last parameter. */
-	xTaskCreateStatic( vTaskFunction, "Task 2", 1000, (void*)pcTextForTask2, 2, xTask2Stack, &xTask2ControlBlock );
+    /* ... and the second task at priority 2.  The priority is the second to
+    last parameter. */
+    xTaskCreateStatic( vTaskFunction, "Task 2", 1000, (void*)pcTextForTask2, 2, xTask2Stack, &xTask2ControlBlock );
 
     /* On the embedul.ar framework, the above application entry point
        -EMBEDULAR_Main()- is executed in a task created at the end of the
@@ -96,7 +96,7 @@ void EMBEDULAR_Main( void *param )
        called vTaskStartScheduler() for us. As shown in this example, the
        application task is free to create any number of additional tasks. */
 
-	for( ;; )
+    for( ;; )
     {
         /* On the embedul.ar framework, this is the main task loop. It will be
            used to check for user input through the execution of this
@@ -120,29 +120,29 @@ char *pcTaskName;
 TickType_t xLastWakeTime;
 const TickType_t xDelay250ms = pdMS_TO_TICKS( 250UL );
 
-	/* The string to print out is passed in via the parameter.  Cast this to a
-	character pointer. */
-	pcTaskName = ( char * ) pvParameters;
+    /* The string to print out is passed in via the parameter.  Cast this to a
+    character pointer. */
+    pcTaskName = ( char * ) pvParameters;
 
-	/* The xLastWakeTime variable needs to be initialized with the current tick
-	count.  Note that this is the only time we access this variable.  From this
-	point on xLastWakeTime is managed automatically by the vTaskDelayUntil()
-	API function. */
-	xLastWakeTime = xTaskGetTickCount();
+    /* The xLastWakeTime variable needs to be initialized with the current tick
+    count.  Note that this is the only time we access this variable.  From this
+    point on xLastWakeTime is managed automatically by the vTaskDelayUntil()
+    API function. */
+    xLastWakeTime = xTaskGetTickCount();
 
-	/* As per most tasks, this task is implemented in an infinite loop. */
-	for( ;; )
-	{
-		/* Print out the name of this task. */
-		vPrintString( pcTaskName );
+    /* As per most tasks, this task is implemented in an infinite loop. */
+    for( ;; )
+    {
+        /* Print out the name of this task. */
+        vPrintString( pcTaskName );
 
-		/* We want this task to execute exactly every 250 milliseconds.  As per
-		the vTaskDelay() function, time is measured in ticks, and the
-		pdMS_TO_TICKS() macro is used to convert this to milliseconds.
-		xLastWakeTime is automatically updated within vTaskDelayUntil() so does not
-		have to be updated by this task code. */
-		vTaskDelayUntil( &xLastWakeTime, xDelay250ms );
-	}
+        /* We want this task to execute exactly every 250 milliseconds.  As per
+        the vTaskDelay() function, time is measured in ticks, and the
+        pdMS_TO_TICKS() macro is used to convert this to milliseconds.
+        xLastWakeTime is automatically updated within vTaskDelayUntil() so does not
+        have to be updated by this task code. */
+        vTaskDelayUntil( &xLastWakeTime, xDelay250ms );
+    }
 }
 
 

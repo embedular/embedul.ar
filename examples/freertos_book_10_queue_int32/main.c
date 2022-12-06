@@ -99,8 +99,8 @@ void EMBEDULAR_Main( void *param )
     /* The queue is created to hold a maximum of 5 long values. */
     xQueue = xQueueCreateStatic( 5, sizeof( int32_t ), ucQueueStorageArea, &xStaticQueue );
 
-	if( xQueue == NULL )
-	{
+    if( xQueue == NULL )
+    {
         /* The queue could not be created. */
         BOARD_AssertState (false);
     }
@@ -123,7 +123,7 @@ void EMBEDULAR_Main( void *param )
        called vTaskStartScheduler() for us. As shown in this example, the
        application task is free to create any number of additional tasks. */
 
-	for( ;; )
+    for( ;; )
     {
         /* On the embedul.ar framework, this is the main task loop. It will be
            used to check for user input through the execution of this
@@ -147,34 +147,34 @@ static void vSenderTask( void *pvParameters )
 int32_t lValueToSend;
 BaseType_t xStatus;
 
-	/* Two instances are created of this task so the value that is sent to the
-	queue is passed in via the task parameter rather than be hard coded.  This way
-	each instance can use a different value.  Cast the parameter to the required
-	type. */
-	lValueToSend = ( int32_t ) ( intptr_t )pvParameters;
+    /* Two instances are created of this task so the value that is sent to the
+    queue is passed in via the task parameter rather than be hard coded.  This way
+    each instance can use a different value.  Cast the parameter to the required
+    type. */
+    lValueToSend = ( int32_t ) ( intptr_t )pvParameters;
 
-	/* As per most tasks, this task is implemented within an infinite loop. */
-	for( ;; )
-	{
-		/* The first parameter is the queue to which data is being sent.  The
-		queue was created before the scheduler was started, so before this task
-		started to execute.
+    /* As per most tasks, this task is implemented within an infinite loop. */
+    for( ;; )
+    {
+        /* The first parameter is the queue to which data is being sent.  The
+        queue was created before the scheduler was started, so before this task
+        started to execute.
 
-		The second parameter is the address of the data to be sent.
+        The second parameter is the address of the data to be sent.
 
-		The third parameter is the Block time � the time the task should be kept
-		in the Blocked state to wait for space to become available on the queue
-		should the queue already be full.  In this case we don�t specify a block
-		time because there should always be space in the queue. */
-		xStatus = xQueueSendToBack( xQueue, &lValueToSend, 0 );
+        The third parameter is the Block time � the time the task should be kept
+        in the Blocked state to wait for space to become available on the queue
+        should the queue already be full.  In this case we don�t specify a block
+        time because there should always be space in the queue. */
+        xStatus = xQueueSendToBack( xQueue, &lValueToSend, 0 );
 
-		if( xStatus != pdPASS )
-		{
-			/* We could not write to the queue because it was full � this must
-			be an error as the queue should never contain more than one item! */
-			vPrintString( "Could not send to the queue." );
-		}
-	}
+        if( xStatus != pdPASS )
+        {
+            /* We could not write to the queue because it was full � this must
+            be an error as the queue should never contain more than one item! */
+            vPrintString( "Could not send to the queue." );
+        }
+    }
 }
 /*-----------------------------------------------------------*/
 
@@ -186,43 +186,43 @@ int32_t lReceivedValue;
 BaseType_t xStatus;
 const TickType_t xTicksToWait = pdMS_TO_TICKS( 100UL );
 
-	/* This task is also defined within an infinite loop. */
-	for( ;; )
-	{
-		/* As this task unblocks immediately that data is written to the queue this
-		call should always find the queue empty. */
-		if( uxQueueMessagesWaiting( xQueue ) != 0 )
-		{
-			vPrintString( "Queue should have been empty!" );
-		}
+    /* This task is also defined within an infinite loop. */
+    for( ;; )
+    {
+        /* As this task unblocks immediately that data is written to the queue this
+        call should always find the queue empty. */
+        if( uxQueueMessagesWaiting( xQueue ) != 0 )
+        {
+            vPrintString( "Queue should have been empty!" );
+        }
 
-		/* The first parameter is the queue from which data is to be received.  The
-		queue is created before the scheduler is started, and therefore before this
-		task runs for the first time.
+        /* The first parameter is the queue from which data is to be received.  The
+        queue is created before the scheduler is started, and therefore before this
+        task runs for the first time.
 
-		The second parameter is the buffer into which the received data will be
-		placed.  In this case the buffer is simply the address of a variable that
-		has the required size to hold the received data.
+        The second parameter is the buffer into which the received data will be
+        placed.  In this case the buffer is simply the address of a variable that
+        has the required size to hold the received data.
 
-		the last parameter is the block time � the maximum amount of time that the
-		task should remain in the Blocked state to wait for data to be available should
-		the queue already be empty. */
-		xStatus = xQueueReceive( xQueue, &lReceivedValue, xTicksToWait );
+        the last parameter is the block time � the maximum amount of time that the
+        task should remain in the Blocked state to wait for data to be available should
+        the queue already be empty. */
+        xStatus = xQueueReceive( xQueue, &lReceivedValue, xTicksToWait );
 
-		if( xStatus == pdPASS )
-		{
-			/* Data was successfully received from the queue, print out the received
-			value. */
-			vPrintStringAndNumber( "Received = ", lReceivedValue );
-		}
-		else
-		{
-			/* We did not receive anything from the queue even after waiting for 100ms.
-			This must be an error as the sending tasks are free running and will be
-			continuously writing to the queue. */
-			vPrintString( "Could not receive from the queue." );
-		}
-	}
+        if( xStatus == pdPASS )
+        {
+            /* Data was successfully received from the queue, print out the received
+            value. */
+            vPrintStringAndNumber( "Received = ", lReceivedValue );
+        }
+        else
+        {
+            /* We did not receive anything from the queue even after waiting for 100ms.
+            This must be an error as the sending tasks are free running and will be
+            continuously writing to the queue. */
+            vPrintString( "Could not receive from the queue." );
+        }
+    }
 }
 
 

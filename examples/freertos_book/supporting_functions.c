@@ -134,21 +134,21 @@ bool vExitRequested( void )
 
 void vPrintString( const char *pcString )
 {
-	/* Print the string using the embedul.ar framework. */
+    /* Print the string using the embedul.ar framework. */
     LOG( NOBJ, pcString );
 }
 /*-----------------------------------------------------------*/
 
 void vPrintStringAndNumber( const char *pcString, uint32_t ulValue )
 {
-	/* Print the string using the embedul.ar framework. */
+    /* Print the string using the embedul.ar framework. */
     LOG( NOBJ, "`0 `1", pcString, ulValue );
 }
 /*-----------------------------------------------------------*/
 
 void vPrintTwoStrings( const char *pcString1, const char *pcString2 )
 {
-	/* Print the string using the embedul.ar framework. */
+    /* Print the string using the embedul.ar framework. */
     LOG_Plain( "At time `0: `1 `2", xTaskGetTickCount(), pcString1, pcString2 );
 }
 /*-----------------------------------------------------------*/

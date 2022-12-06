@@ -86,12 +86,12 @@ void EMBEDULAR_Main( void *param )
 {
 ( void ) param;
 
-	/* Create the first task at priority 1... */
-	xTaskCreateStatic( vTaskFunction, "Task 1", 1000, (void*)pcTextForTask1, 1, xTask1Stack, &xTask1ControlBlock );
+    /* Create the first task at priority 1... */
+    xTaskCreateStatic( vTaskFunction, "Task 1", 1000, (void*)pcTextForTask1, 1, xTask1Stack, &xTask1ControlBlock );
 
-	/* ... and the second task at priority 2.  The priority is the second to
-	last parameter. */
-	xTaskCreateStatic( vTaskFunction, "Task 2", 1000, (void*)pcTextForTask2, 2, xTask2Stack, &xTask2ControlBlock );
+    /* ... and the second task at priority 2.  The priority is the second to
+    last parameter. */
+    xTaskCreateStatic( vTaskFunction, "Task 2", 1000, (void*)pcTextForTask2, 2, xTask2Stack, &xTask2ControlBlock );
 
     /* On the embedul.ar framework, the above application entry point
        -EMBEDULAR_Main()- is executed in a task created at the end of the
@@ -99,7 +99,7 @@ void EMBEDULAR_Main( void *param )
        called vTaskStartScheduler() for us. As shown in this example, the
        application task is free to create any number of additional tasks. */
 
-	for( ;; )
+    for( ;; )
     {
         /* On the embedul.ar framework, this is the main task loop. It will be
            used to check for user input through the execution of this
@@ -122,24 +122,24 @@ void vTaskFunction( void *pvParameters )
 char *pcTaskName;
 volatile uint32_t ul;
 
-	/* The string to print out is passed in via the parameter.  Cast this to a
-	character pointer. */
-	pcTaskName = ( char * ) pvParameters;
+    /* The string to print out is passed in via the parameter.  Cast this to a
+    character pointer. */
+    pcTaskName = ( char * ) pvParameters;
 
-	/* As per most tasks, this task is implemented in an infinite loop. */
-	for( ;; )
-	{
-		/* Print out the name of this task. */
-		vPrintString( pcTaskName );
+    /* As per most tasks, this task is implemented in an infinite loop. */
+    for( ;; )
+    {
+        /* Print out the name of this task. */
+        vPrintString( pcTaskName );
 
-		/* Delay for a period. */
-		for( ul = 0; ul < mainDELAY_LOOP_COUNT; ul++ )
-		{
-			/* This loop is just a very crude delay implementation.  There is
-			nothing to do in here.  Later exercises will replace this crude
-			loop with a proper delay/sleep function. */
-		}
-	}
+        /* Delay for a period. */
+        for( ul = 0; ul < mainDELAY_LOOP_COUNT; ul++ )
+        {
+            /* This loop is just a very crude delay implementation.  There is
+            nothing to do in here.  Later exercises will replace this crude
+            loop with a proper delay/sleep function. */
+        }
+    }
 }
 
 

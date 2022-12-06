@@ -81,9 +81,9 @@ void EMBEDULAR_Main( void *param )
 {
 ( void ) param;
 
-	/* Create the first task at priority 1.  This time the task parameter is
-	not used and is set to NULL. */
-	xTaskCreateStatic( vTask1, "Task 1", 1000, NULL, 1, xTask1Stack, &xTask1ControlBlock );
+    /* Create the first task at priority 1.  This time the task parameter is
+    not used and is set to NULL. */
+    xTaskCreateStatic( vTask1, "Task 1", 1000, NULL, 1, xTask1Stack, &xTask1ControlBlock );
                 /* The task is created at priority 1 ^. */
 
     /* On the embedul.ar framework, the above application entry point
@@ -92,7 +92,7 @@ void EMBEDULAR_Main( void *param )
        called vTaskStartScheduler() for us. As shown in this example, the
        application task is free to create any number of additional tasks. */
 
-	for( ;; )
+    for( ;; )
     {
         /* On the embedul.ar framework, this is the main task loop. It will be
            used to check for user input through the execution of this
@@ -115,21 +115,21 @@ void vTask1( void *pvParameters )
 ( void ) pvParameters;
 const TickType_t xDelay100ms = pdMS_TO_TICKS( 100UL );
 
-	for( ;; )
-	{
-		/* Print out the name of this task. */
-		vPrintString( "Task1 is running" );
+    for( ;; )
+    {
+        /* Print out the name of this task. */
+        vPrintString( "Task1 is running" );
 
-		/* Create task 2 at a higher priority.  Again the task parameter is not 
-		used so is set to NULL. */
-		xTask2Handle = xTaskCreateStatic( vTask2, "Task 2", 1000, NULL, 2, xTask2Stack, &xTask2ControlBlock );
-		/* The task handle is returned by xTaskCreateStatic() */
+        /* Create task 2 at a higher priority.  Again the task parameter is not 
+        used so is set to NULL. */
+        xTask2Handle = xTaskCreateStatic( vTask2, "Task 2", 1000, NULL, 2, xTask2Stack, &xTask2ControlBlock );
+        /* The task handle is returned by xTaskCreateStatic() */
 
-		/* Task2 has/had the higher priority, so for Task1 to reach here Task2
-		must have already executed and deleted itself.  Delay for 100 
-		milliseconds. */
-		vTaskDelay( xDelay100ms );
-	}
+        /* Task2 has/had the higher priority, so for Task1 to reach here Task2
+        must have already executed and deleted itself.  Delay for 100 
+        milliseconds. */
+        vTaskDelay( xDelay100ms );
+    }
 }
 
 /*-----------------------------------------------------------*/
@@ -138,11 +138,11 @@ void vTask2( void *pvParameters )
 {
 ( void ) pvParameters;
 
-	/* Task2 does nothing but delete itself.  To do this it could call vTaskDelete()
-	using a NULL parameter, but instead and purely for demonstration purposes it
-	instead calls vTaskDelete() with its own task handle. */
-	vPrintString( "Task2 is running and about to delete itself" );
-	vTaskDelete( xTask2Handle );
+    /* Task2 does nothing but delete itself.  To do this it could call vTaskDelete()
+    using a NULL parameter, but instead and purely for demonstration purposes it
+    instead calls vTaskDelete() with its own task handle. */
+    vPrintString( "Task2 is running and about to delete itself" );
+    vTaskDelete( xTask2Handle );
 }
 /*-----------------------------------------------------------*/
 

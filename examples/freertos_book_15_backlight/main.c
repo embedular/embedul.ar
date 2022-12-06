@@ -105,28 +105,28 @@ void EMBEDULAR_Main( void *param )
 {
 ( void ) param;
 
-	/* The backlight is off at the start. */
-	xSimulatedBacklightOn = pdFALSE;
+    /* The backlight is off at the start. */
+    xSimulatedBacklightOn = pdFALSE;
 
-	/* Create the one shot timer, storing the handle to the created timer in
-	xOneShotTimer. */
-	xBacklightTimer = xTimerCreateStatic(   "Backlight",			    /* Text name for the timer - not used by FreeRTOS. */
-									        mainBACKLIGHT_TIMER_PERIOD,	/* The timer's period in ticks. */
-									        pdFALSE,					/* Set uxAutoRealod to pdFALSE to create a one-shot timer. */
-									        0,							/* The timer ID is not used in this example. */
-									        prvBacklightTimerCallback,  /* The callback function to be used by the timer being created. */
+    /* Create the one shot timer, storing the handle to the created timer in
+    xOneShotTimer. */
+    xBacklightTimer = xTimerCreateStatic(   "Backlight",			    /* Text name for the timer - not used by FreeRTOS. */
+                                            mainBACKLIGHT_TIMER_PERIOD,	/* The timer's period in ticks. */
+                                            pdFALSE,					/* Set uxAutoRealod to pdFALSE to create a one-shot timer. */
+                                            0,							/* The timer ID is not used in this example. */
+                                            prvBacklightTimerCallback,  /* The callback function to be used by the timer being created. */
                                             &xBacklightTimerBuffer );   /* Data associated with the timer being created. */
 
-	/* A real application, running on a real target, would probably read button
-	pushes in an interrupt.  That allows the application to be event driven, and
-	prevents CPU time being wasted by polling for key presses when no keys have
-	been pressed.  It is not practical to use real interrupts when using the
-	FreeRTOS Windows port, so the vKeyHitTask() task is created to instead 
-	provide the	key reading functionality by simply polling the keyboard. */
-	xTaskCreateStatic( vKeyHitTask, "Key poll", 1000, NULL, 1, keyHitStack, &keyHitControlBlock );
+    /* A real application, running on a real target, would probably read button
+    pushes in an interrupt.  That allows the application to be event driven, and
+    prevents CPU time being wasted by polling for key presses when no keys have
+    been pressed.  It is not practical to use real interrupts when using the
+    FreeRTOS Windows port, so the vKeyHitTask() task is created to instead 
+    provide the	key reading functionality by simply polling the keyboard. */
+    xTaskCreateStatic( vKeyHitTask, "Key poll", 1000, NULL, 1, keyHitStack, &keyHitControlBlock );
 
-	/* Start the timer. */
-	xTimerStart( xBacklightTimer, 0 );
+    /* Start the timer. */
+    xTimerStart( xBacklightTimer, 0 );
 
     /* On the embedul.ar framework, the above application entry point
        -EMBEDULAR_Main()- is executed in a task created at the end of the
@@ -134,7 +134,7 @@ void EMBEDULAR_Main( void *param )
        called vTaskStartScheduler() for us. As shown in this example, the
        application task is free to create any number of additional tasks. */
 
-	for( ;; )
+    for( ;; )
     {
         /* On the embedul.ar framework, this is the main task loop. It will be
            used to check for user input through the execution of this
@@ -156,11 +156,11 @@ static void prvBacklightTimerCallback( TimerHandle_t xTimer )
 (void) xTimer;
 TickType_t xTimeNow = xTaskGetTickCount();
 
-	/* The backlight timer expired, turn the backlight off. */
-	xSimulatedBacklightOn = pdFALSE;
+    /* The backlight timer expired, turn the backlight off. */
+    xSimulatedBacklightOn = pdFALSE;
 
-	/* Print the time at which the backlight was turned off. */
-	vPrintStringAndNumber( "Timer expired, turning backlight OFF at time\t", xTimeNow );
+    /* Print the time at which the backlight was turned off. */
+    vPrintStringAndNumber( "Timer expired, turning backlight OFF at time\t", xTimeNow );
 
     /* On the embedul.ar framework this example handles a real backlight. */
     MIO_SetOutputDeferred (OUTPUT_PROFILE_Group_CONTROL, IO_Type_Bit, OUTPUT_PROFILE_CONTROL_Bit_Backlight, 0);
@@ -174,57 +174,57 @@ const TickType_t xShortDelay = pdMS_TO_TICKS( 50 );
 extern BaseType_t xKeyPressesStopApplication;
 TickType_t xTimeNow;
 
-	/* This example uses key presses, so prevent key presses being used to end
-	the application. */
-	xKeyPressesStopApplication = pdFALSE;
+    /* This example uses key presses, so prevent key presses being used to end
+    the application. */
+    xKeyPressesStopApplication = pdFALSE;
 
-	vPrintString( "Press a key to turn the backlight on." );
+    vPrintString( "Press a key to turn the backlight on." );
 
-	/* A real application, running on a real target, would probably read button
-	pushes in an interrupt.  That allows the application to be event driven, and
-	prevents CPU time being wasted by polling for key presses when no keys have
-	been pressed.  It is not practical to use real interrupts when using the
-	FreeRTOS Windows port, so this task is created to instead provide the key 
-	reading functionality by simply polling the keyboard. */
-	for( ;; )
-	{
-		/* Has a key been pressed? */
-		if( MIO_GetInputBuffer( INPUT_PROFILE_Group_MAIN, IO_Type_Bit, INPUT_PROFILE_MAIN_Bit_A ) )
-		{
-			/* Record the time at which the key press was noted. */
-			xTimeNow = xTaskGetTickCount();
+    /* A real application, running on a real target, would probably read button
+    pushes in an interrupt.  That allows the application to be event driven, and
+    prevents CPU time being wasted by polling for key presses when no keys have
+    been pressed.  It is not practical to use real interrupts when using the
+    FreeRTOS Windows port, so this task is created to instead provide the key 
+    reading functionality by simply polling the keyboard. */
+    for( ;; )
+    {
+        /* Has a key been pressed? */
+        if( MIO_GetInputBuffer( INPUT_PROFILE_Group_MAIN, IO_Type_Bit, INPUT_PROFILE_MAIN_Bit_A ) )
+        {
+            /* Record the time at which the key press was noted. */
+            xTimeNow = xTaskGetTickCount();
 
-			/* A key has been pressed. */
-			if( xSimulatedBacklightOn == pdFALSE )
-			{
-				/* The backlight was off so turn it on and print the time at
-				which it was turned on. */
-				xSimulatedBacklightOn = pdTRUE;
-				vPrintStringAndNumber( "Key pressed, turning backlight ON at time\t", xTimeNow );
+            /* A key has been pressed. */
+            if( xSimulatedBacklightOn == pdFALSE )
+            {
+                /* The backlight was off so turn it on and print the time at
+                which it was turned on. */
+                xSimulatedBacklightOn = pdTRUE;
+                vPrintStringAndNumber( "Key pressed, turning backlight ON at time\t", xTimeNow );
 
                 /* On the embedul.ar framework this example handles a real backlight. */
                 MIO_SetOutputDeferred (OUTPUT_PROFILE_Group_CONTROL, IO_Type_Bit, OUTPUT_PROFILE_CONTROL_Bit_Backlight, 1);
-			}
-			else
-			{
-				/* The backlight was already on so print a message to say the
-				backlight is about to be reset and the time at which it was
-				reset. */
-				vPrintStringAndNumber( "Key pressed, resetting software timer at time\t", xTimeNow );
-			}
+            }
+            else
+            {
+                /* The backlight was already on so print a message to say the
+                backlight is about to be reset and the time at which it was
+                reset. */
+                vPrintStringAndNumber( "Key pressed, resetting software timer at time\t", xTimeNow );
+            }
 
-			/* Reset the software timer.  If the backlight was previously off
-			this call will start the timer.  If the backlight was previously on
-			this call will restart the timer.  A real application will probably
-			read key presses in an interrupt.  If this function was an interrupt
-			service routine then xTimerResetFromISR() must be used instead of
-			xTimerReset(). */
-			xTimerReset( xBacklightTimer, xShortDelay );
-		}
+            /* Reset the software timer.  If the backlight was previously off
+            this call will start the timer.  If the backlight was previously on
+            this call will restart the timer.  A real application will probably
+            read key presses in an interrupt.  If this function was an interrupt
+            service routine then xTimerResetFromISR() must be used instead of
+            xTimerReset(). */
+            xTimerReset( xBacklightTimer, xShortDelay );
+        }
 
-		/* Don't poll too quickly. */
-		vTaskDelay( xShortDelay );
-	}
+        /* Don't poll too quickly. */
+        vTaskDelay( xShortDelay );
+    }
 }
 /*-----------------------------------------------------------*/
 

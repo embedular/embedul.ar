@@ -87,27 +87,27 @@ void EMBEDULAR_Main( void *param )
 TimerHandle_t xAutoReloadTimer, xOneShotTimer;
 BaseType_t xTimer1Started, xTimer2Started;
 
-	/* Create the one shot software timer, storing the handle to the created
-	software timer in xOneShotTimer. */
-	xOneShotTimer = xTimerCreateStatic( "OneShot",				    /* Text name for the software timer - not used by FreeRTOS. */
-								        mainONE_SHOT_TIMER_PERIOD,	/* The software timer's period in ticks. */
-								        pdFALSE,					/* Setting uxAutoRealod to pdFALSE creates a one-shot software timer. */
-								        0,							/* This example does not use the timer id. */
-								        prvOneShotTimerCallback,	/* The callback function to be used by the software timer being created. */
+    /* Create the one shot software timer, storing the handle to the created
+    software timer in xOneShotTimer. */
+    xOneShotTimer = xTimerCreateStatic( "OneShot",				    /* Text name for the software timer - not used by FreeRTOS. */
+                                        mainONE_SHOT_TIMER_PERIOD,	/* The software timer's period in ticks. */
+                                        pdFALSE,					/* Setting uxAutoRealod to pdFALSE creates a one-shot software timer. */
+                                        0,							/* This example does not use the timer id. */
+                                        prvOneShotTimerCallback,	/* The callback function to be used by the software timer being created. */
                                         &xOneShotTimerBuffer );     /* Data associated with the timer being created. */
 
-	/* Create the auto-reload software timer, storing the handle to the created
-	software timer in xAutoReloadTimer. */
-	xAutoReloadTimer = xTimerCreateStatic(  "AutoReload",					/* Text name for the software timer - not used by FreeRTOS. */
-									        mainAUTO_RELOAD_TIMER_PERIOD,	/* The software timer's period in ticks. */
-									        pdTRUE,						    /* Set uxAutoRealod to pdTRUE to create an auto-reload software timer. */
-									        0,								/* This example does not use the timer id. */
-									        prvAutoReloadTimerCallback,	    /* The callback function to be used by the software timer being created. */
+    /* Create the auto-reload software timer, storing the handle to the created
+    software timer in xAutoReloadTimer. */
+    xAutoReloadTimer = xTimerCreateStatic(  "AutoReload",					/* Text name for the software timer - not used by FreeRTOS. */
+                                            mainAUTO_RELOAD_TIMER_PERIOD,	/* The software timer's period in ticks. */
+                                            pdTRUE,						    /* Set uxAutoRealod to pdTRUE to create an auto-reload software timer. */
+                                            0,								/* This example does not use the timer id. */
+                                            prvAutoReloadTimerCallback,	    /* The callback function to be used by the software timer being created. */
                                             &xAutoReloadTimerBuffer );      /* Data associated with the timer being created. */
 
-	/* Check the timers were created. */
-	if( ( xOneShotTimer == NULL ) || ( xAutoReloadTimer == NULL ) )
-	{
+    /* Check the timers were created. */
+    if( ( xOneShotTimer == NULL ) || ( xAutoReloadTimer == NULL ) )
+    {
         BOARD_AssertState (false);
     }
 
@@ -134,7 +134,7 @@ BaseType_t xTimer1Started, xTimer2Started;
        called vTaskStartScheduler() for us. As shown in this example, the
        application task is free to create any number of additional tasks. */
 
-	for( ;; )
+    for( ;; )
     {
         /* On the embedul.ar framework, this is the main task loop. It will be
            used to check for user input through the execution of this
@@ -152,11 +152,11 @@ static void prvOneShotTimerCallback( TimerHandle_t xTimer )
 (void) xTimer;
 static TickType_t xTimeNow;
 
-	/* Obtain the current tick count. */
-	xTimeNow = xTaskGetTickCount();
+    /* Obtain the current tick count. */
+    xTimeNow = xTaskGetTickCount();
 
-	/* Output a string to show the time at which the callback was executed. */
-	vPrintStringAndNumber( "One-shot timer callback executing", xTimeNow );
+    /* Output a string to show the time at which the callback was executed. */
+    vPrintStringAndNumber( "One-shot timer callback executing", xTimeNow );
 }
 /*-----------------------------------------------------------*/
 
@@ -165,11 +165,11 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 (void) xTimer;
 static TickType_t xTimeNow;
 
-	/* Obtain the current tick count. */
-	xTimeNow = xTaskGetTickCount();
+    /* Obtain the current tick count. */
+    xTimeNow = xTaskGetTickCount();
 
-	/* Output a string to show the time at which the callback was executed. */
-	vPrintStringAndNumber( "Auto-reload timer callback executing", xTimeNow );
+    /* Output a string to show the time at which the callback was executed. */
+    vPrintStringAndNumber( "Auto-reload timer callback executing", xTimeNow );
 }
 /*-----------------------------------------------------------*/
 

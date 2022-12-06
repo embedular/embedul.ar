@@ -108,13 +108,13 @@ void EMBEDULAR_Main( void *param )
 ( void ) param;
 
     /* Before a semaphore is used it must be explicitly created.  In this
-	example a counting semaphore is created.  The semaphore is created to have a
-	maximum count value of 10, and an initial count value of 0. */
-	xCountingSemaphore = xSemaphoreCreateCountingStatic( 10, 0, &xCountingSemaphoreBuffer );
+    example a counting semaphore is created.  The semaphore is created to have a
+    maximum count value of 10, and an initial count value of 0. */
+    xCountingSemaphore = xSemaphoreCreateCountingStatic( 10, 0, &xCountingSemaphoreBuffer );
 
-	/* Check the semaphore was created successfully. */
-	if( xCountingSemaphore == NULL )
-	{
+    /* Check the semaphore was created successfully. */
+    if( xCountingSemaphore == NULL )
+    {
         BOARD_AssertState (false);
     }
     
@@ -142,7 +142,7 @@ void EMBEDULAR_Main( void *param )
        called vTaskStartScheduler() for us. As shown in this example, the
        application task is free to create any number of additional tasks. */
 
-	for( ;; )
+    for( ;; )
     {
         /* On the embedul.ar framework, this is the main task loop. It will be
            used to check for user input through the execution of this
@@ -164,20 +164,20 @@ static void vHandlerTask( void *pvParameters )
 {
 ( void ) pvParameters;
 
-	/* As per most tasks, this task is implemented within an infinite loop. */
-	for( ;; )
-	{
-		/* Use the semaphore to wait for the event.  The semaphore was created
-		before the scheduler was started so before this task ran for the first
-		time.  The task blocks indefinitely meaning this function call will only
-		return once the semaphore has been successfully obtained - so there is
-		no need to check the returned value. */
-		xSemaphoreTake( xCountingSemaphore, portMAX_DELAY );
+    /* As per most tasks, this task is implemented within an infinite loop. */
+    for( ;; )
+    {
+        /* Use the semaphore to wait for the event.  The semaphore was created
+        before the scheduler was started so before this task ran for the first
+        time.  The task blocks indefinitely meaning this function call will only
+        return once the semaphore has been successfully obtained - so there is
+        no need to check the returned value. */
+        xSemaphoreTake( xCountingSemaphore, portMAX_DELAY );
 
-		/* To get here the event must have occurred.  Process the event (in this
-		case just print out a message). */
-		vPrintString( "Handler task - Processing event" );
-	}
+        /* To get here the event must have occurred.  Process the event (in this
+        case just print out a message). */
+        vPrintString( "Handler task - Processing event" );
+    }
 }
 /*-----------------------------------------------------------*/
 
@@ -186,27 +186,27 @@ static void vPeriodicTask( void *pvParameters )
 ( void ) pvParameters;
 const TickType_t xDelay500ms = pdMS_TO_TICKS( 500UL );
 
-	/* As per most tasks, this task is implemented within an infinite loop. */
-	for( ;; )
-	{
-		/* This task is just used to 'simulate' an interrupt.  This is done by
-		periodically generating a simulated software interrupt.  Block until it
-		is time to generate the software interrupt again. */
-		vTaskDelay( xDelay500ms );
+    /* As per most tasks, this task is implemented within an infinite loop. */
+    for( ;; )
+    {
+        /* This task is just used to 'simulate' an interrupt.  This is done by
+        periodically generating a simulated software interrupt.  Block until it
+        is time to generate the software interrupt again. */
+        vTaskDelay( xDelay500ms );
 
-		/* Generate the interrupt, printing a message both before and after
-		the interrupt has been generated so the sequence of execution is evident
-		from the output.
+        /* Generate the interrupt, printing a message both before and after
+        the interrupt has been generated so the sequence of execution is evident
+        from the output.
 
-		The syntax used to generate a software interrupt is dependent on the
-		FreeRTOS port being used.  The syntax used below can only be used with
-		the FreeRTOS Windows port, in which such interrupts are only
-		simulated. */
-		vPrintString( "Periodic task - About to generate an interrupt" );
-		vPortGenerateSimulatedInterrupt( mainINTERRUPT_NUMBER );
-		vPrintString( "Periodic task - Interrupt generated" );
+        The syntax used to generate a software interrupt is dependent on the
+        FreeRTOS port being used.  The syntax used below can only be used with
+        the FreeRTOS Windows port, in which such interrupts are only
+        simulated. */
+        vPrintString( "Periodic task - About to generate an interrupt" );
+        vPortGenerateSimulatedInterrupt( mainINTERRUPT_NUMBER );
+        vPrintString( "Periodic task - Interrupt generated" );
         vPrintString( "" );
-	}
+    }
 }
 /*-----------------------------------------------------------*/
 
@@ -214,29 +214,29 @@ static void ulExampleInterruptHandler( void )
 {
 BaseType_t xHigherPriorityTaskWoken;
 
-	/* The xHigherPriorityTaskWoken parameter must be initialized to pdFALSE as
-	it will get set to pdTRUE inside the interrupt safe API function if a
-	context switch is required. */
-	xHigherPriorityTaskWoken = pdFALSE;
+    /* The xHigherPriorityTaskWoken parameter must be initialized to pdFALSE as
+    it will get set to pdTRUE inside the interrupt safe API function if a
+    context switch is required. */
+    xHigherPriorityTaskWoken = pdFALSE;
 
-	/* 'Give' the semaphore multiple times.  The first will unblock the deferred
-	interrupt handling task, the following 'gives' are to demonstrate that the
-	semaphore latches the events to allow the handler task to process them in
-	turn without events getting lost.  This simulates multiple interrupts being
-	processed by the processor, even though in this case the events are
-	simulated within a single interrupt occurrence.*/
-	xSemaphoreGiveFromISR( xCountingSemaphore, &xHigherPriorityTaskWoken );
-	xSemaphoreGiveFromISR( xCountingSemaphore, &xHigherPriorityTaskWoken );
-	xSemaphoreGiveFromISR( xCountingSemaphore, &xHigherPriorityTaskWoken );
+    /* 'Give' the semaphore multiple times.  The first will unblock the deferred
+    interrupt handling task, the following 'gives' are to demonstrate that the
+    semaphore latches the events to allow the handler task to process them in
+    turn without events getting lost.  This simulates multiple interrupts being
+    processed by the processor, even though in this case the events are
+    simulated within a single interrupt occurrence.*/
+    xSemaphoreGiveFromISR( xCountingSemaphore, &xHigherPriorityTaskWoken );
+    xSemaphoreGiveFromISR( xCountingSemaphore, &xHigherPriorityTaskWoken );
+    xSemaphoreGiveFromISR( xCountingSemaphore, &xHigherPriorityTaskWoken );
 
-	/* Pass the xHigherPriorityTaskWoken value into portYIELD_FROM_ISR().  If
-	xHigherPriorityTaskWoken was set to pdTRUE inside xSemaphoreGiveFromISR()
-	then calling portYIELD_FROM_ISR() will request a context switch.  If
-	xHigherPriorityTaskWoken is still pdFALSE then calling
-	portYIELD_FROM_ISR() will have no effect.  The implementation of
-	portYIELD_FROM_ISR() used by the Windows port includes a return statement,
-	which is why this function does not explicitly return a value. */
-	portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+    /* Pass the xHigherPriorityTaskWoken value into portYIELD_FROM_ISR().  If
+    xHigherPriorityTaskWoken was set to pdTRUE inside xSemaphoreGiveFromISR()
+    then calling portYIELD_FROM_ISR() will request a context switch.  If
+    xHigherPriorityTaskWoken is still pdFALSE then calling
+    portYIELD_FROM_ISR() will have no effect.  The implementation of
+    portYIELD_FROM_ISR() used by the Windows port includes a return statement,
+    which is why this function does not explicitly return a value. */
+    portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
 }
 
 

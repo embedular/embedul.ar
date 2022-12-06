@@ -86,12 +86,12 @@ void EMBEDULAR_Main( void *param )
 {
 ( void ) param;
 
-	/* Create the first task at priority 1... */
-	xTaskCreateStatic( vTaskFunction, "Task 1", 1000, (void*)pcTextForTask1, 1, xTask1Stack, &xTask1ControlBlock );
+    /* Create the first task at priority 1... */
+    xTaskCreateStatic( vTaskFunction, "Task 1", 1000, (void*)pcTextForTask1, 1, xTask1Stack, &xTask1ControlBlock );
 
-	/* ... and the second task at priority 2.  The priority is the second to
-	last parameter. */
-	xTaskCreateStatic( vTaskFunction, "Task 2", 1000, (void*)pcTextForTask2, 2, xTask2Stack, &xTask2ControlBlock );
+    /* ... and the second task at priority 2.  The priority is the second to
+    last parameter. */
+    xTaskCreateStatic( vTaskFunction, "Task 2", 1000, (void*)pcTextForTask2, 2, xTask2Stack, &xTask2ControlBlock );
 
     /* On the embedul.ar framework, the above application entry point
        -EMBEDULAR_Main()- is executed in a task created at the end of the
@@ -99,7 +99,7 @@ void EMBEDULAR_Main( void *param )
        called vTaskStartScheduler() for us. As shown in this example, the
        application task is free to create any number of additional tasks. */
 
-	for( ;; )
+    for( ;; )
     {
         /* On the embedul.ar framework, this is the main task loop. It will be
            used to check for user input through the execution of this
@@ -122,22 +122,22 @@ void vTaskFunction( void *pvParameters )
 char *pcTaskName;
 const TickType_t xDelay250ms = pdMS_TO_TICKS( 250UL );
 
-	/* The string to print out is passed in via the parameter.  Cast this to a
-	character pointer. */
-	pcTaskName = ( char * ) pvParameters;
+    /* The string to print out is passed in via the parameter.  Cast this to a
+    character pointer. */
+    pcTaskName = ( char * ) pvParameters;
 
-	/* As per most tasks, this task is implemented in an infinite loop. */
-	for( ;; )
-	{
-		/* Print out the name of this task AND the number of times ulIdleCycleCount
+    /* As per most tasks, this task is implemented in an infinite loop. */
+    for( ;; )
+    {
+        /* Print out the name of this task AND the number of times ulIdleCycleCount
         has been incremented. */
-		vPrintStringAndNumber( pcTaskName, ulIdleCycleCount );
+        vPrintStringAndNumber( pcTaskName, ulIdleCycleCount );
 
-		/* Delay for a period.  This time we use a call to vTaskDelay() which
-		puts the task into the Blocked state until the delay period has expired.
-		The delay period is specified in 'ticks'. */
-		vTaskDelay( xDelay250ms );
-	}
+        /* Delay for a period.  This time we use a call to vTaskDelay() which
+        puts the task into the Blocked state until the delay period has expired.
+        The delay period is specified in 'ticks'. */
+        vTaskDelay( xDelay250ms );
+    }
 }
 /*-----------------------------------------------------------*/
 
@@ -145,8 +145,8 @@ const TickType_t xDelay250ms = pdMS_TO_TICKS( 250UL );
 and return void. */
 void vApplicationIdleHook( void )
 {
-	/* This hook function does nothing but increment a counter. */
-	ulIdleCycleCount++;
+    /* This hook function does nothing but increment a counter. */
+    ulIdleCycleCount++;
 }
 
 

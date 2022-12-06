@@ -102,12 +102,12 @@ void EMBEDULAR_Main( void *param )
 ( void ) param;
 
     /* Before a semaphore is used it must be explicitly created.  In this example
-	a mutex type semaphore is created. */
+    a mutex type semaphore is created. */
     xMutex = xSemaphoreCreateMutexStatic( &xMutexBuffer );
 
-	/* Check the semaphore was created successfully. */
-	if( xMutex == NULL )
-	{
+    /* Check the semaphore was created successfully. */
+    if( xMutex == NULL )
+    {
         BOARD_AssertState (false);
     }
 
@@ -124,7 +124,7 @@ void EMBEDULAR_Main( void *param )
        called vTaskStartScheduler() for us. As shown in this example, the
        application task is free to create any number of additional tasks. */
 
-	for( ;; )
+    for( ;; )
     {
         /* On the embedul.ar framework, this is the main task loop. It will be
            used to check for user input through the execution of this
@@ -144,22 +144,22 @@ void EMBEDULAR_Main( void *param )
 
 static void prvNewPrintString( const char *pcString )
 {
-	/* The semaphore is created before the scheduler is started so already
-	exists by the time this task executes.
+    /* The semaphore is created before the scheduler is started so already
+    exists by the time this task executes.
 
-	Attempt to take the semaphore, blocking indefinitely if the mutex is not
-	available immediately.  The call to xSemaphoreTake() will only return when
-	the semaphore has been successfully obtained so there is no need to check the
-	return value.  If any other delay period was used then the code must check
-	that xSemaphoreTake() returns pdTRUE before accessing the resource (in this
-	case standard out. */
-	xSemaphoreTake( xMutex, portMAX_DELAY );
-	{
-		/* The following line will only execute once the semaphore has been
-		successfully obtained - so standard out can be accessed freely. */
+    Attempt to take the semaphore, blocking indefinitely if the mutex is not
+    available immediately.  The call to xSemaphoreTake() will only return when
+    the semaphore has been successfully obtained so there is no need to check the
+    return value.  If any other delay period was used then the code must check
+    that xSemaphoreTake() returns pdTRUE before accessing the resource (in this
+    case standard out. */
+    xSemaphoreTake( xMutex, portMAX_DELAY );
+    {
+        /* The following line will only execute once the semaphore has been
+        successfully obtained - so standard out can be accessed freely. */
         LOG( NOBJ, pcString );
-	}
-	xSemaphoreGive( xMutex );
+    }
+    xSemaphoreGive( xMutex );
 }
 /*-----------------------------------------------------------*/
 
@@ -168,26 +168,26 @@ static void prvPrintTask( void *pvParameters )
 char *pcStringToPrint;
 const TickType_t xSlowDownDelay = pdMS_TO_TICKS( 5UL );
 
-	/* Two instances of this task are created.  The string printed by the task
-	is passed into the task using the task's parameter.  The parameter is cast
-	to the required type. */
-	pcStringToPrint = ( char * ) pvParameters;
+    /* Two instances of this task are created.  The string printed by the task
+    is passed into the task using the task's parameter.  The parameter is cast
+    to the required type. */
+    pcStringToPrint = ( char * ) pvParameters;
 
-	for( ;; )
-	{
-		/* Print out the string using the newly defined function. */
-		prvNewPrintString( pcStringToPrint );
+    for( ;; )
+    {
+        /* Print out the string using the newly defined function. */
+        prvNewPrintString( pcStringToPrint );
 
-		/* Wait a pseudo random time.  Note that rand() is not necessarily
-		re-entrant, but in this case it does not really matter as the code does
-		not care what value is returned.  In a more secure application a version
-		of rand() that is known to be re-entrant should be used - or calls to
-		rand() should be protected using a critical section. */
-		vTaskDelay( RANDOM_GetUint32() % xMaxBlockTimeTicks );
+        /* Wait a pseudo random time.  Note that rand() is not necessarily
+        re-entrant, but in this case it does not really matter as the code does
+        not care what value is returned.  In a more secure application a version
+        of rand() that is known to be re-entrant should be used - or calls to
+        rand() should be protected using a critical section. */
+        vTaskDelay( RANDOM_GetUint32() % xMaxBlockTimeTicks );
 
-		/* Just to ensure the scrolling is not too fast! */
-		vTaskDelay( xSlowDownDelay );
-	}
+        /* Just to ensure the scrolling is not too fast! */
+        vTaskDelay( xSlowDownDelay );
+    }
 }
 
 

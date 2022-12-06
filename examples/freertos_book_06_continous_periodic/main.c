@@ -87,12 +87,12 @@ void EMBEDULAR_Main( void *param )
 {
 ( void ) param;
 
-	/* Create two instances of the continuous processing task, both at priority	1. */
-	xTaskCreateStatic( vContinuousProcessingTask, "Task 1", 1000, (void*)pcTextForTask1, 1, xTask1Stack, &xTask1ControlBlock );
-	xTaskCreateStatic( vContinuousProcessingTask, "Task 2", 1000, (void*)pcTextForTask2, 1, xTask2Stack, &xTask2ControlBlock );
+    /* Create two instances of the continuous processing task, both at priority	1. */
+    xTaskCreateStatic( vContinuousProcessingTask, "Task 1", 1000, (void*)pcTextForTask1, 1, xTask1Stack, &xTask1ControlBlock );
+    xTaskCreateStatic( vContinuousProcessingTask, "Task 2", 1000, (void*)pcTextForTask2, 1, xTask2Stack, &xTask2ControlBlock );
 
-	/* Create one instance of the periodic task at priority 2. */
-	xTaskCreateStatic( vPeriodicTask, "Task 3", 1000, (void*)pcTextForPeriodicTask, 2, xTask3Stack, &xTask3ControlBlock );
+    /* Create one instance of the periodic task at priority 2. */
+    xTaskCreateStatic( vPeriodicTask, "Task 3", 1000, (void*)pcTextForPeriodicTask, 2, xTask3Stack, &xTask3ControlBlock );
 
     /* On the embedul.ar framework, the above application entry point
        -EMBEDULAR_Main()- is executed in a task created at the end of the
@@ -100,7 +100,7 @@ void EMBEDULAR_Main( void *param )
        called vTaskStartScheduler() for us. As shown in this example, the
        application task is free to create any number of additional tasks. */
 
-	for( ;; )
+    for( ;; )
     {
         /* On the embedul.ar framework, this is the main task loop. It will be
            used to check for user input through the execution of this
@@ -123,17 +123,17 @@ void vContinuousProcessingTask( void *pvParameters )
 {
 char *pcTaskName;
 
-	/* The string to print out is passed in via the parameter.  Cast this to a
-	character pointer. */
-	pcTaskName = ( char * ) pvParameters;
+    /* The string to print out is passed in via the parameter.  Cast this to a
+    character pointer. */
+    pcTaskName = ( char * ) pvParameters;
 
-	/* As per most tasks, this task is implemented in an infinite loop. */
-	for( ;; )
-	{
-		/* Print out the name of this task.  This task just does this repeatedly
-		without ever blocking or delaying. */
-		vPrintString( pcTaskName );
-	}
+    /* As per most tasks, this task is implemented in an infinite loop. */
+    for( ;; )
+    {
+        /* Print out the name of this task.  This task just does this repeatedly
+        without ever blocking or delaying. */
+        vPrintString( pcTaskName );
+    }
 }
 /*-----------------------------------------------------------*/
 
@@ -143,21 +143,21 @@ void vPeriodicTask( void *pvParameters )
 TickType_t xLastWakeTime;
 const TickType_t xDelay5ms = pdMS_TO_TICKS( 3UL );
 
-	/* The xLastWakeTime variable needs to be initialized with the current tick
-	count.  Note that this is the only time we access this variable.  From this
-	point on xLastWakeTime is managed automatically by the vTaskDelayUntil()
-	API function. */
-	xLastWakeTime = xTaskGetTickCount();
+    /* The xLastWakeTime variable needs to be initialized with the current tick
+    count.  Note that this is the only time we access this variable.  From this
+    point on xLastWakeTime is managed automatically by the vTaskDelayUntil()
+    API function. */
+    xLastWakeTime = xTaskGetTickCount();
 
-	/* As per most tasks, this task is implemented in an infinite loop. */
-	for( ;; )
-	{
-		/* Print out the name of this task. */
-		LOG( NOBJ, "Periodic task is running" );
+    /* As per most tasks, this task is implemented in an infinite loop. */
+    for( ;; )
+    {
+        /* Print out the name of this task. */
+        LOG( NOBJ, "Periodic task is running" );
 
-		/* We want this task to execute exactly every 10 milliseconds. */
-		vTaskDelayUntil( &xLastWakeTime, xDelay5ms );
-	}
+        /* We want this task to execute exactly every 10 milliseconds. */
+        vTaskDelayUntil( &xLastWakeTime, xDelay5ms );
+    }
 }
 
 
