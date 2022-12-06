@@ -87,13 +87,13 @@ void EMBEDULAR_Main( void *param )
 ( void ) param;
 
     /* Create one of the two tasks. */
-    xTaskCreateStatic(	vTaskFunction,			/* Pointer to the function that implements the task. */
-                        "Task 1",				/* Text name for the task.  This is to facilitate debugging only. */
-                        1000,			        /* Stack depth - most small microcontrollers will use much less stack than this. */
-                        (void*)pcTextForTask1,	/* Pass the text to be printed in as the task parameter. */
-                        1,						/* This task will run at priority 1. */
-                        xTask1Stack,             /* [xTaskCreateStatic] Task stack. */
-                        &xTask1ControlBlock );   /* [xTaskCreateStatic] Task control block */
+    xTaskCreateStatic(	vTaskFunction,          /* Pointer to the function that implements the task. */
+                        "Task 1",               /* Text name for the task.  This is to facilitate debugging only. */
+                        1000,                   /* Stack depth - most small microcontrollers will use much less stack than this. */
+                        (void*)pcTextForTask1,  /* Pass the text to be printed in as the task parameter. */
+                        1,                      /* This task will run at priority 1. */
+                        xTask1Stack,            /* [xTaskCreateStatic] Task stack. */
+                        &xTask1ControlBlock );  /* [xTaskCreateStatic] Task control block */
 
     /* Create the other task in exactly the same way.  Note this time that we
     are creating the SAME task, but passing in a different parameter.  We are

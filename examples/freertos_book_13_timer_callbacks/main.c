@@ -62,8 +62,8 @@
 #include "supporting_functions.h"
 
 /* The periods assigned to the one-shot and auto-reload timers respectively. */
-#define mainONE_SHOT_TIMER_PERIOD		( pdMS_TO_TICKS( 3333UL ) )
-#define mainAUTO_RELOAD_TIMER_PERIOD	( pdMS_TO_TICKS( 500UL ) )
+#define mainONE_SHOT_TIMER_PERIOD        ( pdMS_TO_TICKS( 3333UL ) )
+#define mainAUTO_RELOAD_TIMER_PERIOD    ( pdMS_TO_TICKS( 500UL ) )
 
 /* State of each statically created timer. */
 StaticTimer_t xOneShotTimerBuffer;
@@ -89,20 +89,20 @@ BaseType_t xTimer1Started, xTimer2Started;
 
     /* Create the one shot software timer, storing the handle to the created
     software timer in xOneShotTimer. */
-    xOneShotTimer = xTimerCreateStatic( "OneShot",				    /* Text name for the software timer - not used by FreeRTOS. */
-                                        mainONE_SHOT_TIMER_PERIOD,	/* The software timer's period in ticks. */
-                                        pdFALSE,					/* Setting uxAutoRealod to pdFALSE creates a one-shot software timer. */
-                                        0,							/* This example does not use the timer id. */
-                                        prvOneShotTimerCallback,	/* The callback function to be used by the software timer being created. */
+    xOneShotTimer = xTimerCreateStatic( "OneShot",                  /* Text name for the software timer - not used by FreeRTOS. */
+                                        mainONE_SHOT_TIMER_PERIOD,  /* The software timer's period in ticks. */
+                                        pdFALSE,                    /* Setting uxAutoRealod to pdFALSE creates a one-shot software timer. */
+                                        0,                          /* This example does not use the timer id. */
+                                        prvOneShotTimerCallback,    /* The callback function to be used by the software timer being created. */
                                         &xOneShotTimerBuffer );     /* Data associated with the timer being created. */
 
     /* Create the auto-reload software timer, storing the handle to the created
     software timer in xAutoReloadTimer. */
-    xAutoReloadTimer = xTimerCreateStatic(  "AutoReload",					/* Text name for the software timer - not used by FreeRTOS. */
-                                            mainAUTO_RELOAD_TIMER_PERIOD,	/* The software timer's period in ticks. */
-                                            pdTRUE,						    /* Set uxAutoRealod to pdTRUE to create an auto-reload software timer. */
-                                            0,								/* This example does not use the timer id. */
-                                            prvAutoReloadTimerCallback,	    /* The callback function to be used by the software timer being created. */
+    xAutoReloadTimer = xTimerCreateStatic(  "AutoReload",                   /* Text name for the software timer - not used by FreeRTOS. */
+                                            mainAUTO_RELOAD_TIMER_PERIOD,   /* The software timer's period in ticks. */
+                                            pdTRUE,                         /* Set uxAutoRealod to pdTRUE to create an auto-reload software timer. */
+                                            0,                              /* This example does not use the timer id. */
+                                            prvAutoReloadTimerCallback,     /* The callback function to be used by the software timer being created. */
                                             &xAutoReloadTimerBuffer );      /* Data associated with the timer being created. */
 
     /* Check the timers were created. */

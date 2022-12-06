@@ -62,7 +62,7 @@
 #include "supporting_functions.h"
 
 /* The periods assigned to the one-shot timer. */
-#define mainBACKLIGHT_TIMER_PERIOD		( pdMS_TO_TICKS( 5000UL ) )
+#define mainBACKLIGHT_TIMER_PERIOD      ( pdMS_TO_TICKS( 5000UL ) )
 
 /*-----------------------------------------------------------*/
 
@@ -110,10 +110,10 @@ void EMBEDULAR_Main( void *param )
 
     /* Create the one shot timer, storing the handle to the created timer in
     xOneShotTimer. */
-    xBacklightTimer = xTimerCreateStatic(   "Backlight",			    /* Text name for the timer - not used by FreeRTOS. */
-                                            mainBACKLIGHT_TIMER_PERIOD,	/* The timer's period in ticks. */
-                                            pdFALSE,					/* Set uxAutoRealod to pdFALSE to create a one-shot timer. */
-                                            0,							/* The timer ID is not used in this example. */
+    xBacklightTimer = xTimerCreateStatic(   "Backlight",                /* Text name for the timer - not used by FreeRTOS. */
+                                            mainBACKLIGHT_TIMER_PERIOD, /* The timer's period in ticks. */
+                                            pdFALSE,                    /* Set uxAutoRealod to pdFALSE to create a one-shot timer. */
+                                            0,                          /* The timer ID is not used in this example. */
                                             prvBacklightTimerCallback,  /* The callback function to be used by the timer being created. */
                                             &xBacklightTimerBuffer );   /* Data associated with the timer being created. */
 
@@ -122,7 +122,7 @@ void EMBEDULAR_Main( void *param )
     prevents CPU time being wasted by polling for key presses when no keys have
     been pressed.  It is not practical to use real interrupts when using the
     FreeRTOS Windows port, so the vKeyHitTask() task is created to instead 
-    provide the	key reading functionality by simply polling the keyboard. */
+    provide the key reading functionality by simply polling the keyboard. */
     xTaskCreateStatic( vKeyHitTask, "Key poll", 1000, NULL, 1, keyHitStack, &keyHitControlBlock );
 
     /* Start the timer. */

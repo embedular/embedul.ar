@@ -75,12 +75,12 @@
 /* The number of the simulated interrupt used in this example.  Numbers 0 to 2
 are used by the FreeRTOS Windows port itself, so 3 is the first number available
 to the application. */
-#define mainINTERRUPT_NUMBER	3
+#define mainINTERRUPT_NUMBER    3
 
 /* Definitions for the event bits in the event group. */
-#define mainFIRST_TASK_BIT	( 1UL << 0UL ) /* Event bit 0, which is set by a task. */
-#define mainSECOND_TASK_BIT	( 1UL << 1UL ) /* Event bit 1, which is set by a task. */
-#define mainISR_BIT			( 1UL << 2UL ) /* Event bit 2, which is set by an ISR. */
+#define mainFIRST_TASK_BIT      ( 1UL << 0UL )  /* Event bit 0, which is set by a task. */
+#define mainSECOND_TASK_BIT     ( 1UL << 1UL )  /* Event bit 1, which is set by a task. */
+#define mainISR_BIT             ( 1UL << 2UL )  /* Event bit 2, which is set by an ISR. */
 
 /* The tasks to be created. */
 static void vIntegerGenerator( void *pvParameters );
