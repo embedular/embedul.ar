@@ -11,9 +11,7 @@ $(call emb_info,Compiling example '$(EXAMPLE)')
 APP_OBJS += \
     ./examples/$(EXAMPLE)/main.o
 
-#$(CONFIG)
-
-# Optional example Makefile params
+# (Optional) Specific example makefile params
 -include ./examples/$(EXAMPLE)/example.mk
 
 $(BUILD)
