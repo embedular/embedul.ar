@@ -183,8 +183,7 @@ void BOARD_Sync (void)
             s_board->iface->Update (s_board);
         }
 
-        INPUT_Update ();
-        OUTPUT_Update ();
+        MIO_Update ();
     }
     OSWRAP_ResumeScheduler ();
 }

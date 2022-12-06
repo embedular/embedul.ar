@@ -94,6 +94,12 @@ void OSWRAP_EnableAutoSync (const uint32_t Period_ms)
 }
 
 
+void OSWRAP_EnableAltTickHook (void)
+{
+    s_o->enableAltTickHook = true;
+}
+
+
 void OSWRAP_SuspendScheduler (void)
 {
     if (s_o->iface->SuspendScheduler)
@@ -109,6 +115,17 @@ void OSWRAP_ResumeScheduler (void)
     {
         s_o->iface->ResumeScheduler (s_o);
     }
+}
+
+
+const char * OSWRAP_TaskName (void)
+{
+    if (s_o->iface->TaskName)
+    {
+        return s_o->iface->TaskName (s_o);
+    }
+
+    return NULL;
 }
 
 
@@ -156,6 +173,8 @@ void OSWRAP__createMainTaskAndSync (struct BOARD *const B,
         // Spawn the application main task
         s_o->iface->CreateMainTask (s_o, MainTask);
 
+        // This task (RunTask) will be used to call BOARD_Sync() until
+        // the application calls BOARD_Exit().
         while (!B->exit)
         {
             // Sync using one of two methods depending on

@@ -41,15 +41,6 @@
 
 #define configUSE_TRACE_FACILITY                   1
 
-/* Software timer related configuration options.  The maximum possible task
- * priority is configMAX_PRIORITIES - 1.  The priority of the timer task is
- * deliberately set higher to ensure it is correctly capped back to
- * configMAX_PRIORITIES - 1. */
-#define configUSE_TIMERS                           0
-#define configTIMER_TASK_PRIORITY                  ( configMAX_PRIORITIES - 1 )
-#define configTIMER_QUEUE_LENGTH                   20
-#define configTIMER_TASK_STACK_DEPTH               ( configMINIMAL_STACK_SIZE * 2 )
-
 /* Run time stats gathering configuration options. */
 unsigned long ulGetRunTimeCounterValue( void ); /* Prototype of function that returns run time counter. */
 void vConfigureTimerForRunTimeStats( void );    /* Prototype of function that initialises the run time counter. */

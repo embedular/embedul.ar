@@ -51,12 +51,6 @@
         _bon, \
         IO_GUI_ELEMENT_DEFAULT_TON)
 
-const char *const s_GUIFunctionName[IO_GUI_Function__COUNT] =
-{
-    [IO_GUI_Function_Input]     = "Input",
-    [IO_GUI_Function_Output]    = "Output"
-};
-
 
 struct ButtonState
 {
@@ -330,13 +324,12 @@ const struct IO_GUI_Element s_OutputRangeNames[IO_GUI_OUTR__COUNT] =
 };
 
 
-const struct IO_GUI_Element *const
-    s_IONames[IO_GUI_Function__COUNT][IO_Type__COUNT] =
+const struct IO_GUI_Element *const s_IONames[MIO_Dir__COUNT][IO_Type__COUNT] =
 {
-    [IO_GUI_Function_Input][IO_Type_Bit]    = s_InputBitNames,
-    [IO_GUI_Function_Input][IO_Type_Range]  = s_InputRangeNames,
-    [IO_GUI_Function_Output][IO_Type_Bit]   = s_OutputBitNames,
-    [IO_GUI_Function_Output][IO_Type_Range] = s_OutputRangeNames
+    [MIO_Dir_Input][IO_Type_Bit]    = s_InputBitNames,
+    [MIO_Dir_Input][IO_Type_Range]  = s_InputRangeNames,
+    [MIO_Dir_Output][IO_Type_Bit]   = s_OutputBitNames,
+    [MIO_Dir_Output][IO_Type_Range] = s_OutputRangeNames
 };
 
 
@@ -389,12 +382,10 @@ void IO_GUI_Init (struct IO_GUI *const G, const enum SCREEN_Role Screen)
 
     resetShowSelectedElement (G);
 
-    G->showType         = IO_Type_Bit;
-    G->showFunction     = IO_GUI_Function_Input;
-    G->showProfile[IO_GUI_Function_Input]
-                        = INPUT_PROFILE_Type_MAIN;
-    G->showProfile[IO_GUI_Function_Output]
-                        = OUTPUT_PROFILE_Type_SIGN;        
+    G->showType                     = IO_Type_Bit;
+    G->showDir                 = MIO_Dir_Input;
+    G->showProfile[MIO_Dir_Input]   = INPUT_PROFILE_Group_MAIN;
+    G->showProfile[MIO_Dir_Output]  = OUTPUT_PROFILE_Group_SIGN;        
 
     BITFIELD_Init (&G->inBitfield, G->inBitBuffer,
                    BITFIELD_COUNT(IO_GUI_INB__COUNT), NULL, 0);
@@ -411,39 +402,40 @@ void IO_GUI_Init (struct IO_GUI *const G, const enum SCREEN_Role Screen)
 
 void IO_GUI_Attach (struct IO_GUI *const G)
 {
-    INPUT_RegisterGateway ((struct IO *) G, 0);
+    MIO_RegisterGateway (MIO_Dir_Input, (struct IO *) G, 0);
 
-    INPUT_MAP_BIT (CONTROL, Backlight, IO_GUI_INB_ControlBacklight);
-    INPUT_MAP_BIT (CONTROL, StoragePower, IO_GUI_INB_ControlStoragePower);
-    INPUT_MAP_BIT (CONTROL, StorageDetect, IO_GUI_INB_ControlStorageDetect);
-    INPUT_MAP_BIT (CONTROL, WirelessEnable, IO_GUI_INB_ControlWirelessEnable);
-    INPUT_MAP_BIT (CONTROL, SoundMute, IO_GUI_INB_ControlSoundMute);
+    MIO_MAP_INPUT_BIT (CONTROL, Backlight, IO_GUI_INB_ControlBacklight);
+    MIO_MAP_INPUT_BIT (CONTROL, StoragePower, IO_GUI_INB_ControlStoragePower);
+    MIO_MAP_INPUT_BIT (CONTROL, StorageDetect, IO_GUI_INB_ControlStorageDetect);
+    MIO_MAP_INPUT_BIT (CONTROL, WirelessEnable,
+                       IO_GUI_INB_ControlWirelessEnable);
+    MIO_MAP_INPUT_BIT (CONTROL, SoundMute, IO_GUI_INB_ControlSoundMute);
 
-    INPUT_MAP_BIT (GP1, Right, IO_GUI_INB_Gp1Right);
-    INPUT_MAP_BIT (GP1, Left, IO_GUI_INB_Gp1Left);
-    INPUT_MAP_BIT (GP1, Down, IO_GUI_INB_Gp1Down);
-    INPUT_MAP_BIT (GP1, Up, IO_GUI_INB_Gp1Up);
-    INPUT_MAP_BIT (GP1, Start, IO_GUI_INB_Gp1Start);
-    INPUT_MAP_BIT (GP1, Select, IO_GUI_INB_Gp1Select);
-    INPUT_MAP_BIT (GP1, A, IO_GUI_INB_Gp1A);
-    INPUT_MAP_BIT (GP1, B, IO_GUI_INB_Gp1B);
-    INPUT_MAP_BIT (GP1, C, IO_GUI_INB_Gp1C);
-    INPUT_MAP_BIT (GP1, X, IO_GUI_INB_Gp1X);
-    INPUT_MAP_BIT (GP1, Y, IO_GUI_INB_Gp1Y);
-    INPUT_MAP_BIT (GP1, Z, IO_GUI_INB_Gp1Z);
+    MIO_MAP_INPUT_BIT (GP1, Right, IO_GUI_INB_Gp1Right);
+    MIO_MAP_INPUT_BIT (GP1, Left, IO_GUI_INB_Gp1Left);
+    MIO_MAP_INPUT_BIT (GP1, Down, IO_GUI_INB_Gp1Down);
+    MIO_MAP_INPUT_BIT (GP1, Up, IO_GUI_INB_Gp1Up);
+    MIO_MAP_INPUT_BIT (GP1, Start, IO_GUI_INB_Gp1Start);
+    MIO_MAP_INPUT_BIT (GP1, Select, IO_GUI_INB_Gp1Select);
+    MIO_MAP_INPUT_BIT (GP1, A, IO_GUI_INB_Gp1A);
+    MIO_MAP_INPUT_BIT (GP1, B, IO_GUI_INB_Gp1B);
+    MIO_MAP_INPUT_BIT (GP1, C, IO_GUI_INB_Gp1C);
+    MIO_MAP_INPUT_BIT (GP1, X, IO_GUI_INB_Gp1X);
+    MIO_MAP_INPUT_BIT (GP1, Y, IO_GUI_INB_Gp1Y);
+    MIO_MAP_INPUT_BIT (GP1, Z, IO_GUI_INB_Gp1Z);
 
-    INPUT_MAP_BIT (GP2, Right, IO_GUI_INB_Gp2Right);
-    INPUT_MAP_BIT (GP2, Left, IO_GUI_INB_Gp2Left);
-    INPUT_MAP_BIT (GP2, Down, IO_GUI_INB_Gp2Down);
-    INPUT_MAP_BIT (GP2, Up, IO_GUI_INB_Gp2Up);
-    INPUT_MAP_BIT (GP2, Start, IO_GUI_INB_Gp2Start);
-    INPUT_MAP_BIT (GP2, Select, IO_GUI_INB_Gp2Select);
-    INPUT_MAP_BIT (GP2, A, IO_GUI_INB_Gp2A);
-    INPUT_MAP_BIT (GP2, B, IO_GUI_INB_Gp2B);
-    INPUT_MAP_BIT (GP2, C, IO_GUI_INB_Gp2C);
-    INPUT_MAP_BIT (GP2, X, IO_GUI_INB_Gp2X);
-    INPUT_MAP_BIT (GP2, Y, IO_GUI_INB_Gp2Y);
-    INPUT_MAP_BIT (GP2, Z, IO_GUI_INB_Gp2Z);
+    MIO_MAP_INPUT_BIT (GP2, Right, IO_GUI_INB_Gp2Right);
+    MIO_MAP_INPUT_BIT (GP2, Left, IO_GUI_INB_Gp2Left);
+    MIO_MAP_INPUT_BIT (GP2, Down, IO_GUI_INB_Gp2Down);
+    MIO_MAP_INPUT_BIT (GP2, Up, IO_GUI_INB_Gp2Up);
+    MIO_MAP_INPUT_BIT (GP2, Start, IO_GUI_INB_Gp2Start);
+    MIO_MAP_INPUT_BIT (GP2, Select, IO_GUI_INB_Gp2Select);
+    MIO_MAP_INPUT_BIT (GP2, A, IO_GUI_INB_Gp2A);
+    MIO_MAP_INPUT_BIT (GP2, B, IO_GUI_INB_Gp2B);
+    MIO_MAP_INPUT_BIT (GP2, C, IO_GUI_INB_Gp2C);
+    MIO_MAP_INPUT_BIT (GP2, X, IO_GUI_INB_Gp2X);
+    MIO_MAP_INPUT_BIT (GP2, Y, IO_GUI_INB_Gp2Y);
+    MIO_MAP_INPUT_BIT (GP2, Z, IO_GUI_INB_Gp2Z);
 
     // Both Bit_Overtemp, Bit_ChannelError, RangeChannelsShorted, and
     // Range_ChannelsOpen share the same number of elements
@@ -451,67 +443,67 @@ void IO_GUI_Attach (struct IO_GUI *const G)
          i <= INPUT_PROFILE_LIGHTDEV_Bit_Overtemp__END -
               INPUT_PROFILE_LIGHTDEV_Bit_Overtemp__BEGIN; ++i)
     {
-        INPUT_Map (INPUT_PROFILE_Type_LIGHTDEV, IO_Type_Bit,
-                   INPUT_PROFILE_LIGHTDEV_Bit_Overtemp__BEGIN + i,
-                   IO_GUI_INB_LightdevOvertemp__BEGIN + i);
+        MIO_Map (MIO_Dir_Input, INPUT_PROFILE_Group_LIGHTDEV, IO_Type_Bit,
+                 INPUT_PROFILE_LIGHTDEV_Bit_Overtemp__BEGIN + i,
+                 IO_GUI_INB_LightdevOvertemp__BEGIN + i);
 
-        INPUT_Map (INPUT_PROFILE_Type_LIGHTDEV, IO_Type_Bit,
-                   INPUT_PROFILE_LIGHTDEV_Bit_ChannelError__BEGIN + i,
-                   IO_GUI_INB_LightdevChannelError__BEGIN + i);
+        MIO_Map (MIO_Dir_Input, INPUT_PROFILE_Group_LIGHTDEV, IO_Type_Bit,
+                 INPUT_PROFILE_LIGHTDEV_Bit_ChannelError__BEGIN + i,
+                 IO_GUI_INB_LightdevChannelError__BEGIN + i);
 
-        INPUT_Map (INPUT_PROFILE_Type_LIGHTDEV, IO_Type_Range,
-                   INPUT_PROFILE_LIGHTDEV_Range_ChannelsShorted__BEGIN + i,
-                   IO_GUI_INR_LightdevChannelsShorted__BEGIN + i);
+        MIO_Map (MIO_Dir_Input, INPUT_PROFILE_Group_LIGHTDEV, IO_Type_Range,
+                 INPUT_PROFILE_LIGHTDEV_Range_ChannelsShorted__BEGIN + i,
+                 IO_GUI_INR_LightdevChannelsShorted__BEGIN + i);
 
-        INPUT_Map (INPUT_PROFILE_Type_LIGHTDEV, IO_Type_Range,
-                   INPUT_PROFILE_LIGHTDEV_Range_ChannelsOpen__BEGIN + i,
-                   IO_GUI_INR_LightdevChannelsOpen__BEGIN + i);
+        MIO_Map (MIO_Dir_Input, INPUT_PROFILE_Group_LIGHTDEV, IO_Type_Range,
+                 INPUT_PROFILE_LIGHTDEV_Range_ChannelsOpen__BEGIN + i,
+                 IO_GUI_INR_LightdevChannelsOpen__BEGIN + i);
     }
 
-    INPUT_MAP_BIT (MAIN, A, IO_GUI_INB_MainA);
-    INPUT_MAP_BIT (MAIN, B, IO_GUI_INB_MainB);
-    INPUT_MAP_BIT (MAIN, C, IO_GUI_INB_MainC);
-    INPUT_MAP_BIT (MAIN, D, IO_GUI_INB_MainD);
-    INPUT_MAP_BIT (MAIN, PointerPressed, IO_GUI_INB_MainPointerPressed);
-    INPUT_MAP_RANGE (MAIN, PointerX, IO_GUI_INR_MainPointerX);
-    INPUT_MAP_RANGE (MAIN, PointerY, IO_GUI_INR_MainPointerY);
-    INPUT_MAP_RANGE (MAIN, PointerOverScreenType,
-                     IO_GUI_INR_MainPointerOverScreenType);
+    MIO_MAP_INPUT_BIT (MAIN, A, IO_GUI_INB_MainA);
+    MIO_MAP_INPUT_BIT (MAIN, B, IO_GUI_INB_MainB);
+    MIO_MAP_INPUT_BIT (MAIN, C, IO_GUI_INB_MainC);
+    MIO_MAP_INPUT_BIT (MAIN, D, IO_GUI_INB_MainD);
+    MIO_MAP_INPUT_BIT (MAIN, PointerPressed, IO_GUI_INB_MainPointerPressed);
+    MIO_MAP_INPUT_RANGE (MAIN, PointerX, IO_GUI_INR_MainPointerX);
+    MIO_MAP_INPUT_RANGE (MAIN, PointerY, IO_GUI_INR_MainPointerY);
+    MIO_MAP_INPUT_RANGE (MAIN, PointerOverScreenType,
+                         IO_GUI_INR_MainPointerOverScreenType);
 
 
-    OUTPUT_RegisterGateway ((struct IO *) G, 0);
+    MIO_RegisterGateway (MIO_Dir_Output, (struct IO *) G, 0);
 
-    OUTPUT_MAP_BIT (CONTROL, Backlight, IO_GUI_OUTB_ControlBacklight);
-    OUTPUT_MAP_BIT (CONTROL, StoragePower, IO_GUI_OUTB_ControlStoragePower);
-    OUTPUT_MAP_BIT (CONTROL, StorageEnable, IO_GUI_OUTB_ControlStorageEnable);
-    OUTPUT_MAP_BIT (CONTROL, WirelessEnable, IO_GUI_OUTB_ControlWirelessEnable);
-    OUTPUT_MAP_BIT (CONTROL, SoundMute, IO_GUI_OUTB_ControlSoundMute);
+    MIO_MAP_OUTPUT_BIT (CONTROL, Backlight, IO_GUI_OUTB_ControlBacklight);
+    MIO_MAP_OUTPUT_BIT (CONTROL, StoragePower, IO_GUI_OUTB_ControlStoragePower);
+    MIO_MAP_OUTPUT_BIT (CONTROL, StorageEnable, IO_GUI_OUTB_ControlStorageEnable);
+    MIO_MAP_OUTPUT_BIT (CONTROL, WirelessEnable, IO_GUI_OUTB_ControlWirelessEnable);
+    MIO_MAP_OUTPUT_BIT (CONTROL, SoundMute, IO_GUI_OUTB_ControlSoundMute);
 
     // Both Iref and Pwm share the same number of elements
     for (enum OUTPUT_PROFILE_LIGHTDEV_Range i = 0;
          i <= OUTPUT_PROFILE_LIGHTDEV_Range_Iref__END -
               OUTPUT_PROFILE_LIGHTDEV_Range_Iref__BEGIN; ++i)
     {
-        OUTPUT_Map (OUTPUT_PROFILE_Type_LIGHTDEV, IO_Type_Range,
-                    OUTPUT_PROFILE_LIGHTDEV_Range_Iref__BEGIN + i,
-                    IO_GUI_OUTR_LightdevIref__BEGIN + i);
+        MIO_Map (MIO_Dir_Output, OUTPUT_PROFILE_Group_LIGHTDEV, IO_Type_Range,
+                 OUTPUT_PROFILE_LIGHTDEV_Range_Iref__BEGIN + i,
+                 IO_GUI_OUTR_LightdevIref__BEGIN + i);
 
-        OUTPUT_Map (OUTPUT_PROFILE_Type_LIGHTDEV, IO_Type_Range,
-                    OUTPUT_PROFILE_LIGHTDEV_Range_Pwm__BEGIN + i,
-                    IO_GUI_OUTR_LightdevPwm__BEGIN + i);
+        MIO_Map (MIO_Dir_Output, OUTPUT_PROFILE_Group_LIGHTDEV, IO_Type_Range,
+                 OUTPUT_PROFILE_LIGHTDEV_Range_Pwm__BEGIN + i,
+                 IO_GUI_OUTR_LightdevPwm__BEGIN + i);
     }
 
-    OUTPUT_MAP_BIT (MARQUEE, Dir, IO_GUI_OUTB_MarqueeDir);
-    OUTPUT_MAP_RANGE (MARQUEE, Step, IO_GUI_OUTR_MarqueeStep);
-    OUTPUT_MAP_RANGE (MARQUEE, FlashMaxLuminance,
+    MIO_MAP_OUTPUT_BIT (MARQUEE, Dir, IO_GUI_OUTB_MarqueeDir);
+    MIO_MAP_OUTPUT_RANGE (MARQUEE, Step, IO_GUI_OUTR_MarqueeStep);
+    MIO_MAP_OUTPUT_RANGE (MARQUEE, FlashMaxLuminance,
                       IO_GUI_OUTR_MarqueeFlashMaxLuminance);
-    OUTPUT_MAP_RANGE (MARQUEE, FlashPhase, IO_GUI_OUTR_MarqueeFlashPhase);
-    OUTPUT_MAP_RANGE (MARQUEE, FlashDuration, IO_GUI_OUTR_MarqueeFlashDuration);
+    MIO_MAP_OUTPUT_RANGE (MARQUEE, FlashPhase, IO_GUI_OUTR_MarqueeFlashPhase);
+    MIO_MAP_OUTPUT_RANGE (MARQUEE, FlashDuration, IO_GUI_OUTR_MarqueeFlashDuration);
 
-    OUTPUT_MAP_BIT (SIGN, Warning, IO_GUI_OUTB_SignWarning);
-    OUTPUT_MAP_BIT (SIGN, Red, IO_GUI_OUTB_SignRed);
-    OUTPUT_MAP_BIT (SIGN, Green, IO_GUI_OUTB_SignGreen);
-    OUTPUT_MAP_BIT (SIGN, Blue, IO_GUI_OUTB_SignBlue);
+    MIO_MAP_OUTPUT_BIT (SIGN, Warning, IO_GUI_OUTB_SignWarning);
+    MIO_MAP_OUTPUT_BIT (SIGN, Red, IO_GUI_OUTB_SignRed);
+    MIO_MAP_OUTPUT_BIT (SIGN, Green, IO_GUI_OUTB_SignGreen);
+    MIO_MAP_OUTPUT_BIT (SIGN, Blue, IO_GUI_OUTB_SignBlue);
 }
 
 
@@ -538,11 +530,11 @@ void IO_GUI__setInputRange (struct IO_GUI *const G, const enum IO_GUI_INR Inr,
 
 static IO_Code getProfileCodes (struct IO_GUI *const G)
 {
-    const uint32_t ProfileType = G->showProfile[G->showFunction];
+    const uint32_t ProfileGroup = G->showProfile[G->showDir];
 
-    const IO_Code Codes = (G->showFunction == IO_GUI_Function_Input)?
-                           INPUT_ProfileCodes(ProfileType, G->showType) :
-                           OUTPUT_ProfileCodes(ProfileType, G->showType);
+    const IO_Code Codes =
+        MIO_ProfileCodes (G->showDir, ProfileGroup, G->showType);
+
     return Codes;
 }
 
@@ -552,14 +544,13 @@ static IO_Value getSelfValue (struct IO_GUI *const G,
 {
     if (G->showType == IO_Type_Bit)
     {
-        struct BITFIELD *const B =
-            (G->showFunction == IO_GUI_Function_Input)? 
-                &G->inBitfield : &G->outBitfield;
+        struct BITFIELD *const B = (G->showDir == MIO_Dir_Input)? 
+                                        &G->inBitfield : &G->outBitfield;
 
         return BITFIELD_GetBit (B, DriverCode);
     }
 
-    return (G->showFunction == IO_GUI_Function_Input)?
+    return (G->showDir == MIO_Dir_Input)?
                 G->inRanges[DriverCode] : G->outRanges[DriverCode];
 }
 
@@ -780,20 +771,16 @@ static void processProfileCode (
 {
     const int32_t   X           = 1*8;
     const int32_t   Y           = 7*8 + ElementIndex * 4*8;
-    const uint32_t  ProfileType = G->showProfile[G->showFunction];
+    const uint32_t  ProfileGroup = G->showProfile[G->showDir];
 
-    bool IsMapped = (G->showFunction == IO_GUI_Function_Input)?
-                     INPUT_IsMapped (ProfileType, G->showType, ProfileCode) :
-                     OUTPUT_IsMapped (ProfileType, G->showType, ProfileCode);
+    bool IsMapped = MIO_IsMapped (G->showDir, ProfileGroup,
+                                  G->showType, ProfileCode);
 
     if (IsMapped)
     {
-        const IO_Code SelfDriverCode = 
-            (G->showFunction == IO_GUI_Function_Input)?
-                INPUT__isMappedByDriver(ProfileType, G->showType, ProfileCode,
-                                        &G->device) :
-                OUTPUT__isMappedByDriver(ProfileType, G->showType, ProfileCode,
-                                         &G->device);
+        const IO_Code SelfDriverCode =
+            MIO__isMappedByDriver (G->showDir, ProfileGroup, G->showType,
+                                   ProfileCode, &G->device);
 
         // Mapped to this driver
         if (SelfDriverCode != IO_INVALID_CODE)
@@ -802,12 +789,12 @@ static void processProfileCode (
             RGB332_Select vTextColor = IO_GUI_ELEMENT_DEFAULT_TOFF;
 
             const char *const ValueName =
-                (G->showFunction == IO_GUI_Function_Input)?
+                (G->showDir == MIO_Dir_Input)?
                     inputName(&G->device, G->showType, SelfDriverCode) :
                     outputName(&G->device, G->showType, SelfDriverCode);
 
             const struct IO_GUI_Element *const E = 
-                &s_IONames[G->showFunction][G->showType][SelfDriverCode];
+                &s_IONames[G->showDir][G->showType][SelfDriverCode];
 
             const IO_Value Value = getSelfValue (G, SelfDriverCode);
             
@@ -827,7 +814,7 @@ static void processProfileCode (
                         VARIANT_ToString(&VARIANT_SpawnBaseAuto(Base, Value)),
                         vBackColor, vTextColor);
 
-            if (G->showFunction == IO_GUI_Function_Input)
+            if (G->showDir == MIO_Dir_Input)
             {
                 processSelfInputProfileCode (G, X, Y, SelfDriverCode,
                                              PointerX, PointerY, Pressed);
@@ -837,11 +824,8 @@ static void processProfileCode (
         else
         {
             const struct IO_ConstGateway Gateway = 
-                (G->showFunction == IO_GUI_Function_Input)?
-                    INPUT__getMappedGateway(ProfileType, G->showType,
-                                            ProfileCode) :
-                    OUTPUT__getMappedGateway(ProfileType, G->showType,
-                                             ProfileCode);
+                MIO__getMappedGateway (G->showDir, ProfileGroup, G->showType,
+                                       ProfileCode);
 
             char driverDesc[64];
 
@@ -890,12 +874,12 @@ static void drawMenuItem (struct IO_GUI *const G,
 }
 
 
-inline static const char * getProfileName (const enum IO_GUI_Function Function,
-                                           const uint32_t ProfileType)
+inline static const char * getProfileName (const enum MIO_Dir Dir,
+                                           const uint32_t ProfileGroup)
 {
-    return (Function == IO_GUI_Function_Input)?
-            INPUT_PROFILE_GetTypeName(ProfileType) :
-            OUTPUT_PROFILE_GetTypeName(ProfileType);
+    return (Dir == MIO_Dir_Input)?
+            INPUT_PROFILE_GetGroupName(ProfileGroup) :
+            OUTPUT_PROFILE_GetGroupName(ProfileGroup);
 }
 
 
@@ -934,9 +918,9 @@ static void processMenu (struct IO_GUI *const G, const uint32_t PointerX,
                     {
                         itemPressed = 1;
 
-                        G->showFunction =
-                            (G->showFunction + 1 < IO_GUI_Function__COUNT)?
-                                G->showFunction + 1 : 0;
+                        G->showDir =
+                            (G->showDir + 1 < MIO_Dir__COUNT)?
+                                G->showDir + 1 : 0;
                     }
                     // Second item: Profile
                     else if (PointerX < 20*8*2)
@@ -944,14 +928,14 @@ static void processMenu (struct IO_GUI *const G, const uint32_t PointerX,
                         itemPressed = 2;
 
                         const uint32_t ProfileCount =
-                            (G->showFunction == IO_GUI_Function_Input)?
-                                INPUT_PROFILE_Type__COUNT :
-                                OUTPUT_PROFILE_Type__COUNT;
+                            (G->showDir == MIO_Dir_Input)?
+                                INPUT_PROFILE_Group__COUNT :
+                                OUTPUT_PROFILE_Group__COUNT;
 
-                        G->showProfile[G->showFunction] = 
-                            (G->showProfile[G->showFunction] + 1 < 
+                        G->showProfile[G->showDir] = 
+                            (G->showProfile[G->showDir] + 1 < 
                             ProfileCount)?
-                                G->showProfile[G->showFunction] + 1 : 0;
+                                G->showProfile[G->showDir] + 1 : 0;
                     }
                     // Third item: Bit or Range
                     else if (PointerX < 20*8*3)
@@ -970,14 +954,13 @@ static void processMenu (struct IO_GUI *const G, const uint32_t PointerX,
     const IO_Code ProfileCodes = getProfileCodes (G);
 
     drawMenuItem (G, 0, "Function",
-                  s_GUIFunctionName[G->showFunction],
+                  MIO_DirName(G->showDir),
                   itemPressed == 1);
     drawMenuItem (G, 1, "Profile",
-                  getProfileName(G->showFunction,
-                                            G->showProfile[G->showFunction]),
+                  getProfileName(G->showDir, G->showProfile[G->showDir]),
                   itemPressed == 2);
     drawMenuItem (G, 2, "Type",
-                  G->showType == IO_Type_Bit? "Bit" : "Range",
+                  IO_TypeName(G->showType),
                   itemPressed == 3);
 
     if (ProfileCodes)

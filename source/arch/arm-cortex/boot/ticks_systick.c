@@ -36,7 +36,7 @@ struct TICKS_SYSTICK
 static struct TICKS_SYSTICK s_ticks_systick;
 
 
-// Note that this driver supports a single instance of itself
+// This driver supports a single instance of itself
 static volatile TIMER_Ticks         s_ticks = 0;
 static volatile TIMER_TickHookFunc  s_hook  = NULL;
 

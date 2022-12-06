@@ -10,7 +10,7 @@
 
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION     1
 #define configCPU_CLOCK_HZ			                SystemCoreClock
-#define configMINIMAL_STACK_SIZE	                (128 + 32)
+#define configMINIMAL_STACK_SIZE	                1000 // (128 + 32)
 
 #ifndef __NVIC_PRIO_BITS
     #error Undefined CMSIS __NVIC_PRIO_BITS

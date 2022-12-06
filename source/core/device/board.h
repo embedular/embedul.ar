@@ -36,8 +36,7 @@
 #include "embedul.ar/source/core/device/sound.h"
 #include "embedul.ar/source/core/manager/comm.h"
 #include "embedul.ar/source/core/manager/log.h"
-#include "embedul.ar/source/core/manager/input.h"
-#include "embedul.ar/source/core/manager/output.h"
+#include "embedul.ar/source/core/manager/mio.h"
 #include "embedul.ar/source/core/manager/storage.h"
 #include "embedul.ar/source/core/manager/screen.h"
 #include "embedul.ar/source/core/lang/en.h"
@@ -144,8 +143,7 @@ struct BOARD
     // Already allocated managers for device drivers
     struct COMM                     comm;
     struct LOG                      log;
-    struct INPUT                    input;
-    struct OUTPUT                   output;
+    struct MIO                      mio;
     struct STORAGE                  storage;
     struct SCREEN                   screen;
 };

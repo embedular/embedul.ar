@@ -142,7 +142,8 @@ struct IO_ConstGateway
 enum IO_MapAction
 {
     IO_MapAction_NoRemap,
-    IO_MapAction_Overwrite
+    IO_MapAction_Overwrite,
+    IO_MapAction__COUNT
 };
 
 
@@ -151,6 +152,7 @@ void            IO_Init                 (struct IO *const Io,
                                          const struct IO_PortInfo *const
                                          PortInfo, const TIMER_Ticks
                                          DeferredUpdatePeriod);
+const char *    IO_TypeName             (const enum IO_Type IoType);
 bool            IO_Initialized          (struct IO *const Io);
 void            IO_Update               (struct IO *const Io);
 IO_Port         IO_PortCount            (struct IO *const Io);

@@ -30,7 +30,7 @@
 #include "task.h"
 
 
-static volatile TIMER_TickHookFunc s_tickHook = NULL;
+static TIMER_TickHookFunc s_tickHook = NULL;
 
 
 // Dimensions of the buffer that the task being created will use as its stack.
@@ -49,9 +49,9 @@ static volatile TIMER_TickHookFunc s_tickHook = NULL;
     #define MAIN_TASK_STACK_WORDS   OSWRAP_FREERTOS_MAIN_TASK_STACK_WORDS
 #endif
 
-
-#define RUN_TASK_PRIORITY           tskIDLE_PRIORITY + 1
-#define MAIN_TASK_PRIORITY          tskIDLE_PRIORITY + 1
+// RunTask and MainTask run at the highest priority available.
+#define RUN_TASK_PRIORITY           (configMAX_PRIORITIES - 1)
+#define MAIN_TASK_PRIORITY          (configMAX_PRIORITIES - 1)
 
 
 struct OSWRAP_FREERTOS
@@ -81,28 +81,33 @@ StackType_t     s_mainTaskStack[MAIN_TASK_STACK_WORDS];
 BSS_SECTION_OSWRAP_FREERTOS_RUN_MAIN_TCB
 #endif
 StaticTask_t    s_runTaskControlBlock;
+
+#ifdef BSS_SECTION_OSWRAP_FREERTOS_RUN_MAIN_TCB
+BSS_SECTION_OSWRAP_FREERTOS_RUN_MAIN_TCB
+#endif
 StaticTask_t    s_mainTaskControlBlock;
 
 
-static void summary                 (struct OSWRAP *const O);
-static void createRunTaskAndStart   (struct OSWRAP *const O,
-                                     const OSWRAP_TaskFunc RunTask,
-                                     struct BOARD *const B);
-static void createMainTask          (struct OSWRAP *const O,
-                                     const OSWRAP_TaskFunc MainTask);
-static void runTaskSyncLock         (struct OSWRAP *const O);
-static bool syncUnlock              (struct OSWRAP *const O);
-static void closeMainTask           (struct OSWRAP *const O);
-static void closeRunTaskAndEnd      (struct OSWRAP *const O);
-static void suspendScheduler        (struct OSWRAP *const O);
-static void resumeScheduler         (struct OSWRAP *const O);
+static void         summary                 (struct OSWRAP *const O);
+static void         createRunTaskAndStart   (struct OSWRAP *const O,
+                                             const OSWRAP_TaskFunc RunTask,
+                                             struct BOARD *const B);
+static void         createMainTask          (struct OSWRAP *const O,
+                                             const OSWRAP_TaskFunc MainTask);
+static void         runTaskSyncLock         (struct OSWRAP *const O);
+static bool         syncUnlock              (struct OSWRAP *const O);
+static void         closeMainTask           (struct OSWRAP *const O);
+static void         closeRunTaskAndEnd      (struct OSWRAP *const O);
+static void         suspendScheduler        (struct OSWRAP *const O);
+static void         resumeScheduler         (struct OSWRAP *const O);
 static TIMER_TickHookFunc
-            setTickHook             (struct OSWRAP *const O,
-                                     const TIMER_TickHookFunc Hook);
+                    setTickHook             (struct OSWRAP *const O,
+                                             const TIMER_TickHookFunc Hook);
 static TIMER_Ticks
-            ticksNow                (struct OSWRAP *const O);
-static void delay                   (struct OSWRAP *const O,
-                                     const TIMER_Ticks Ticks);
+                    ticksNow                (struct OSWRAP *const O);
+static void         delay                   (struct OSWRAP *const O,
+                                             const TIMER_Ticks Ticks);
+static const char * taskName                (struct OSWRAP *const O);
 
 
 static const struct OSWRAP_IFACE OSWRAP_FREERTOS_IFACE =
@@ -119,7 +124,8 @@ static const struct OSWRAP_IFACE OSWRAP_FREERTOS_IFACE =
     .ResumeScheduler        = resumeScheduler,
     .SetTickHook            = setTickHook,
     .TicksNow               = ticksNow,
-    .Delay                  = delay
+    .Delay                  = delay,
+    .TaskName               = taskName
 };
 
 
@@ -173,6 +179,11 @@ void vApplicationMallocFailedHook (void)
 
 
 #if (configUSE_TICK_HOOK == 1)
+CC_Weak void vApplicationTickHook_2 (void)
+{
+}
+
+
 void vApplicationTickHook (void)
 {
     /* This function will be called by each tick interrupt if
@@ -185,12 +196,17 @@ void vApplicationTickHook (void)
     {
         s_tickHook (xTaskGetTickCountFromISR());
     }
+
+    if (s_oswrap_freertos.device.enableAltTickHook)
+    {
+        vApplicationTickHook_2 ();
+    }
 }
 #endif
 
 
 #if (configUSE_IDLE_HOOK == 1)
-void vApplicationIdleHook (void)
+CC_Weak void vApplicationIdleHook (void)
 {
     /* vApplicationIdleHook() will only be called if configUSE_IDLE_HOOK is set
      * to 1 in FreeRTOSConfig.h.  It will be called on each iteration of the idle
@@ -203,7 +219,6 @@ void vApplicationIdleHook (void)
      * allocated by the kernel to any task that has since deleted itself. */
 }
 #endif
-
 
 /* configUSE_STATIC_ALLOCATION is set to 1, so the application must provide an
  * implementation of vApplicationGetIdleTaskMemory() to provide the memory that is
@@ -456,4 +471,12 @@ static void delay (struct OSWRAP *const O,
     (void) O;
 
     vTaskDelay ((TickType_t)Ticks);
+}
+
+
+static const char * taskName (struct OSWRAP *const O)
+{
+    (void) O;
+
+    return pcTaskGetName (NULL);
 }

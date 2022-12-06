@@ -27,7 +27,7 @@
 
 
 #define LOG_ARG_FMT_MAX_SIZE        512
-#define LOG_DEVICE_FMT              "`0" OBJECT_TYPE_SEPARATOR "`1: "
+#define LOG_OBJECT_INFO_FMT         "`0" OBJECT_TYPE_SEPARATOR "`1: "
 
 static struct LOG * s_l = NULL;
 
@@ -325,7 +325,7 @@ void LOG__assertFailed (struct STREAM *const S, const char *const Func,
 static void logBegin (struct STREAM *const S, const char *const InnerFlow, 
                       const char *const Func, const char *const File,
                       const int Line, 
-                      const struct OBJECT_INFO *const DevInfo,
+                      const struct OBJECT_INFO *const ObjInfo,
                       const char *const Prefix)
 {
     // ╎╎╎│   (in this example: OuterFlow x 3, InnerFlow x 1)
@@ -361,12 +361,12 @@ static void logBegin (struct STREAM *const S, const char *const InnerFlow,
                         Prefix, Func, File, Line);
     }
 
-    if (DevInfo && DevInfo->Ptr)
+    if (ObjInfo && ObjInfo->Ptr)
     {
-        BOARD_AssertState (DevInfo->Type && DevInfo->Description);
+        BOARD_AssertState (ObjInfo->Type && ObjInfo->Description);
 
-        outStrArgs (S, 0, LOG_DEVICE_FMT,
-                    VARIANT_AutoParams(DevInfo->Type, DevInfo->Description));
+        outStrArgs (S, 0, LOG_OBJECT_INFO_FMT,
+                    VARIANT_AutoParams(ObjInfo->Type, ObjInfo->Description));
     }
 }
 
@@ -382,7 +382,7 @@ inline static void logEnd (struct STREAM *const S, const char *const Suffix)
 
 void LOG__args (const char *const InnerFlow, const char *const Func,
                 const char *const File, const int Line, 
-                const struct OBJECT_INFO *const DevInfo, 
+                const struct OBJECT_INFO *const ObjInfo, 
                 const char *const Prefix, const char *const Suffix, 
                 const char *const Msg, struct VARIANT *const ArgValues, 
                 const uint32_t ArgCount)
@@ -392,7 +392,7 @@ void LOG__args (const char *const InnerFlow, const char *const Func,
 
     struct STREAM *const S = s_l->debugStream;
 
-    logBegin (S, InnerFlow, Func, File, Line, DevInfo, Prefix);
+    logBegin (S, InnerFlow, Func, File, Line, ObjInfo, Prefix);
 
     // A custom InnerFlow keeps the same color as the context level
     if (!InnerFlow)

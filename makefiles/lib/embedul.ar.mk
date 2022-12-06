@@ -81,15 +81,14 @@ OBJS += $(LIB_EMBEDULAR)/device/board.o \
         $(LIB_EMBEDULAR)/device/oswrap.o \
         $(LIB_EMBEDULAR)/device/ticks.o \
         $(LIB_EMBEDULAR)/manager/log.o \
-        $(LIB_EMBEDULAR)/manager/input.o \
-        $(LIB_EMBEDULAR)/manager/input/action.o \
-        $(LIB_EMBEDULAR)/manager/input/profile.o \
-        $(LIB_EMBEDULAR)/manager/output.o \
-        $(LIB_EMBEDULAR)/manager/output/profile.o \
+	    $(LIB_EMBEDULAR)/manager/mio.o \
         $(LIB_EMBEDULAR)/manager/storage.o \
         $(LIB_EMBEDULAR)/manager/storage/cache.o \
         $(LIB_EMBEDULAR)/manager/comm.o \
         $(LIB_EMBEDULAR)/manager/screen.o \
+        $(LIB_EMBEDULAR)/misc/input/action.o \
+        $(LIB_EMBEDULAR)/misc/input/profile.o \
+        $(LIB_EMBEDULAR)/misc/output/profile.o \
         $(LIB_EMBEDULAR)/misc/hsl.o \
         $(LIB_EMBEDULAR)/misc/rgb332.o \
         $(LIB_EMBEDULAR)/misc/collide.o

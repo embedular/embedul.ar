@@ -171,26 +171,26 @@ void IO_PCA9956B_Attach (struct IO_PCA9956B *const P,
     BOARD_AssertParams (DeviceOffset < 
                         LIB_EMBEDULAR_CONFIG_INPUT_MAX_LIGHTING_DEVICES);
 
-    INPUT_RegisterGateway ((struct IO *)P, 0);
+    MIO_RegisterGateway (MIO_Dir_Input, (struct IO *)P, 0);
 
-    INPUT_Map (INPUT_PROFILE_Type_LIGHTDEV, IO_Type_Range,
+    INPUT_Map (INPUT_PROFILE_Group_LIGHTDEV, IO_Type_Range,
                INPUT_PROFILE_LIGHTDEV_Range_ChannelsShorted(DeviceOffset),
                IO_PCA9956B_INR_CHANNELS_SHORTED_BITFIELD);
 
-    INPUT_Map (INPUT_PROFILE_Type_LIGHTDEV, IO_Type_Range,
+    INPUT_Map (INPUT_PROFILE_Group_LIGHTDEV, IO_Type_Range,
                INPUT_PROFILE_LIGHTDEV_Range_ChannelsOpen(DeviceOffset),
                IO_PCA9956B_INR_CHANNELS_OPEN_BITFIELD);
 
-    INPUT_Map (INPUT_PROFILE_Type_LIGHTDEV, IO_Type_Bit,
+    INPUT_Map (INPUT_PROFILE_Group_LIGHTDEV, IO_Type_Bit,
                   INPUT_PROFILE_LIGHTDEV_Bit_Overtemp(DeviceOffset),
                   IO_PCA9956B_INB_OVERTEMP);
 
-    INPUT_Map (INPUT_PROFILE_Type_LIGHTDEV, IO_Type_Bit,
+    INPUT_Map (INPUT_PROFILE_Group_LIGHTDEV, IO_Type_Bit,
                INPUT_PROFILE_LIGHTDEV_Bit_ChannelError(DeviceOffset),
                IO_PCA9956B_INB_CHANNEL_ERROR);
 
 
-    OUTPUT_RegisterGateway ((struct IO *)P, 0);
+    MIO_RegisterGateway (MIO_Dir_Output, (struct IO *)P, 0);
 
     const enum OUTPUT_PROFILE_LIGHTDEV_Range IrefStart = 
                     OUTPUT_PROFILE_LIGHTDEV_Range_Iref(ChannelOffset);
@@ -200,9 +200,9 @@ void IO_PCA9956B_Attach (struct IO_PCA9956B *const P,
 
     for (uint32_t i = 0; i < IO_PCA9956B_CHANNEL_COUNT; ++i)
     {
-        OUTPUT_Map (OUTPUT_PROFILE_Type_LIGHTDEV, IO_Type_Range,
+        OUTPUT_Map (OUTPUT_PROFILE_Group_LIGHTDEV, IO_Type_Range,
                     IrefStart + i, IO_PCA9956B_OUTR_CH0_IREF + i);
-        OUTPUT_Map (OUTPUT_PROFILE_Type_LIGHTDEV, IO_Type_Range,
+        OUTPUT_Map (OUTPUT_PROFILE_Group_LIGHTDEV, IO_Type_Range,
                     PwmStart + i, IO_PCA9956B_OUTR_CH0_PWM + i);
     }
 }

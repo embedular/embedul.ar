@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "embedul.ar/source/core/device/io.h"
+#include "embedul.ar/source/core/manager/mio.h"
 #include "embedul.ar/source/core/manager/screen.h"
 #include "SDL.h"
 
@@ -134,15 +134,6 @@ enum IO_GUI_OUTR
 };
 
 
-// FIXME: will become MIO.
-enum IO_GUI_Function
-{
-    IO_GUI_Function_Input,
-    IO_GUI_Function_Output,
-    IO_GUI_Function__COUNT
-};
-
-
 struct IO_GUI
 {
     struct IO               device;
@@ -160,8 +151,8 @@ struct IO_GUI
     uint32_t                rangeIncrement;
     IO_Code                 lastBitCodePressed;
     IO_Code                 lastBitCodeToggled;
-    enum IO_GUI_Function    showFunction;
-    uint32_t                showProfile[IO_GUI_Function__COUNT];
+    enum MIO_Dir            showDir;
+    uint32_t                showProfile[MIO_Dir__COUNT];
     enum IO_Type            showType;
     uint32_t                showElementPage;
     uint32_t                showElementSelected;

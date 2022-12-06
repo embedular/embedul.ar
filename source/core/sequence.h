@@ -26,7 +26,7 @@
 #pragma once
 
 #include "embedul.ar/source/core/timer.h"
-#include "embedul.ar/source/core/manager/input/profile.h"
+#include "embedul.ar/source/core/misc/input/profile.h"
 
 
 enum SEQUENCE_InputType
@@ -63,7 +63,7 @@ struct SEQUENCE_StageInput
     enum SEQUENCE_InputType             type;
     union 
     {
-        enum INPUT_PROFILE_Type         profileType;
+        enum INPUT_PROFILE_Group         profileType;
         enum INPUT_PROFILE_SelectFlag   profileSelectFlags;
     };
     IO_Code                             profileCode;

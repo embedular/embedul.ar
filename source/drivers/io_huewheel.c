@@ -115,14 +115,14 @@ void IO_HUEWHEEL_Attach (struct IO_HUEWHEEL *const H)
 {
     BOARD_AssertParams (H);
 
-    OUTPUT_RegisterGateway ((struct IO *)H, 0);
+    MIO_RegisterGateway (MIO_Dir_Output, (struct IO *)H, 0);
 
-    OUTPUT_MAP_BIT      (MARQUEE, Dir, IO_HUEWHEEL_OUTB_Dir);
-    OUTPUT_MAP_RANGE    (MARQUEE, Step, IO_HUEWHEEL_OUTR_Step);
-    OUTPUT_MAP_RANGE    (MARQUEE, FlashMaxLuminance, 
-                         IO_HUEWHEEL_OUTR_MaxLuminance);
-    OUTPUT_MAP_RANGE    (MARQUEE, FlashPhase, IO_HUEWHEEL_OUTR_Phase);
-    OUTPUT_MAP_RANGE    (MARQUEE, FlashDuration, IO_HUEWHEEL_OUTR_Duration);
+    MIO_MAP_OUTPUT_BIT      (MARQUEE, Dir, IO_HUEWHEEL_OUTB_Dir);
+    MIO_MAP_OUTPUT_RANGE    (MARQUEE, Step, IO_HUEWHEEL_OUTR_Step);
+    MIO_MAP_OUTPUT_RANGE    (MARQUEE, FlashMaxLuminance, 
+                             IO_HUEWHEEL_OUTR_MaxLuminance);
+    MIO_MAP_OUTPUT_RANGE    (MARQUEE, FlashPhase, IO_HUEWHEEL_OUTR_Phase);
+    MIO_MAP_OUTPUT_RANGE    (MARQUEE, FlashDuration, IO_HUEWHEEL_OUTR_Duration);
 }
 
 

@@ -27,7 +27,8 @@
 #include "embedul.ar/source/core/device/board.h"
 
 
-struct NOBJ {} * NOBJ;
+struct NOBJ {} * NOBJ = (struct NOBJ *) 0x0;
+struct TSKN {} * TSKN = (struct TSKN *) 0x1;
 
 
 const char * OBJECT_INFO_Type (struct OBJECT_INFO *O)

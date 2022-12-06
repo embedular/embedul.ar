@@ -78,7 +78,7 @@
 #define LOG_ITEM_FAILED_STR                 LOG_PENDING_FAILED_STR
 #define LOG_ITEM_UNTESTED_STR               " "
 
-#define CHECK_EDATA_OVERRIDE_PROFILE_TYPE   INPUT_PROFILE_Type_MAIN
+#define CHECK_EDATA_OVERRIDE_PROFILE_TYPE   INPUT_PROFILE_Group_MAIN
 #define CHECK_EDATA_OVERRIDE_PROFILE_CODE   INPUT_PROFILE_MAIN_Bit_A
 #define CHECK_EDATA_OVERRIDE_TIMEOUT        5000
 
@@ -388,17 +388,18 @@ static const struct LOG_Table s_ScreenMgrTable =
 #endif
 
 
-bool BOARD_INIT_InputCountdown (const enum INPUT_PROFILE_Type ProfileType,
+bool BOARD_INIT_InputCountdown (const enum INPUT_PROFILE_Group ProfileType,
                                 const IO_Code ProfileCode,
                                 const TIMER_Ticks Countdown,
                                 const char *const Msg)
 {
-    if (!INPUT_IsMapped (ProfileType, IO_Type_Bit, ProfileCode))
+    if (!MIO_IsMapped (MIO_Dir_Input, ProfileType, IO_Type_Bit, ProfileCode))
     {
         return true;
     }
 
-    LOG (NOBJ, Msg, INPUT_MappedName(ProfileType, IO_Type_Bit, ProfileCode));
+    LOG (NOBJ, Msg, MIO_MappedName(MIO_Dir_Input, ProfileType, IO_Type_Bit,
+                                   ProfileCode));
 
     const TIMER_Ticks   Timeout = TICKS_Now () + Countdown;
     const uint32_t      LPM     = LOG_ProgressMax ();
@@ -425,7 +426,8 @@ bool BOARD_INIT_InputCountdown (const enum INPUT_PROFILE_Type ProfileType,
             lastOutColumn = LOG_ProgressUpdate (lastOutColumn, Col);
         }
 
-        lastBitBuffer = INPUT_GetBuffered(ProfileType, IO_Type_Bit, ProfileCode);
+        lastBitBuffer = MIO_GetInputBuffer (ProfileType, IO_Type_Bit, 
+                                            ProfileCode);
     }
     while (!lastBitBuffer && Timeout > TICKS_Now());
 
@@ -466,8 +468,7 @@ static void boardInitSequenceBegin (struct BOARD *const B)
 
 static void initManagers (struct BOARD *const B)
 {
-    INPUT_Init      (&B->input);
-    OUTPUT_Init     (&B->output);
+    MIO_Init        (&B->mio);
     COMM_Init       (&B->comm);
     STORAGE_Init    (&B->storage);
     SCREEN_Init     (&B->screen);
@@ -485,21 +486,25 @@ static void showOswrapSummary ()
 }
 
 
-static void showInputProfilesSummary (struct BOARD *const B)
+static void showIoProfilesSummary (struct BOARD *const B, 
+                                   const enum MIO_Dir Dir, 
+                                   const char *const Title)
 {
-    LOG_AutoContext (NOBJ, LANG_INPUT_MGR_SUMMARY);
+    LOG_AutoContext (&B->mio, Title);
 
     LOG_TableBegin (&s_IOProfilesTable);
 
     uint32_t enabledProfilesCount = 0;
 
-    for (enum INPUT_PROFILE_Type t = 0; t < INPUT_PROFILE_Type__COUNT; ++t)
+    const IO_PROFILE_Group ProfileGroupCount = MIO__profileGroupCount (Dir);
+
+    for (IO_PROFILE_Group g = 0; g < ProfileGroupCount; ++g)
     {
-        const bool EnabledProfile = INPUT_HasProfile (t);
+        const bool EnabledProfile = MIO_HasProfile (Dir, g);
 
-        const struct INPUT_PROFILE *const P = &B->input.profiles[t];        
+        const struct IO_PROFILE *const P = &B->mio.profiles[Dir][g];
 
-        LOG_TableEntry (&s_IOProfilesTable, INPUT_PROFILE_GetTypeName(t),
+        LOG_TableEntry (&s_IOProfilesTable, MIO__profileGroupName(Dir, g),
                         (EnabledProfile)? LOG_ITEM_OK_STR : LOG_ITEM_FAILED_STR,
                         P->count[IO_Type_Bit], P->count[IO_Type_Range]);
 
@@ -513,40 +518,7 @@ static void showInputProfilesSummary (struct BOARD *const B)
 
     if (!enabledProfilesCount)
     {
-        LOG_Warn (NOBJ, LANG_NO_PROFILES_SET);
-    }
-}
-
-
-static void showOutputProfilesSummary (struct BOARD *const B)
-{
-    LOG_AutoContext (NOBJ, LANG_OUTPUT_MGR_SUMMARY);
-
-    LOG_TableBegin (&s_IOProfilesTable);
-
-    uint32_t enabledProfilesCount = 0;
-
-    for (enum OUTPUT_PROFILE_Type t = 0; t < OUTPUT_PROFILE_Type__COUNT; ++t)
-    {
-        const bool EnabledProfile = OUTPUT_HasProfile (t);
-
-        const struct OUTPUT_PROFILE *const P = &B->output.profiles[t];
-
-        LOG_TableEntry (&s_IOProfilesTable, OUTPUT_PROFILE_GetTypeName(t),
-                        (EnabledProfile)? LOG_ITEM_OK_STR : LOG_ITEM_FAILED_STR,
-                        P->count[IO_Type_Bit], P->count[IO_Type_Range]);
-
-        if (EnabledProfile)
-        {
-            ++ enabledProfilesCount;
-        }
-    }
-
-    LOG_TableEnd (&s_IOProfilesTable);
-
-    if (!enabledProfilesCount)
-    {
-        LOG_Warn (NOBJ, LANG_NO_PROFILES_SET);
+        LOG_Warn (&B->mio, LANG_NO_PROFILES_SET);
     }
 }
 
@@ -557,8 +529,8 @@ static void initIoProfiles (struct BOARD *const B)
 
     BOARD_INIT_Component (B, BOARD_Stage_InitIOProfiles, NOBJ);
 
-    showInputProfilesSummary    (B);
-    showOutputProfilesSummary   (B);
+    showIoProfilesSummary (B, MIO_Dir_Input, LANG_INPUT_SUMMARY);
+    showIoProfilesSummary (B, MIO_Dir_Output, LANG_OUTPUT_SUMMARY);
 }
 
 
@@ -574,8 +546,8 @@ static void initIoLevel1Drivers (struct BOARD *const B)
 {
     LOG_AutoContext (NOBJ, LANG_IO_LEVEL_1_DRIVERS);
 
-    INPUT_CurrentMapAction  (IO_MapAction_Overwrite);
-    OUTPUT_CurrentMapAction (IO_MapAction_Overwrite);
+    MIO_CurrentMapAction (MIO_Dir_Input, IO_MapAction_Overwrite);
+    MIO_CurrentMapAction (MIO_Dir_Output, IO_MapAction_Overwrite);
 
     BOARD_INIT_Component (B, BOARD_Stage_InitIOLevel1Drivers, NOBJ);
 }
@@ -611,8 +583,8 @@ static void initIoLevel2Drivers (struct BOARD *const B)
 {
     LOG_AutoContext (NOBJ, LANG_IO_LEVEL_2_DRIVERS);
 
-    INPUT_CurrentMapAction  (IO_MapAction_Overwrite);
-    OUTPUT_CurrentMapAction (IO_MapAction_Overwrite);
+    MIO_CurrentMapAction (MIO_Dir_Input, IO_MapAction_Overwrite);
+    MIO_CurrentMapAction (MIO_Dir_Output, IO_MapAction_Overwrite);
 
     BOARD_INIT_Component (B, BOARD_Stage_InitIOLevel2Drivers, NOBJ);
 }
@@ -639,35 +611,66 @@ static void initIoLevel3Drivers (struct BOARD *const B)
 {
     LOG_AutoContext (NOBJ, LANG_IO_LEVEL_3_DRIVERS);
 
-    INPUT_CurrentMapAction  (IO_MapAction_Overwrite);
-    OUTPUT_CurrentMapAction (IO_MapAction_Overwrite);
+    MIO_CurrentMapAction (MIO_Dir_Input, IO_MapAction_Overwrite);
+    MIO_CurrentMapAction (MIO_Dir_Output, IO_MapAction_Overwrite);
 
     BOARD_INIT_Component (B, BOARD_Stage_InitIOLevel3Drivers, NOBJ);
 }
 
 
-static void showOutputManagerSummary (struct BOARD *const B)
+static void showIoManagerTypeMapping (const enum MIO_Dir Dir,
+                                      const struct IO_PROFILE *const P,
+                                      const IO_PROFILE_Group ProfileGroup,
+                                      const enum IO_Type IoType)
 {
-    LOG_AutoContext (NOBJ, LANG_OUTPUT_MGR_SUMMARY);
+    for (uint32_t pcode = 0; pcode < P->count[IoType]; ++pcode)
+    {
+        struct IO_PROFILE_Map *const Map = &P->map[IoType][pcode];
+
+        if (Map->driverCode != IO_INVALID_CODE)
+        {
+            LOG_TableEntry (&s_ProfileMappingTable,
+                            IO_TypeName(IoType), pcode,
+                            Map->gatewayId, Map->driverCode,
+                            MIO_MappedName(Dir, ProfileGroup, IoType, pcode));
+        }
+        #ifdef BOARD_INIT_SHOW_NOT_SET
+        else 
+        {
+            LOG_TableEntry (&s_ProfileMappingTable,
+                            IO_TypeName(IoType), pcode,
+                            "", "",
+                            "");
+        }
+        #endif
+    }
+}
+
+
+static void showIoManagerSummary (struct BOARD *const B,
+                                  const enum MIO_Dir Dir,
+                                  const char *const Title)
+{
+    LOG_AutoContext (&B->mio, Title);
 
     // List devices
     LOG_TableBegin (&s_IOGatewayTable);
-    for (uint32_t deviceId = 0; deviceId < OUTPUT_MAX_GATEWAYS; ++deviceId)
+    for (uint32_t gwId = 0; gwId < MIO__maxGateways(Dir); ++gwId)
     {
-        struct IO_Gateway *const Src = &B->output.gateways[deviceId];
+        struct IO_Gateway *const G = &B->mio.gateways[Dir][gwId];
 
-        if (Src->driver)
+        if (G->driver)
         {
             LOG_TableEntry (&s_IOGatewayTable,
-                            deviceId, 
-                            IO_Description(Src->driver),
-                            Src->driverPort);
+                            gwId, 
+                            IO_Description(G->driver),
+                            G->driverPort);
         }
         #ifdef BOARD_INIT_SHOW_NOT_SET
         else 
         {
             LOG_TableEntry (&s_IODeviceTable,
-                            deviceId, 
+                            gwId, 
                             "",
                             "");
         }
@@ -677,158 +680,23 @@ static void showOutputManagerSummary (struct BOARD *const B)
 
     LOG_Newline ();
 
-    for (enum OUTPUT_PROFILE_Type t = 0; t < OUTPUT_PROFILE_Type__COUNT; ++t)
+    for (IO_PROFILE_Group pg = 0; pg < MIO__profileGroupCount(Dir); ++pg)
     {
         // Profile is available
-        if (OUTPUT_HasProfile (t))
+        if (MIO_HasProfile (Dir, pg))
         {
-            LOG_AutoContext (NOBJ, OUTPUT_PROFILE_GetTypeName(t));
+            LOG_AutoContext (NOBJ, "`0:`1 profile",
+                             MIO_DirName (Dir),
+                             MIO__profileGroupName(Dir, pg));
 
-            const struct OUTPUT_PROFILE *const P = &B->output.profiles[t];
+
+            const struct IO_PROFILE *const P = &B->mio.profiles[Dir][pg];
 
             // List bit and range mappings
             LOG_TableBegin (&s_ProfileMappingTable);
 
-            for (uint32_t pcode = 0; pcode < P->count[IO_Type_Bit]; ++pcode)
-            {
-                struct IO_PROFILE_Map *const Map =
-                    &P->map[IO_Type_Bit][pcode];
-
-                if (Map->driverCode != IO_INVALID_CODE)
-                {
-                    LOG_TableEntry (&s_ProfileMappingTable,
-                                    "bit", pcode,
-                                    Map->gatewayId, Map->driverCode,
-                                    OUTPUT_MappedName(t, IO_Type_Bit, pcode));
-                }
-                #ifdef BOARD_INIT_SHOW_NOT_SET
-                else 
-                {
-                    LOG_TableEntry (&s_ProfileMappingTable,
-                                    "bit", pcode,
-                                    "", "",
-                                    "");
-                }
-                #endif
-            }
-
-            for (uint32_t pcode = 0; pcode < P->count[IO_Type_Range]; ++pcode)
-            {
-                struct IO_PROFILE_Map *const Map =
-                    &P->map[IO_Type_Range][pcode];
-
-                if (Map->driverCode != IO_INVALID_CODE)
-                {
-                    LOG_TableEntry (&s_ProfileMappingTable,
-                                    "range", pcode,
-                                    Map->gatewayId, Map->driverCode,
-                                    OUTPUT_MappedName(t, IO_Type_Range, pcode));
-                }
-                #ifdef BOARD_INIT_SHOW_NOT_SET
-                else 
-                {
-                    LOG_TableEntry (&s_ProfileMappingTable,
-                                    "range", pcode,
-                                    "", "",
-                                    "");
-                }
-                #endif
-            }
-
-            LOG_TableEnd (&s_ProfileMappingTable);
-        }
-    }
-}
-
-
-static void showInputManagerSummary (struct BOARD *const B)
-{
-    LOG_AutoContext (NOBJ, LANG_INPUT_MGR_SUMMARY);
-
-    // List devices
-    LOG_TableBegin (&s_IOGatewayTable);
-    for (uint32_t deviceId = 0; deviceId < INPUT_MAX_GATEWAYS; ++deviceId)
-    {
-        struct IO_Gateway *const Src = &B->input.gateways[deviceId];
-
-        if (Src->driver)
-        {
-            LOG_TableEntry (&s_IOGatewayTable,
-                            deviceId, 
-                            IO_Description(Src->driver),
-                            Src->driverPort);
-        }
-        #ifdef BOARD_INIT_SHOW_NOT_SET
-        else 
-        {
-            LOG_TableEntry (&s_InputDeviceTable,
-                            deviceId, 
-                            "",
-                            "");
-        }
-        #endif
-    }
-    LOG_TableEnd (&s_IOGatewayTable);
-
-    LOG_Newline ();
-
-    for (enum INPUT_PROFILE_Type t = 0; t < INPUT_PROFILE_Type__COUNT; ++t)
-    {
-        // Profile is available
-        if (INPUT_HasProfile (t))
-        {
-            LOG_AutoContext (NOBJ, INPUT_PROFILE_GetTypeName(t));
-
-            const struct INPUT_PROFILE *const P = &B->input.profiles[t];
-
-            // List bit and range mappings
-            LOG_TableBegin (&s_ProfileMappingTable);
-
-            for (uint32_t pcode = 0; pcode < P->count[IO_Type_Bit]; ++pcode)
-            {
-                const struct IO_PROFILE_Map *const Map =
-                    &P->map[IO_Type_Bit][pcode];
-
-                if (Map->driverCode != IO_INVALID_CODE)
-                {
-                    LOG_TableEntry (&s_ProfileMappingTable,
-                                    "bit", pcode,
-                                    Map->gatewayId, Map->driverCode,
-                                    INPUT_MappedName(t, IO_Type_Bit, pcode));
-                }
-                #ifdef BOARD_INIT_SHOW_NOT_SET
-                else 
-                {
-                    LOG_TableEntry (&s_InputMappingTable,
-                                    "bit", pcode,
-                                    "", "",
-                                    "");
-                }
-                #endif
-            }
-
-            for (uint32_t pcode = 0; pcode < P->count[IO_Type_Range]; ++pcode)
-            {
-                const struct IO_PROFILE_Map *const Map =
-                    &P->map[IO_Type_Range][pcode];
-
-                if (Map->driverCode != IO_INVALID_CODE)
-                {
-                    LOG_TableEntry (&s_ProfileMappingTable,
-                                    "range", pcode,
-                                    Map->gatewayId, Map->driverCode,
-                                    INPUT_MappedName(t, IO_Type_Range, pcode));
-                }
-                #ifdef BOARD_INIT_SHOW_NOT_SET
-                else 
-                {
-                    LOG_TableEntry (&s_InputMappingTable,
-                                    "range", pcode,
-                                    "", "",
-                                    "");
-                }
-                #endif
-            }
+            showIoManagerTypeMapping (Dir, P, pg, IO_Type_Bit);
+            showIoManagerTypeMapping (Dir, P, pg, IO_Type_Range);
 
             LOG_TableEnd (&s_ProfileMappingTable);
         }
@@ -1181,8 +1049,8 @@ static void showScreenManagerSummary (struct BOARD *const B)
 
 static void showManagersSummary (struct BOARD *const B)
 {
-    showInputManagerSummary     (B);
-    showOutputManagerSummary    (B);
+    showIoManagerSummary        (B, MIO_Dir_Input, LANG_INPUT_SUMMARY);
+    showIoManagerSummary        (B, MIO_Dir_Output, LANG_OUTPUT_SUMMARY);
     showCommManagerSummary      (B);
     showStorageManagerSummary   (B);
     showScreenManagerSummary    (B);

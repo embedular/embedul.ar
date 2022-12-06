@@ -27,6 +27,12 @@
 #include "embedul.ar/source/core/device/board.h"
 
 
+const char *const s_TypeName[IO_Type__COUNT] = {
+    [IO_Type_Bit]   = "Bit",
+    [IO_Type_Range] = "Range"
+};
+
+
 void IO_Init (struct IO *const Io,
               const struct IO_IFACE *const Iface,
               const struct IO_PortInfo *const PortInfo,
@@ -56,6 +62,13 @@ void IO_Init (struct IO *const Io,
         BOARD_AssertState (IO_Initialized(Io));
     }
     LOG_ContextEnd ();
+}
+
+
+const char * IO_TypeName (const enum IO_Type IoType)
+{ 
+    BOARD_AssertParams (IoType < IO_Type__COUNT);
+    return s_TypeName[IoType];
 }
 
 

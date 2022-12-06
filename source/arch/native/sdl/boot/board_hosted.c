@@ -270,8 +270,8 @@ void * initComponent (struct BOARD *const B,
 
         case BOARD_Stage_InitIOLevel3Drivers:
         {
-            INPUT_CurrentMapAction  (IO_MapAction_NoRemap);
-            OUTPUT_CurrentMapAction (IO_MapAction_NoRemap);
+            MIO_CurrentMapAction (MIO_Dir_Input, IO_MapAction_NoRemap);
+            MIO_CurrentMapAction (MIO_Dir_Output, IO_MapAction_NoRemap);
 
             IO_GUI_Init     (&H->ioGui, SCREEN_Role_Menu);
             IO_GUI_Attach   (&H->ioGui);

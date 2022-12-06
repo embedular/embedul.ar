@@ -110,6 +110,8 @@ typedef TIMER_TickHookFunc
 typedef TIMER_Ticks (* OSWRAP_TicksNowFunc)(struct OSWRAP *const O);
 typedef void        (* OSWRAP_DelayFunc)(struct OSWRAP *const O,
                                         const TIMER_Ticks Ticks);
+typedef const char *
+                    (* OSWRAP_TaskNameFunc)(struct OSWRAP *const O);
 
 
 struct OSWRAP_IFACE
@@ -128,6 +130,7 @@ struct OSWRAP_IFACE
     const OSWRAP_SetTickHookFunc        SetTickHook;
     const OSWRAP_TicksNowFunc           TicksNow;
     const OSWRAP_DelayFunc              Delay;
+    const OSWRAP_TaskNameFunc           TaskName;
 };
 
 
@@ -135,17 +138,21 @@ struct OSWRAP
 {
     const struct OSWRAP_IFACE   * iface;
     uint32_t                    autoSyncPeriod_ms;
+    bool                        enableAltTickHook;
 };
 
 
-void            OSWRAP_Init             (struct OSWRAP *const O, const struct
-                                         OSWRAP_IFACE *const Iface);
-bool            OSWRAP_IsMultitasking   (void);
-void            OSWRAP_EnableManualSync (void);
-void            OSWRAP_EnableAutoSync   (const uint32_t Period_ms);
+void            OSWRAP_Init                 (struct OSWRAP *const O,
+                                             const struct OSWRAP_IFACE *const
+                                             Iface);
+bool            OSWRAP_IsMultitasking       (void);
+void            OSWRAP_EnableManualSync     (void);
+void            OSWRAP_EnableAutoSync       (const uint32_t Period_ms);
+void            OSWRAP_EnableAltTickHook    (void);
 // Stops the multistasking OS scheduler, effectively avoiding task switches in
 // the middle of a critical section.
-void            OSWRAP_SuspendScheduler (void);
+void            OSWRAP_SuspendScheduler     (void);
 // Resumens the multistasking OS scheduler.
-void            OSWRAP_ResumeScheduler  (void);
-const char *    OSWRAP_Description      (void);
+void            OSWRAP_ResumeScheduler      (void);
+const char *    OSWRAP_TaskName             (void);
+const char *    OSWRAP_Description          (void);

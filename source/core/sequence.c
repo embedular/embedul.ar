@@ -87,29 +87,32 @@ bool SEQUENCE_Update (struct SEQUENCE *const S)
                     break;
 
                 case SEQUENCE_InputType_Bit:
-                    exitStage = INPUT_GetBuffered (Stage->input.profileType,
-                                                 IO_Type_Bit,
-                                                 Stage->input.profileCode);
+                    exitStage = MIO_GetInputBuffer (Stage->input.profileType,
+                                                    IO_Type_Bit,
+                                                    Stage->input.profileCode);
                     break;
 
                 case SEQUENCE_InputType_AnyBit:
-                    exitStage = INPUT_AnyBit (Stage->input.profileSelectFlags);
+                    exitStage = MIO_GetAnyInputBit (
+                                    Stage->input.profileSelectFlags);
                     break;
 
             #if (LIB_EMBEDULAR_CONFIG_INPUT_ACTION == 1)
                 case SEQUENCE_InputType_BitAction:
-                    exitStage =
-                        (INPUT_GetBitAction(Stage->input.profileType,
-                            Stage->input.profileCode) == Stage->input.action)?
-                            true : false;
+                    exitStage = (MIO_GetInputBitAction(
+                                    Stage->input.profileType,
+                                    Stage->input.profileCode) == 
+                                                Stage->input.action)?
+                                true : false;
                     break;
             #endif
 
                 case SEQUENCE_InputType_Range:
                 {
-                    IO_Value Value = INPUT_GetBuffered (Stage->input.profileType,
-                                                      IO_Type_Range,
-                                                      Stage->input.profileCode);
+                    IO_Value Value = MIO_GetInputBuffer (
+                                    Stage->input.profileType, IO_Type_Range,
+                                    Stage->input.profileCode);
+
                     exitStage = (Value >= Stage->input.rangeMin &&
                                  Value <= Stage->input.rangeMax)? 
                                  true : false;
