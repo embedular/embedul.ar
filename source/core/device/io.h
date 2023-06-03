@@ -25,9 +25,8 @@
 
 #pragma once
 
-#include "embedul.ar/source/core/bitfield.h"
 #include "embedul.ar/source/core/timer.h"
-#include <stdint.h>
+#include <stdbool.h>
 
 
 #define IO_INVALID_CODE             ((IO_Code) -1)

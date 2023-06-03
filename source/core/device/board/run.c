@@ -49,7 +49,7 @@
                             "`M40`3`L1" \
                             "`M40`4`L1"
 #define GREET_FWK_0_DESC    "embedded systems framework"
-#define GREET_FWK_1_AUTH    "© 2018-2022 santiago germino"
+#define GREET_FWK_1_AUTH    "© 2018-2023 santiago germino"
 #define GREET_FWK_2_WEB     "http://embedul.ar"
 #define GREET_FWK_3_BUILD   CC_BuildInfoStr
 #define GREET_FWK_4_VER     CC_VcsFwkVersionStr
@@ -565,7 +565,7 @@ static void initCommDrivers (struct BOARD *const B)
     LOG_AutoContext (NOBJ, LANG_COMM_DRIVERS);
 
     // Default LOG stream. This can be overriden by the board or rig.
-    COMM_SetStream (COMM_Stream_Log, B->debugStream);
+    COMM_SetDevice (COMM_Device_Log, B->debugStream);
 
     BOARD_INIT_Component (B, BOARD_Stage_InitCommDrivers, NOBJ);
 }
@@ -710,16 +710,16 @@ static void showCommManagerSummary (struct BOARD *const B)
 
     LOG_TableBegin (&s_CommMgrTable);
 
-    for (enum COMM_Stream i = 0; i < COMM_Stream__COUNT; ++i)
+    for (enum COMM_Device dev = 0; dev < COMM_Device__COUNT; ++dev)
     {
-        struct STREAM *const Stream = B->comm.stream[i];
+        struct STREAM *const S = B->comm.device[dev];
 
-        if (Stream)
+        if (S)
         {
             LOG_TableEntry (&s_CommMgrTable,
                             "stream",
-                            COMM_StreamRoleDescription(i),
-                            STREAM_Description(Stream));
+                            COMM_DeviceRoleDescription(dev),
+                            STREAM_Description(S));
         }
         #ifdef BOARD_INIT_SHOW_NOT_SET
         else 
@@ -727,28 +727,6 @@ static void showCommManagerSummary (struct BOARD *const B)
             LOG_TableEntry (&s_CommMgrTable,
                             "stream",
                             COMM_StreamRoleDescription(i),
-                            "");
-        }
-        #endif
-    }
-
-    for (enum COMM_Packet i = 0; i < COMM_Packet__COUNT; ++i)
-    {
-        struct PACKET *const Packet = B->comm.packet[i];
-
-        if (Packet)
-        {
-            LOG_TableEntry (&s_CommMgrTable,
-                            "packet",
-                            COMM_PacketRoleDescription(i),
-                            PACKET_Description(Packet));
-        }
-        #ifdef BOARD_INIT_SHOW_NOT_SET
-        else 
-        {
-            LOG_TableEntry (&s_CommMgrTable,
-                            "packet",
-                            COMM_PacketRoleDescription(i),
                             "");
         }
         #endif
@@ -1118,6 +1096,9 @@ static void boardInitSequence (struct BOARD *const B)
     BOARD_INIT_Component    (B, BOARD_Stage_InitDebugStreamDriver,
                              B->debugStream);
     BOARD_AssertInitialized (B->debugStream);
+    // Default debug stream output timeout (data input to the stream) for
+    // greeting messages prior to log manager init.
+    STREAM_Timeout (B->debugStream, LOG_DEBUG_STREAM_TIMEOUT);
     // -------------------------------------------------------------------------
     // Assert messages working. Still no log messages.
     // -------------------------------------------------------------------------

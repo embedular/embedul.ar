@@ -300,6 +300,9 @@ void LOG__assertFailed (struct STREAM *const S, const char *const Func,
         return;
     }
 
+    // Default stream timeout for outgoing data; data going into the stream.
+    STREAM_Timeout (S, LOG_DEBUG_STREAM_TIMEOUT);
+
     // Visually closing current context levels, if any
     outContextLevel (S, "x", "x", true);
     outContextInfo  (S, s_l->contextIndent? " " : "[",
@@ -328,6 +331,9 @@ static void logBegin (struct STREAM *const S, const char *const InnerFlow,
                       const struct OBJECT_INFO *const ObjInfo,
                       const char *const Prefix)
 {
+    // Default stream timeout for outgoing data; data going into the stream.
+    STREAM_Timeout (S, LOG_DEBUG_STREAM_TIMEOUT);
+
     // ╎╎╎│   (in this example: OuterFlow x 3, InnerFlow x 1)
     outContextLevel (S, NULL, InnerFlow, true);
 
@@ -544,6 +550,9 @@ void LOG_TableBegin (const struct LOG_Table *const Table)
         struct STREAM *const S = s_l->debugStream;
         const struct LOG_TableStyle *const Style = s_l->logTableStyle;
 
+        // Default stream timeout for outgoing data; data going into the stream.
+        STREAM_Timeout (S, LOG_DEBUG_STREAM_TIMEOUT);
+
         outContextLevel (S, NULL, NULL, false);
         outStrAutoArgs  (S, 0, Style->TableBegin);
         outContextLevel (S, NULL, NULL, false);
@@ -582,7 +591,12 @@ void LOG_TableEnd (const struct LOG_Table *const Table)
 
     OSWRAP_SuspendScheduler ();
     {
-        outTableHBorder (s_l->debugStream, Table, 2);
+        struct STREAM *const S = s_l->debugStream;
+
+        // Default stream timeout for outgoing data; data going into the stream.
+        STREAM_Timeout (S, LOG_DEBUG_STREAM_TIMEOUT);
+
+        outTableHBorder (S, Table, 2);
     }
     OSWRAP_ResumeScheduler ();
 }
@@ -653,7 +667,12 @@ void LOG_PendingEndOk (void)
 
     OSWRAP_SuspendScheduler ();
     {
-        STREAM_IN_FromString (s_l->debugStream, LOG_PENDING_OK_STR "\r\n");
+        struct STREAM *const S = s_l->debugStream;
+
+        // Default stream timeout for outgoing data; data going into the stream.
+        STREAM_Timeout (S, LOG_DEBUG_STREAM_TIMEOUT);
+
+        STREAM_IN_FromString (S, LOG_PENDING_OK_STR "\r\n");
     }
     OSWRAP_ResumeScheduler ();
 }
@@ -665,7 +684,12 @@ void LOG_PendingEndFail (void)
 
     OSWRAP_SuspendScheduler ();
     {
-        STREAM_IN_FromString (s_l->debugStream, LOG_PENDING_FAILED_STR "\r\n");
+        struct STREAM *const S = s_l->debugStream;
+
+        // Default stream timeout for outgoing data; data going into the stream.
+        STREAM_Timeout (S, LOG_DEBUG_STREAM_TIMEOUT);
+
+        STREAM_IN_FromString (S, LOG_PENDING_FAILED_STR "\r\n");
     }
     OSWRAP_ResumeScheduler ();
 }
@@ -687,16 +711,20 @@ void LOG_ContextEnd (void)
 
     OSWRAP_SuspendScheduler ();
     {
+        struct STREAM *const S = s_l->debugStream;
+
+        // Default stream timeout for outgoing data; data going into the stream.
+        STREAM_Timeout (S, LOG_DEBUG_STREAM_TIMEOUT);
+
         if (s_l->contextIndent)
         {
             const TIMER_Ticks Elapsed =
-                TICKS_Now() -
-                    s_l->contextStartTicks[s_l->contextIndent - 1];
+                TICKS_Now() - s_l->contextStartTicks[s_l->contextIndent - 1];
 
-            outContextLevel (s_l->debugStream, NULL, "└", true);
-            outContextInfo  (s_l->debugStream, "x", "╵", Elapsed,
-                            NULL, NULL, NULL, LOG_LINE_TIMING_ONLY);
-            outStr          (s_l->debugStream, "\r\n");
+            outContextLevel (S, NULL, "└", true);
+            outContextInfo  (S, "x", "╵", Elapsed, NULL, NULL, NULL,
+                             LOG_LINE_TIMING_ONLY);
+            outStr          (S, "\r\n");
 
             -- s_l->contextIndent;
         }

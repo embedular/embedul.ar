@@ -73,8 +73,7 @@ $(call emb_declare_lib,$\
 OBJS += $(LIB_EMBEDULAR)/device/board.o \
         $(LIB_EMBEDULAR)/device/board/run.o \
         $(LIB_EMBEDULAR)/device/stream.o \
-        $(LIB_EMBEDULAR)/device/packet.o \
-        $(LIB_EMBEDULAR)/device/packet/error_log.o \
+        $(LIB_EMBEDULAR)/device/stream/check.o \
         $(LIB_EMBEDULAR)/device/rawstor.o \
         $(LIB_EMBEDULAR)/device/random.o \
         $(LIB_EMBEDULAR)/device/io.o \

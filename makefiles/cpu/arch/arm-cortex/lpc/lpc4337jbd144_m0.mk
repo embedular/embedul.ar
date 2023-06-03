@@ -25,3 +25,5 @@
 
 $(call emb_declare_chip,lpc,43,37,jbd144)
 $(call emb_include,cpu/arch/arm-cortex/m0.mk)
+
+FLASH_BASE ?= 0x1B000000

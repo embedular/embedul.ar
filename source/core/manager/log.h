@@ -31,6 +31,8 @@
 #include "embedul.ar/source/core/ansi.h"
 
 
+#define LOG_DEBUG_STREAM_TIMEOUT    5000
+
 #define LOG_BASE_COLOR              ANSI_SGR_SET_NFG(WHITE)
 #define LOG_BASE_BOLD_COLOR         ANSI_SGR_SET_BFG(WHITE)
 #define LOG_ASSERT_COLOR            ANSI_SGR_SET_BFG(WHITE)

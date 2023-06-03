@@ -43,7 +43,7 @@ static const char * s_OutputBitNames[IO_BOARD_NUCLEO_144_OUTB__COUNT] =
 
 
 static void         update              (struct IO *const Io);
-static uint32_t     getInput            (struct IO *const Io,
+static IO_Value     getInput            (struct IO *const Io,
                                          const enum IO_Type IoType,
                                          const IO_Code DriverCode,
                                          const IO_Port Port);
@@ -51,7 +51,7 @@ static void         setOutput           (struct IO *const Io,
                                          const enum IO_Type IoType,
                                          const IO_Code DriverCode,
                                          const IO_Port Port,
-                                         const uint32_t Value);
+                                         const IO_Value Value);
 static const char * inputName           (struct IO *const Io,
                                          const enum IO_Type IoType,
                                          const IO_Code DriverCode);
@@ -140,7 +140,7 @@ void update (struct IO *const Io)
 }
 
 
-uint32_t getInput (struct IO *const Io, const enum IO_Type IoType,
+IO_Value getInput (struct IO *const Io, const enum IO_Type IoType,
                    const IO_Code DriverCode, const IO_Port Port)
 {
     (void) IoType;
@@ -154,7 +154,7 @@ uint32_t getInput (struct IO *const Io, const enum IO_Type IoType,
 
 void setOutput (struct IO *const Io, const enum IO_Type IoType,
                 const IO_Code DriverCode, const IO_Port Port,
-                const uint32_t Value)
+                const IO_Value Value)
 {
     (void) IoType;
     (void) Port;

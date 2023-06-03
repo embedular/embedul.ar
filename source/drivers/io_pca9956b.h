@@ -26,7 +26,6 @@
 #pragma once
 
 #include "embedul.ar/source/core/device/io.h"
-#include "embedul.ar/source/core/device/packet.h"
 #include "embedul.ar/source/core/manager/comm.h"
 
 
@@ -120,7 +119,7 @@ struct IO_PCA9956B
 {
     struct IO           device;
     struct IO_PortInfo  portInfo[IO_PCA9956B_PORT_COUNT];
-    struct PACKET       * packet;
+    struct STREAM       * stream;
     uint32_t            channelsShorted;
     uint32_t            channelsOpen;
     // ch(Iref/Pwm)[0] reserved as the i2c register to write to.
@@ -134,7 +133,7 @@ struct IO_PCA9956B
 
 
 void IO_PCA9956B_Init       (struct IO_PCA9956B *const P,
-                             const enum COMM_Packet Com,
+                             const enum COMM_Device ComDevice,
                              const uint8_t I2cAddr);
 void IO_PCA9956B_Attach     (struct IO_PCA9956B *const P,
                              const uint32_t ChannelOffset,

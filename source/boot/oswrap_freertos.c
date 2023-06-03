@@ -178,6 +178,11 @@ void vApplicationMallocFailedHook (void)
 #endif
 
 
+// Overriden by a FreeRTOS application and in effect after calling
+// OSWRAP_EnableAltTickHook().
+// One may obfuscate the fact that this callback is called
+// vApplicationTickHook_2 by using
+// #define vApplicationTickHook vApplicationTickHook_2.
 #if (configUSE_TICK_HOOK == 1)
 CC_Weak void vApplicationTickHook_2 (void)
 {

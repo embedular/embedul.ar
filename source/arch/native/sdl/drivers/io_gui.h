@@ -27,6 +27,7 @@
 
 #include "embedul.ar/source/core/manager/mio.h"
 #include "embedul.ar/source/core/manager/screen.h"
+#include "embedul.ar/source/core/bitfield.h"
 #include "SDL.h"
 
 

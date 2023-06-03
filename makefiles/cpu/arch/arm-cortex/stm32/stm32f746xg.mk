@@ -26,5 +26,7 @@
 $(call emb_declare_chip,stm32,f7,46,xg)
 $(call emb_include,cpu/arch/arm-cortex/m7f-sp.mk)
 
+FLASH_BASE ?= 0x08000000
+
 # Required by STM32Cube
 CFLAGS += -DSTM32F746xx

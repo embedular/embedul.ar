@@ -246,7 +246,7 @@ void CYCLIC_IN_FromStream (struct CYCLIC *const C, struct STREAM *const S)
 
     {
         uint8_t data;
-        while ((void)(data = STREAM_OUT_ToOctet(S)), STREAM_OUT_Count(S))
+        while ((void)(data = STREAM_OUT_ToOctet(S)), STREAM_Count(S))
         {
             C->data[C->inIndex] = data;
             C->inIndex = (C->inIndex + 1) & (C->capacity - 1);
@@ -334,7 +334,7 @@ void CYCLIC_OUT_ToStream (struct CYCLIC *const C, struct STREAM *const S)
         while (elements --)
         {
             STREAM_IN_FromOctet (S, C->data[C->outIndex]);
-            if (!STREAM_IN_Count (S))
+            if (!STREAM_Count (S))
             {
                 break;
             }

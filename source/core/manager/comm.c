@@ -30,24 +30,19 @@
 static struct COMM * s_p = NULL;
 
 
-static const char * s_CommStreamName[COMM_Stream__COUNT] =
+static const char * s_CommDeviceName[COMM_Device__COUNT] =
 {
-    "log messages",
-    "p2p serial local",
-    "p2p serial expansion",
-    "ip net. serial config"
-};
-
-
-static const char * s_CommPacketName[COMM_Packet__COUNT] =
-{
-    "serial network",
-    "high speed local",
-    "high speed expansion",
-    "low speed local bus",
-    "low speed expansion bus",
-    "peripheral bus",
-    "ip network"
+    [COMM_Device_Log]                       = "Log messages",
+    [COMM_Device_P2PSerialLocal]            = "P2P serial local",
+    [COMM_Device_P2PSerialExpansion]        = "P2P serial expansion",
+    [COMM_Device_SerialNetwork]             = "Serial network",
+    [COMM_Device_HighSpeedDeviceLocal]      = "High speed local",
+    [COMM_Device_HighSpeedDeviceExpansion]  = "High speed expansion",
+    [COMM_Device_LowSpeedLocalBus]          = "Low speed local bus",
+    [COMM_Device_LowSpeedExpansionBus]      = "Low speed expansion bus",
+    [COMM_Device_PeripheralBus]             = "Peripheral bus",
+    [COMM_Device_IPNetwork]                 = "IP network",
+    [COMM_Device_IPNetworkSerialConfig]     = "IP net. serial config"
 };
 
 
@@ -58,87 +53,55 @@ void COMM_Init (struct COMM *const C)
 
     OBJECT_Clear (C);
 
-    LOG_ContextBegin (C, LANG_INIT);
     {
+        LOG_AutoContext (C, LANG_INIT);
+
         s_p = C;
 
-        LOG_Items (2,
-                    LANG_STREAM_DEVICE_TYPES,   (uint32_t)COMM_Stream__COUNT,
-                    LANG_PACKET_DEVICE_TYPES,   (uint32_t)COMM_Packet__COUNT);
+        LOG_Items (1, LANG_MAX_DEVICES, (uint32_t)COMM_Device__COUNT);
     }
-    LOG_ContextEnd ();
 }
 
 
-bool COMM_HasStream (const enum COMM_Stream Stream)
+bool COMM_HasDevice (const enum COMM_Device ComDevice)
 {
-    return s_p->stream[Stream]? true : false;
+    return s_p->device[ComDevice]? true : false;
 }
 
 
-bool COMM_HasPacket (const enum COMM_Packet Packet)
-{
-    return s_p->packet[Packet]? true : false;
-}
-
-
-void COMM_SetStream (const enum COMM_Stream Stream, struct STREAM *const S)
+void COMM_SetDevice (const enum COMM_Device ComDevice, struct STREAM *const S)
 {
     BOARD_AssertParams (STREAM_IsValid(S));
 
-    if (COMM_HasStream(Stream))
+    if (COMM_HasDevice(ComDevice))
     {
         LOG_Warn (s_p, LANG_MANAGER_DRIVER_OVERWRITE);
         LOG_Items (3,
-                    LANG_ROLE,  COMM_StreamRoleDescription(Stream),
-                    LANG_SET,   STREAM_Description(s_p->stream[Stream]),
+                    LANG_ROLE,  COMM_DeviceRoleDescription(ComDevice),
+                    LANG_SET,   STREAM_Description(s_p->device[ComDevice]),
                     LANG_NEW,   STREAM_Description(S));
     }
 
-    s_p->stream[Stream] = S;
+    s_p->device[ComDevice] = S;
 }
 
 
-void COMM_SetPacket (const enum COMM_Packet Packet, struct PACKET *const P)
+struct STREAM * COMM_GetDevice (const enum COMM_Device ComDevice)
 {
-    BOARD_AssertParams (PACKET_IsValid(P));
-
-    if (COMM_HasPacket(Packet))
-    {
-        LOG_Warn (s_p, LANG_MANAGER_DRIVER_OVERWRITE);
-        LOG_Items (3,
-                    LANG_ROLE,  COMM_PacketRoleDescription(Packet),
-                    LANG_SET,   PACKET_Description(s_p->packet[Packet]),
-                    LANG_NEW,   PACKET_Description(P));
-    }
-
-    s_p->packet[Packet] = P;
+    BOARD_AssertParams (COMM_HasDevice(ComDevice));
+    return s_p->device[ComDevice];
 }
 
 
-struct STREAM * COMM_GetStream (const enum COMM_Stream Stream)
+const char * COMM_DeviceRoleDescription (const enum COMM_Device ComDevice)
 {
-    BOARD_AssertParams (COMM_HasStream(Stream));
-    return s_p->stream[Stream];
+    BOARD_AssertParams (ComDevice < COMM_Device__COUNT);
+    return s_CommDeviceName[ComDevice];
 }
 
 
-struct PACKET * COMM_GetPacket (const enum COMM_Packet Packet)
+const char * COMM_PacketRoleDescription (const enum COMM_Device ComDevice)
 {
-    BOARD_AssertParams (COMM_HasPacket(Packet));
-    return s_p->packet[Packet];
-}
-
-
-const char * COMM_StreamRoleDescription (const enum COMM_Stream Stream)
-{
-    BOARD_AssertParams (Stream < COMM_Stream__COUNT);
-    return s_CommStreamName[Stream];
-}
-
-
-const char * COMM_PacketRoleDescription (const enum COMM_Packet Packet)
-{
-    BOARD_AssertParams (Packet < COMM_Packet__COUNT);
-    return s_CommPacketName[Packet];
+    BOARD_AssertParams (ComDevice < COMM_Device__COUNT);
+    return s_CommDeviceName[ComDevice];
 }

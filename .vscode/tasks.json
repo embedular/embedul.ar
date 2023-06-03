@@ -67,9 +67,9 @@
                 "freertos_book_13_timer_callbacks",
                 "freertos_book_14_timer_sequence",
                 "freertos_book_15_backlight",
-                "freertos_book_16_semaphore",
-                "freertos_book_17_semaphore_counting",
-                "freertos_book_18_deferred",
+                "freertos_book_16_int_semaphore",
+                "freertos_book_17_int_semaphore_counting",
+                "freertos_book_18_int_deferred",
                 "freertos_book_19_int_queue",
                 "freertos_book_20_mutex",
                 "freertos_book_21_tickhook_queue",
@@ -95,6 +95,7 @@
                 "edu_ciaa_retro_poncho-m4",
                 "retro_ciaa-m4",
                 "nucleo_144-stm32f429zi",
+                "gicsafe_mp",
                 "native_hosted"
             ],
             "default": "native_hosted"

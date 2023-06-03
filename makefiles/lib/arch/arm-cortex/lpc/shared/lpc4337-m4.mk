@@ -41,8 +41,6 @@ OBJS += \
     $(TARGET_BSP)/shared/seed.o \
     $(TARGET_BSP)/shared/sysinit_util.o
 
-FLASH_BASE ?= 0x1A000000
-
 # Startup and LD scripts for M4 core
 OBJS += $(STARTUP_ROOT)/cr_startup_lpc43xx-m4.o
 

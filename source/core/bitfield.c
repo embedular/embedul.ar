@@ -79,6 +79,16 @@ void BITFIELD_Init (struct BITFIELD *const B, uint32_t *const Buffer,
 
 
 /**
+ * Resets the entire bitfield to zero.
+ */
+void BITFIELD_Reset (struct BITFIELD *const B)
+{
+    BOARD_AssertParams (B && B->data);
+    memset (B->data, 0, B->capacity * sizeof(uint32_t));
+}
+
+
+/**
  * Set a single bit state by its ``BitIndex``.
  *
  * :param BitIndex: The bit position, from the least significant bit starting at

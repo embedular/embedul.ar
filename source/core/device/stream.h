@@ -35,11 +35,29 @@
     STREAM_IN_FromParsedStringArgs (_s, _c, _m, _str, \
                                     VARIANT_AutoParams(__VA_ARGS__))
 
+#define STREAM_ADDRT_IN_BUFFER(_stream,_addr,_timeout,_data,_size) \
+    STREAM_Address (_stream, &VARIANT_SpawnAuto(_addr)); \
+    STREAM_Timeout (_stream, _timeout); \
+    STREAM_IN_FromBuffer (_stream, _data, _size);
+
+#define STREAM_ADDRT_COMP_BUFFERS(_stream,_addr,_timeout,_in_data,_in_size,\
+                                  _out_data,_out_size) \
+    STREAM_Address (_stream, &VARIANT_SpawnAuto(_addr)); \
+    STREAM_Timeout (_stream, _timeout); \
+    STREAM_COMP_Buffers (_stream, _in_data, _in_size, _out_data, _out_size);
+
 
 struct STREAM;
 
+struct STREAM_CompResult
+{
+    uint32_t inCount;
+    uint32_t outCount;
+};
 
 typedef void        (* STREAM_HardwareInitFunc)(struct STREAM *const S);
+typedef void        (* STREAM_ConnectFunc)(struct STREAM *const S);
+typedef bool        (* STREAM_AssertConnectedFunc)(struct STREAM *const S);
 typedef enum DEVICE_CommandResult
                     (* STREAM_CommandFunc)(struct STREAM *const S, 
                                             const char *const Name,
@@ -50,27 +68,61 @@ typedef uint32_t    (* STREAM_DataInFunc)(struct STREAM *const S,
 typedef uint32_t    (* STREAM_DataOutFunc)(struct STREAM *const S,
                                             uint8_t *const Buffer,
                                             const uint32_t Octets);
+typedef struct STREAM_CompResult
+                    (* STREAM_DataCompFunc)(struct STREAM *const S,
+                                            const uint8_t *const InData,
+                                            const uint32_t InOctets,
+                                            uint8_t *const OutBuffer,
+                                            const uint32_t OutOctets);
+
+
+enum STREAM_TransferType
+{
+    STREAM_TransferType_Undefined,
+    STREAM_TransferType_In,
+    STREAM_TransferType_Out,
+    STREAM_TransferType_Composite
+};
+
+
+enum STREAM_TransferStatus
+{
+    STREAM_TransferStatus_Ok,
+     // The driver uses "Stopped" to stop the API from requesting more data.
+    STREAM_TransferStatus_Stopped,
+    STREAM_TransferStatus_Disconnected,
+    STREAM_TransferStatus_Timedout,
+    STREAM_TransferStatus_NoAck,
+    STREAM_TransferStatus_BusError,
+    STREAM_TransferStatus_TargetNoAck,
+    STREAM_TransferStatus_ArbitrationLost,
+    STREAM_TransferStatus_UnknownError
+};
 
 
 struct STREAM_IFACE
 {
     const char                      * const Description;
     const STREAM_HardwareInitFunc   HardwareInit;
+    const STREAM_ConnectFunc        Connect;
     const STREAM_CommandFunc        Command;
     const STREAM_DataInFunc         DataIn;
     const STREAM_DataOutFunc        DataOut;
+    const STREAM_DataCompFunc       DataComp;
 };
 
 
 struct STREAM
 {
     const struct STREAM_IFACE       * iface;
-    TIMER_Ticks                     inTimeout;
-    TIMER_Ticks                     outTimeout;
-    uint32_t                        lastIn;
-    uint32_t                        lastOut;
-    uint8_t                         octetInRetry;
-    bool                            stop;
+    bool                            connected;
+    enum STREAM_TransferType        type;
+    enum STREAM_TransferStatus      status;
+    struct VARIANT                  address;
+    uint32_t                        iteration;
+    TIMER_Ticks                     timeout;
+    uint32_t                        count;
+    uint8_t                         s2sInRetry;
 };
 
 
@@ -78,22 +130,21 @@ void            STREAM_Init                 (struct STREAM *const S,
                                              const struct STREAM_IFACE *const
                                              Iface);
 bool            STREAM_IsValid              (struct STREAM *const S);
+bool            STREAM_Connect              (struct STREAM *const S);
+bool            STREAM_IsConnected          (struct STREAM *const S);
 enum DEVICE_CommandResult
                 STREAM_Command              (struct STREAM *const S,
                                              const char *const Name,
                                              struct VARIANT *const Value);
-void            STREAM_OUT_Timeout          (struct STREAM *const S,
+void            STREAM_Address              (struct STREAM *const S,
+                                             struct VARIANT *const Address);
+void            STREAM_Timeout              (struct STREAM *const S,
                                              const TIMER_Ticks Ticks);
-void            STREAM_OUT_ToBuffer         (struct STREAM *const S,
-                                             uint8_t *const Buffer,
-                                             const uint32_t Octets);
-uint8_t         STREAM_OUT_ToOctet          (struct STREAM *const S);
-void            STREAM_OUT_ToStream         (struct STREAM *const S,
-                                             struct STREAM *const In);
-void            STREAM_OUT_Discard          (struct STREAM *const S);
-uint32_t        STREAM_OUT_Count            (struct STREAM *const S);
-void            STREAM_IN_Timeout           (struct STREAM *const S,
-                                             const TIMER_Ticks Ticks);
+enum STREAM_TransferType
+                STREAM_TransferType         (struct STREAM *const S);
+enum STREAM_TransferStatus
+                STREAM_TransferStatus       (struct STREAM *const S);
+uint32_t        STREAM_Count                (struct STREAM *const S);
 void            STREAM_IN_FromBuffer        (struct STREAM *const S,
                                              const uint8_t *const Data,
                                              const uint32_t Octets);
@@ -110,6 +161,17 @@ void            STREAM_IN_FromOctet         (struct STREAM *const S,
                                              const uint8_t Octet);
 void            STREAM_IN_FromStream        (struct STREAM *const S,
                                              struct STREAM *const Out);
-void            STREAM_IN_OctetRetry        (struct STREAM *const S);
-uint32_t        STREAM_IN_Count             (struct STREAM *const S);
+void            STREAM_IN_S2SRetry          (struct STREAM *const S);
+void            STREAM_OUT_ToBuffer         (struct STREAM *const S,
+                                             uint8_t *const Buffer,
+                                             const uint32_t Octets);
+uint8_t         STREAM_OUT_ToOctet          (struct STREAM *const S);
+void            STREAM_OUT_ToStream         (struct STREAM *const S,
+                                             struct STREAM *const In);
+void            STREAM_OUT_Discard          (struct STREAM *const S);
+void            STREAM_COMP_Buffers         (struct STREAM *const S,
+                                             const uint8_t *const InData,
+                                             const uint32_t InOctets,
+                                             uint8_t *const OutBuffer,
+                                             const uint32_t OutOctets);
 const char *    STREAM_Description          (struct STREAM *const S);

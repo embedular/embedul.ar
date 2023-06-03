@@ -98,8 +98,8 @@
 
 
 #define MIO_GET_INPUT(_pname,_ptype,_pcode,_when) \
-    MIO_GetInput (MIO_PROFILE_PARAMS(OUTPUT,_pname,_ptype,_pcode), \
-                  MIO_OutUpdateValue_ ## _when)
+    MIO_GetInput (MIO_PROFILE_PARAMS(INPUT,_pname,_ptype,_pcode), \
+                  MIO_InUpdateValue_ ## _when)
 
 #define MIO_GET_INPUT_BIT_NOW(_pname,_pcode) \
     MIO_GET_INPUT(_pname,Bit,_pcode,Now)
@@ -115,7 +115,7 @@
 
 #if (LIB_EMBEDULAR_CONFIG_INPUT_ACTION == 1)
     #define MIO_GET_INPUT_BIT_ACTION(_pname,_pcode) \
-        MIO_GetInputBitAction (INPUT_PROFILE_Group ## _pname, \
+        MIO_GetInputBitAction (INPUT_PROFILE_Group_ ## _pname, \
                                INPUT_PROFILE_ ## _pname ## _Bit_ ## _pcode)
 
     #define MIO_CHECK_INPUT_BIT_ACTION(_pname,_pcode,_action) \

@@ -26,7 +26,7 @@
 #pragma once
 
 #include "embedul.ar/source/core/device/io.h"
-#include "embedul.ar/source/core/device/packet.h"
+#include "embedul.ar/source/core/device/stream.h"
 #include "embedul.ar/source/core/manager/comm.h"
 
 
@@ -96,7 +96,7 @@ struct IO_DUAL_GENESIS_PCA9673
     struct IO_PortInfo  portInfo[IO_DUAL_GENESIS_PORT_COUNT];
     uint32_t            gp1Data;
     uint32_t            gp2Data;
-    struct PACKET       * packet;
+    struct STREAM       * stream;
     uint8_t             txData[2];
     uint8_t             rxData[2];
     #ifdef IO_DUAL_GENESIS_PCA9673_I2C_LOG_GP1
@@ -108,7 +108,7 @@ struct IO_DUAL_GENESIS_PCA9673
 
 void IO_DUAL_GENESIS_PCA9673_Init (
                             struct IO_DUAL_GENESIS_PCA9673 *const G,
-                            const enum COMM_Packet Com,
+                            const enum COMM_Device ComDevice,
                             const uint8_t I2cAddr);
 void IO_DUAL_GENESIS_PCA9673_Attach (
                             struct IO_DUAL_GENESIS_PCA9673 *const G);

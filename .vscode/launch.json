@@ -80,6 +80,16 @@
                 "${env:LIB_EMBEDULAR_PATH}/embedul.ar/source/arch/arm-cortex/stm32/f4/openocd/nucleo_144.cfg"
             ],
             "svdFile": "${env:LIB_EMBEDULAR_PATH}/embedul.ar/source/arch/arm-cortex/stm32/f4/svd/STM32F429.svd"
+        },
+        {
+            "name": "[JLink] gicsafe_mp",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/build/binary/gicsafe_mp/arm-none-eabi-gcc/debug_cortex-m4_O0/${workspaceFolderBasename}.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "jlink",
+            "device": "STM32F407VG",
+            "svdFile": "${env:LIB_EMBEDULAR_PATH}/embedul.ar/source/arch/arm-cortex/stm32/f4/svd/STM32F407.svd"
         }
     ]
 }

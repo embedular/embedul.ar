@@ -91,7 +91,8 @@ void SCREEN_FADE_In (struct SCREEN_FADE *const F,
 
     initFx (F, Role, Fx, PassFilter);
 
-    ANIM_Start (&F->anim, ANIM_Type_Blink, F->max, 0, 0, Duration, 0, 0);
+    ANIM_Start (&F->anim, ANIM_Type_Blink, F->max, 0, 0, Duration, 0, 0,
+                TICKS_Now());
 }
 
 
@@ -105,7 +106,8 @@ void SCREEN_FADE_Out (struct SCREEN_FADE *const F,
 
     initFx (F, Role, Fx, PassFilter);
 
-    ANIM_Start (&F->anim, ANIM_Type_Blink, 0, F->max, 0, Duration, 0, 0);
+    ANIM_Start (&F->anim, ANIM_Type_Blink, 0, F->max, 0, Duration, 0, 0,
+                TICKS_Now());
 }
 
 
@@ -129,7 +131,7 @@ void SCREEN_FADE_Flash (struct SCREEN_FADE *const F,
     else
     {
         ANIM_Start (&F->anim, ANIM_Type_PingPong, 0, vScaled,
-                    0, Duration >> 1, Duration, Repeat);
+                    0, Duration >> 1, Duration, Repeat, TICKS_Now());
     }
 }
 
@@ -140,7 +142,7 @@ void SCREEN_FADE_Update (struct SCREEN_FADE *const F)
 
     if (ANIM_Pending (&F->anim))
     {
-        ANIM_Update (&F->anim);
+        ANIM_Update (&F->anim, TICKS_Now());
 
         BOARD_AssertState (F->table && F->anim.vCurrent <= F->max);
 

@@ -29,24 +29,28 @@
 #include "board.h"
 #include "embedul.ar/source/core/cc.h"
 // Modeline selected by the project makefile
-#include CC_ExpStr(VIDEO_ADAPTER_MODELINE)
+#ifdef VIDEO_ADAPTER_MODELINE
+    #include CC_ExpStr(VIDEO_ADAPTER_MODELINE)
+#endif
 #include "embedul.ar/source/arch/arm-cortex/m0_instdelay.h"
 #include "embedul.ar/source/arch/arm-cortex/lpc/drivers/video_dualcore/exchange.h"
 #include "embedul.ar/source/core/misc/modeline.h"
 #include <stdbool.h>
 
 
-#ifndef VIDEO_ADAPTER_GPIO_MASK
-    #error Undefined Pixel GPIO Mask (VIDEO_ADAPTER_GPIO_MASK)
-#endif
+#ifdef VIDEO_ADAPTER_STR
+    #ifndef VIDEO_ADAPTER_GPIO_MASK
+        #error Undefined Pixel GPIO Mask (VIDEO_ADAPTER_GPIO_MASK)
+    #endif
 
-#ifndef VIDEO_ADAPTER_GPIO_MASK_ADDR
-    #error Undefined Pixel GPIO Mask Address (VIDEO_ADAPTER_GPIO_MASK_ADDR)
-#endif
+    #ifndef VIDEO_ADAPTER_GPIO_MASK_ADDR
+        #error Undefined Pixel GPIO Mask Address (VIDEO_ADAPTER_GPIO_MASK_ADDR)
+    #endif
 
-#ifndef VIDEO_ADAPTER_GPIO_MPIN_ADDR
-    #error Undefined Pixel GPIO Masked Pin Address \
-            (VIDEO_ADAPTER_GPIO_MPIN_ADDR)
+    #ifndef VIDEO_ADAPTER_GPIO_MPIN_ADDR
+        #error Undefined Pixel GPIO Masked Pin Address \
+                (VIDEO_ADAPTER_GPIO_MPIN_ADDR)
+    #endif
 #endif
 
 // Framebuffer line repetitions needed to fill the vertical signal resolution.

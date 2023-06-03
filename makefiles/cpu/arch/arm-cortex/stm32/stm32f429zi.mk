@@ -26,5 +26,7 @@
 $(call emb_declare_chip,stm32,f4,29,zi)
 $(call emb_include,cpu/arch/arm-cortex/m4f.mk)
 
+FLASH_BASE ?= 0x08000000
+
 # Required by STM32Cube
 CFLAGS += -DSTM32F429xx

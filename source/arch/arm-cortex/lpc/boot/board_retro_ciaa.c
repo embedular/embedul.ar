@@ -29,10 +29,10 @@
 #include "embedul.ar/source/drivers/io_lp5036.h"
 #include "embedul.ar/source/drivers/io_huewheel.h"
 #include "embedul.ar/source/drivers/io_pca9956b.h"
-#include "embedul.ar/source/drivers/packet_esp32at_tcp_server.h"
+#include "embedul.ar/source/drivers/stream_esp32at_tcp_server.h"
 #include "embedul.ar/source/arch/arm-cortex/lpc/drivers/io_board_retro_ciaa.h"
 #include "embedul.ar/source/arch/arm-cortex/lpc/drivers/stream_usart.h"
-#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/packet_i2c_controller.h"
+#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/stream_i2c_controller.h"
 #include "embedul.ar/source/arch/arm-cortex/lpc/drivers/rawstor_sd_sdmmc.h"
 #include "embedul.ar/source/arch/arm-cortex/lpc/drivers/video_dualcore.h"
 #include "embedul.ar/source/arch/arm-cortex/lpc/drivers/sound_pcm5100.h"
@@ -88,9 +88,9 @@ struct BOARD_RETRO_CIAA
     struct STREAM_USART                     streamDebugUsart;
 #ifndef BOARD_RETRO_CIAA_DISABLE_TCP_SERVER
     struct STREAM_USART                     streamEsp32atUsart;
-    struct PACKET_ESP32AT_TCP_SERVER        packetEsp32Tcp;
+    struct STREAM_ESP32AT_TCP_SERVER        streamEsp32Tcp;
 #endif
-    struct PACKET_I2C_CONTROLLER            packetI2cExpController;
+    struct STREAM_I2C_CONTROLLER            streamI2cExpController;
     struct IO_DUAL_GENESIS_PCA9673          ioDualGenesis;
     struct IO_LP5036                        ioLp5036;
     struct IO_HUEWHEEL                      ioHuewheel;
@@ -247,12 +247,12 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
             BOARD_AssertState (BOARD_ESP_INTERFACE == LPC_UART1);
 
             // Stack Port I2C interface
-            PACKET_I2C_CONTROLLER_Init (&R->packetI2cExpController,
+            STREAM_I2C_CONTROLLER_Init (&R->streamI2cExpController,
                                         BOARD_STACKPORT_I2C_INTERFACE,
                                         BOARD_STACKPORT_I2C_SPEED);
 
-            COMM_SetPacket (COMM_Packet_LowSpeedExpansionBus,
-                            (struct PACKET *)&R->packetI2cExpController);
+            COMM_SetDevice (COMM_Device_LowSpeedExpansionBus,
+                            (struct STREAM *)&R->streamI2cExpController);
 
         #ifndef BOARD_RETRO_CIAA_DISABLE_TCP_SERVER
             STREAM_UART1_Init (&R->streamEsp32atUsart,
@@ -260,14 +260,14 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
                         R->tcpServerOutBuffer, sizeof(R->tcpServerOutBuffer),
                         BOARD_ESP_BAUD_RATE, BOARD_ESP_CONFIG);
 
-            COMM_SetStream (COMM_Stream_IPNetworkSerialConfig,
+            COMM_SetDevice (COMM_Device_IPNetworkSerialConfig,
                             (struct STREAM *)&R->streamEsp32atUsart);
 
-            PACKET_ESP32AT_TCP_SERVER_Init (&R->packetEsp32Tcp,
+            STREAM_ESP32AT_TCP_SERVER_Init (&R->streamEsp32Tcp,
                                     (struct STREAM *)&R->streamEsp32atUsart);
 
-            COMM_SetPacket (COMM_Packet_IPNetwork,
-                            (struct PACKET *)&R->packetEsp32Tcp);
+            COMM_SetDevice (COMM_Device_IPNetwork,
+                            (struct STREAM *)&R->streamEsp32Tcp);
         #endif
             break;
         }
@@ -293,25 +293,22 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
                     // Set RGB pixels at half intensity to avoid consuming over 
                     // 500 mA.
                     IO_LP5036_Init (&R->ioLp5036,
-                                    COMM_Packet_LowSpeedExpansionBus,
+                                    COMM_Device_LowSpeedExpansionBus,
                                     BOARD_SP_GENESIS_I2C_ADDR_LP5036,
                                     0x80);
 
-                    IO_HUEWHEEL_Init    (&R->ioHuewheel,
-                                         (struct IO_Gateway) {
-                                            .driver = (struct IO *)&R->ioLp5036,
-                                            .driverPort = 0
-                                         }, 
-                                         s_HuewheelPolarPlacement, 12);
-                    IO_HUEWHEEL_Attach  (&R->ioHuewheel);
+                    IO_HUEWHEEL_Init (&R->ioHuewheel, (struct IO_Gateway) {
+                                        .driver = (struct IO *)&R->ioLp5036,
+                                        .driverPort = 0
+                                      }, s_HuewheelPolarPlacement, 12);
+                    IO_HUEWHEEL_Attach (&R->ioHuewheel);
 
-                    OUTPUT_SET_RANGE_DEFER (MARQUEE, Step, 520);
+                    MIO_SET_OUTPUT_RANGE_DEFER (MARQUEE, Step, 520);
 
-                    IO_DUAL_GENESIS_PCA9673_Init    (
-                                            &R->ioDualGenesis, 
-                                            COMM_Packet_LowSpeedExpansionBus,
+                    IO_DUAL_GENESIS_PCA9673_Init (&R->ioDualGenesis, 
+                                            COMM_Device_LowSpeedExpansionBus,
                                             BOARD_SP_GENESIS_I2C_ADDR_PCA9673);
-                    IO_DUAL_GENESIS_PCA9673_Attach  (&R->ioDualGenesis);
+                    IO_DUAL_GENESIS_PCA9673_Attach (&R->ioDualGenesis);
                 }
                 else
                 {
@@ -323,14 +320,14 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
                 {
                     LOG_PendingEndOk ();
 
-                    IO_PCA9956B_Init    (&R->ioPca9956BDeviceA,
-                                         COMM_Packet_LowSpeedExpansionBus,
-                                         BOARD_SP_SSL_I2C_ADDR_PCA9956B_DA);
-                    IO_PCA9956B_Attach  (&R->ioPca9956BDeviceA, 0, 0);
-                    IO_PCA9956B_Init    (&R->ioPca9956BDeviceB,
-                                         COMM_Packet_LowSpeedExpansionBus,
-                                         BOARD_SP_SSL_I2C_ADDR_PCA9956B_DB);
-                    IO_PCA9956B_Attach  (&R->ioPca9956BDeviceB, 24, 1);
+                    IO_PCA9956B_Init (&R->ioPca9956BDeviceA,
+                                      COMM_Device_LowSpeedExpansionBus,
+                                      BOARD_SP_SSL_I2C_ADDR_PCA9956B_DA);
+                    IO_PCA9956B_Attach (&R->ioPca9956BDeviceA, 0, 0);
+                    IO_PCA9956B_Init (&R->ioPca9956BDeviceB,
+                                      COMM_Device_LowSpeedExpansionBus,
+                                      BOARD_SP_SSL_I2C_ADDR_PCA9956B_DB);
+                    IO_PCA9956B_Attach (&R->ioPca9956BDeviceB, 24, 1);
                 }
                 else
                 {
@@ -344,7 +341,7 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
         {
             VIDEO_DUALCORE_Init (&R->videoDualcore);
             SCREEN_RegisterDevice (SCREEN_Role_Primary,
-                                    (struct VIDEO *)&R->videoDualcore);
+                                   (struct VIDEO *)&R->videoDualcore);
             break;
         }
 

@@ -67,7 +67,7 @@ static const char * s_OutputBitNames[IO_BOARD_RETRO_CIAA_OUTB__COUNT] =
     [IO_BOARD_RETRO_CIAA_OUTB_LED_WARN]         = "Warning",
     [IO_BOARD_RETRO_CIAA_OUTB_BOARD_BACKLIGHT]  = "Backlight",
     [IO_BOARD_RETRO_CIAA_OUTB_SD_POW]           = "SD power",
-    [IO_BOARD_RETRO_CIAA_OUTB_WIFI_EN]          = "WiFi enable",
+    [IO_BOARD_RETRO_CIAA_OUTB_WIFI_EN]          = "Wifi enable",
     [IO_BOARD_RETRO_CIAA_OUTB_SOUND_MUTE]       = "Sound mute"
 };
 

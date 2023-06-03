@@ -26,11 +26,11 @@
 
 #include "embedul.ar/source/core/device/board.h"
 #include "embedul.ar/source/drivers/random_sfmt.h"
-#include "embedul.ar/source/drivers/packet_esp32at_tcp_server.h"
+#include "embedul.ar/source/drivers/socket_esp32at_tcp_server.h"
 #include "embedul.ar/source/drivers/rawstor_sd_1bit.h"
 #include "embedul.ar/source/arch/arm-cortex/lpc/drivers/io_board_edu_ciaa.h"
 #include "embedul.ar/source/arch/arm-cortex/lpc/drivers/stream_usart.h"
-#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/packet_ssp.h"
+#include "embedul.ar/source/arch/arm-cortex/lpc/drivers/stream_ssp.h"
 #include "embedul.ar/source/arch/arm-cortex/lpc/drivers/io_dual_nes_videoex.h"
 #include "embedul.ar/source/arch/arm-cortex/lpc/drivers/video_dualcore.h"
 #include "embedul.ar/source/arch/arm-cortex/lpc/drivers/sound_pcm5100.h"
@@ -259,7 +259,7 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
             COMM_SetStream (COMM_Stream_IPNetworkSerialConfig,
                             (struct STREAM *)&E->streamExtUsart);
 
-            PACKET_ESP32AT_TCP_SERVER_Init (&E->packetEsp32Tcp,
+            SOCKET_ESP32AT_TCP_SERVER_Init (&E->packetEsp32Tcp,
                                     (struct STREAM *)&E->streamExtUsart);
 
             COMM_SetPacket (COMM_Packet_IPNetwork,

@@ -27,28 +27,6 @@
 #include "embedul.ar/source/arch/arm-cortex/lpc/18xx_43xx/lpcopen/chip_18xx_43xx/chip.h"
 
 
-// MMC/SDC specific ioctl command (compatible with FatFs)
-#define SDCARD_IOCTL_GET_TYPE       	10
-#define SDCARD_IOCTL_GET_CSD        	11
-#define SDCARD_IOCTL_GET_CID        	12
-#define SDCARD_IOCTL_GET_OCR        	13
-#define SDCARD_IOCTL_GET_SDSTAT     	14
-
-// Card type flags (queried by SDCARD_IOCTL_GET_TYPE)
-#define SDCARD_Type_Unknown             0x00
-#define SDCARD_Type_MMC_v3              0x01
-#define SDCARD_Type_SD_v1               0x02
-#define SDCARD_Type_SD_v2               0x04
-#define SDCARD_Type_SD_Any              (SDCARD_Type_SD_v1 | SDCARD_Type_SD_v2)
-#define SDCARD_Type_Block_Addressing    0x08
-
-typedef uint8_t SDCARD_Type;
-
-#define SDCARD_Status_Media_Initializing_P1_PowerOn     0
-#define SDCARD_Status_Media_Initializing_P1_NativeMode  1
-#define SDCARD_Status_Media_Initializing_P1_Idle        2
-
-
 struct RAWSTOR_SD_SDMMC
 {
     struct RAWSTOR      device;

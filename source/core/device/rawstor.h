@@ -36,13 +36,13 @@
 //       the logs.
 #define RAWSTOR_STATUS_LOG_ENTRIES              8
 
-// RAWSTOR_Status, RAWSTOR_Result and IOCTRL values and parameters in
-// write/read/ioctl operations are equivalents to the FatFs library own values
-// for disk interface. The intention is to ensure direct interoperability
+// RAWSTOR_Status_Disk, RAWSTOR_Status_Result and IOCTRL values and parameters
+// in write/read/ioctl operations are equivalents to the FatFs library own
+// values for disk interface. The intention is to ensure direct interoperability
 // between embedul.ar low level storage funcions and FatFs.
 //
-// FatFs DSTATUS = RAWSTOR_Status_Disk
-// FatFs DRESULT = RAWSTOR_Status_Result
+// FatFs DSTATUS == RAWSTOR_Status_Disk
+// FatFs DRESULT == RAWSTOR_Status_Result
 typedef uint8_t     RAWSTOR_Status_Disk;
 typedef uint8_t     RAWSTOR_Status_Result;
 typedef uint8_t     RAWSTOR_Status_Media;
@@ -116,11 +116,33 @@ struct RAWSTOR_Status
 #define RAWSTOR_IOCTL_CMD_FORMAT                8   // Create physical format on
                                                     // the media
 
-// RAWSTOR_IOCTL_CMD_POWER sub command (passed as *data)
-#define RAWSTOR_IOCTL_CMD_POWER_OFF             0
-#define RAWSTOR_IOCTL_CMD_POWER_ON              1
-#define RAWSTOR_IOCTL_CMD_POWER_STATUS          2
+// MMC/SDC specific ioctl command (compatible with FatFs)
+#define RAWSTOR_IOCTL_SDCARD_GET_TYPE       	10
+#define RAWSTOR_IOCTL_SDCARD_GET_CSD        	11
+#define RAWSTOR_IOCTL_SDCARD_GET_CID        	12
+#define RAWSTOR_IOCTL_SDCARD_GET_OCR        	13
+#define RAWSTOR_IOCTL_SDCARD_GET_SDSTAT     	14
 
+// RAWSTOR_IOCTL_CMD_POWER sub command, passed in *data.
+#define RAWSTOR_IOCTL_CMD_POWER__OFF            0
+#define RAWSTOR_IOCTL_CMD_POWER__ON             1
+#define RAWSTOR_IOCTL_CMD_POWER__STATUS         2
+
+// SDCard type flags, queried by RAWSTOR_IOCTL_SDCARD_GET_TYPE.
+#define RAWSTOR_IOCTL_SDCARD_TYPE_UNKNOWN               0
+#define RAWSTOR_IOCTL_SDCARD_TYPE_FLAG_MMC_V3           0x01
+#define RAWSTOR_IOCTL_SDCARD_TYPE_FLAG_SD_V1            0x02
+#define RAWSTOR_IOCTL_SDCARD_TYPE_FLAG_SD_V2            0x04
+#define RAWSTOR_IOCTL_SDCARD_TYPE_FLAG_SD_VX            \
+                                    (RAWSTOR_IOCTL_SDCARD_TYPE_FLAG_SD_V1 | \
+                                     RAWSTOR_IOCTL_SDCARD_Type_FLAG_SD_V2)
+#define RAWSTOR_IOCTL_SDCARD_TYPE_FLAG_BLOCK_ADDR       0x08
+
+typedef uint8_t SDCARD_Type;
+
+#define SDCARD_Status_Media_Initializing_P1_PowerOn     0
+#define SDCARD_Status_Media_Initializing_P1_NativeMode  1
+#define SDCARD_Status_Media_Initializing_P1_Idle        2
 
 struct RAWSTOR;
 

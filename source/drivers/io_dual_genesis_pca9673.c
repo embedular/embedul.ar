@@ -25,7 +25,10 @@
 
 #include "embedul.ar/source/drivers/io_dual_genesis_pca9673.h"
 #include "embedul.ar/source/core/device/board.h"
-#include "embedul.ar/source/core/device/packet/error_log.h"
+#include "embedul.ar/source/core/device/stream/check.h"
+
+
+#define IO_DUAL_GENESIS_I2C_TIMEOUT     8
 
 
 // PCA9673 register position mask for each connected genesis signal + presence
@@ -88,15 +91,15 @@ static const char * inputName           (struct IO *const Io,
 static const struct IO_IFACE IO_DUAL_GENESIS_PCA9673_IFACE =
 {
     IO_IFACE_DECLARE("dual genesis on pca9673", DUAL_GENESIS),
-    .HardwareInit       = hardwareInit,
-    .Update             = update,
-    .GetInput           = getInput,
-    .InputName          = inputName
+    .HardwareInit   = hardwareInit,
+    .Update         = update,
+    .GetInput       = getInput,
+    .InputName      = inputName
 };
 
 
 void IO_DUAL_GENESIS_PCA9673_Init (struct IO_DUAL_GENESIS_PCA9673 *const G,
-                                   const enum COMM_Packet Com,
+                                   const enum COMM_Device ComDevice,
                                    const uint8_t I2cAddr)
 {
     BOARD_AssertParams (G);
@@ -106,7 +109,7 @@ void IO_DUAL_GENESIS_PCA9673_Init (struct IO_DUAL_GENESIS_PCA9673 *const G,
     // This drivers supports hot-plugged devices. Available input/outputs
     // is zero initially.
 
-    G->packet   = COMM_GetPacket (Com);
+    G->stream   = COMM_GetDevice (ComDevice);
     G->i2cAddr  = I2cAddr;
 
     // Update once per frame (~60 Hz).
@@ -163,10 +166,10 @@ void hardwareInit (struct IO *const Io)
     G->txData[0] = 0xFF & ~CHCFG_1TH;
     G->txData[1] = 0xFF & ~CHCFG_2TH;
 
-    PACKET_SendTo   (G->packet, &VARIANT_SpawnUint(G->i2cAddr));
-    PACKET_Send     (G->packet, G->txData, 2);
+    STREAM_ADDRT_IN_BUFFER (G->stream, &VARIANT_SpawnUint(G->i2cAddr),
+                            IO_DUAL_GENESIS_I2C_TIMEOUT, G->txData, 2);
 
-    if (PACKET_ERROR_LOG_nAck (G->packet))
+    if (!STREAM_CHECK_I2cControllerXferStatus (G->stream))
     {
         BOARD_AssertInitialized (false);
     }
@@ -236,10 +239,11 @@ static bool processHardwareState (struct IO_DUAL_GENESIS_PCA9673 *const G,
     G->txData[1] &= (* Gp2Count)? ~CHCFG_2OK : 0xFF;
 
     // Keep inputs HIGH, flip TH, and get input status for both controllers.
-    PACKET_SendTo   (G->packet, &VARIANT_SpawnUint(G->i2cAddr));
-    PACKET_Bidir    (G->packet, G->txData, 2, G->rxData, 2);
+    STREAM_ADDRT_COMP_BUFFERS (G->stream, &VARIANT_SpawnUint(G->i2cAddr),
+                               IO_DUAL_GENESIS_I2C_TIMEOUT,
+                               G->txData, 2, G->rxData, 2);
 
-    if (PACKET_ERROR_LOG_Generic (G->packet))
+    if (!STREAM_CHECK_I2cControllerXferStatus (G->stream))
     {
         return false;
     }

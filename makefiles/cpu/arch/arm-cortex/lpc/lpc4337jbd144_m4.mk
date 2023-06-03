@@ -25,3 +25,5 @@
 
 $(call emb_declare_chip,lpc,43,37,jbd144)
 $(call emb_include,cpu/arch/arm-cortex/m4f.mk)
+
+FLASH_BASE ?= 0x1A000000

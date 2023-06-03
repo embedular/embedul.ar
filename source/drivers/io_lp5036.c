@@ -25,7 +25,10 @@
 
 #include "embedul.ar/source/drivers/io_lp5036.h"
 #include "embedul.ar/source/core/device/board.h"
-#include "embedul.ar/source/core/device/packet/error_log.h"
+#include "embedul.ar/source/core/device/stream/check.h"
+
+
+#define IO_LP5036_XFER_TIMEOUT      5
 
 
 static const char * s_OutputRangeNames[IO_LP5036_OUTR__COUNT] =
@@ -84,10 +87,10 @@ static const char * outputName          (struct IO *const Io,
 static const struct IO_IFACE IO_LP5036_IFACE =
 {
     IO_IFACE_DECLARE("lp5036 36-channel led driver", LP5036),
-    .HardwareInit       = hardwareInit,
-    .Update             = update,
-    .SetOutput          = setOutput,
-    .OutputName         = outputName
+    .HardwareInit   = hardwareInit,
+    .Update         = update,
+    .SetOutput      = setOutput,
+    .OutputName     = outputName
 };
 
 
@@ -98,15 +101,15 @@ static bool deviceUpdate (struct IO_LP5036 *const L)
     // [1..36] = OUT0_Color..OUT35_Color values.
     L->outData[0] = 0x14;
 
-    PACKET_SendTo       (L->packet, &VARIANT_SpawnUint(L->i2cAddr));
-    PACKET_SendTimeout  (L->packet, 5);
-    PACKET_Send         (L->packet, L->outData, 1 + IO_LP5036_OUTR__COUNT);
+    STREAM_ADDRT_IN_BUFFER (L->stream, L->i2cAddr, IO_LP5036_XFER_TIMEOUT,
+                            L->outData, 1 + IO_LP5036_OUTR__COUNT);
 
-    return PACKET_ERROR_LOG_Generic (L->packet);
+    return STREAM_CHECK_I2cControllerXferStatus(L->stream);
 }
 
 
-void IO_LP5036_Init (struct IO_LP5036 *const L, const enum COMM_Packet Com,
+void IO_LP5036_Init (struct IO_LP5036 *const L,
+                     const enum COMM_Device ComDevice,
                      const uint8_t I2cAddr, const uint8_t MaxIntensity)
 {
     BOARD_AssertParams (L);
@@ -115,7 +118,7 @@ void IO_LP5036_Init (struct IO_LP5036 *const L, const enum COMM_Packet Com,
 
     IO_INIT_STATIC_PORT_INFO (L, LP5036);
 
-    L->packet       = COMM_GetPacket (Com);
+    L->stream       = COMM_GetDevice (ComDevice);
     L->i2cAddr      = I2cAddr;
     L->maxIntensity = MaxIntensity;
 
@@ -133,11 +136,10 @@ static void hardwareInit (struct IO *const Io)
     L->outData[0] = 0x00;
     L->outData[1] = 0x40;
 
-    PACKET_SendTo       (L->packet, &VARIANT_SpawnUint(L->i2cAddr));
-    PACKET_SendTimeout  (L->packet, 5);
-    PACKET_Send         (L->packet, L->outData, 2);
+    STREAM_ADDRT_IN_BUFFER (L->stream, L->i2cAddr, IO_LP5036_XFER_TIMEOUT,
+                            L->outData, 2);
 
-    if (PACKET_ERROR_LOG_nAck (L->packet))
+    if (!STREAM_CHECK_I2cControllerXferStatus (L->stream))
     {
         BOARD_AssertInitialized (false);
     }
@@ -148,11 +150,10 @@ static void hardwareInit (struct IO *const Io)
     L->outData[0] = 0x08;
     memset (&L->outData[1], L->maxIntensity, 36);
 
-    PACKET_SendTo       (L->packet, &VARIANT_SpawnUint(L->i2cAddr));
-    PACKET_SendTimeout  (L->packet, 5);
-    PACKET_Send         (L->packet, L->outData, 1 + 36);
+    STREAM_ADDRT_IN_BUFFER (L->stream, L->i2cAddr, IO_LP5036_XFER_TIMEOUT,
+                            L->outData, 1 + 36);
 
-    if (PACKET_ERROR_LOG_Generic (L->packet))
+    if (!STREAM_CHECK_I2cControllerXferStatus (L->stream))
     {
         BOARD_AssertInitialized (false);
     }
@@ -160,8 +161,7 @@ static void hardwareInit (struct IO *const Io)
     // Initial status: all channels ON.
     memset (&L->outData[1], 0xFF, IO_LP5036_OUTR__COUNT);
 
-    // Returns 'true' on error.
-    if (deviceUpdate (L))
+    if (!deviceUpdate (L))
     {
         BOARD_AssertInitialized (false);
     }

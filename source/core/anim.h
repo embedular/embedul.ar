@@ -118,9 +118,10 @@ void        ANIM_Start          (struct ANIM *const A,
                                  const uint32_t VBegin, const uint32_t VEnd, 
                                  const uint32_t Delay, const uint32_t Phase,
                                  const uint32_t Duration, 
-                                 const uint32_t Repeat);
+                                 const uint32_t Repeat,
+                                 const TIMER_Ticks Now);
 void        ANIM_TimeShift      (struct ANIM *const A, const uint32_t Delta);
-void        ANIM_Update         (struct ANIM *const A);
+void        ANIM_Update         (struct ANIM *const A, const TIMER_Ticks Now);
 void        ANIM_SetValue       (struct ANIM *const A, const uint32_t Value);
 uint32_t    ANIM_GetValue       (struct ANIM *const A);
 bool        ANIM_Pending        (struct ANIM *const A);

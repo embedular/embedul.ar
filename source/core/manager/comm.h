@@ -26,47 +26,34 @@
 #pragma once
 
 #include "embedul.ar/source/core/device/stream.h"
-#include "embedul.ar/source/core/device/packet.h"
 
 
-enum COMM_Stream
+enum COMM_Device
 {
-    COMM_Stream_Log = 0,
-    COMM_Stream_P2PSerialLocal,
-    COMM_Stream_P2PSerialExpansion,
-    COMM_Stream_IPNetworkSerialConfig,
-    COMM_Stream__COUNT
-};
-
-
-enum COMM_Packet
-{
-    COMM_Packet_SerialNetwork = 0,
-    COMM_Packet_HighSpeedDeviceLocal,
-    COMM_Packet_HighSpeedDeviceExpansion,
-    COMM_Packet_LowSpeedLocalBus,
-    COMM_Packet_LowSpeedExpansionBus,
-    COMM_Packet_PeripheralBus,
-    COMM_Packet_IPNetwork,
-    COMM_Packet__COUNT
+    COMM_Device_Log = 0,
+    COMM_Device_P2PSerialLocal,
+    COMM_Device_P2PSerialExpansion,
+    COMM_Device_SerialNetwork,
+    COMM_Device_HighSpeedDeviceLocal,
+    COMM_Device_HighSpeedDeviceExpansion,
+    COMM_Device_LowSpeedLocalBus,
+    COMM_Device_LowSpeedExpansionBus,
+    COMM_Device_PeripheralBus,
+    COMM_Device_IPNetwork,
+    COMM_Device_IPNetworkSerialConfig,
+    COMM_Device__COUNT
 };
 
 
 struct COMM
 {
-    struct STREAM       * stream[COMM_Stream__COUNT];
-    struct PACKET       * packet[COMM_Packet__COUNT];
+    struct STREAM   * device[COMM_Device__COUNT];
 };
 
 
 void            COMM_Init                   (struct COMM *const C);
-bool            COMM_HasStream              (const enum COMM_Stream Stream);
-bool            COMM_HasPacket              (const enum COMM_Packet Packet);
-void            COMM_SetStream              (const enum COMM_Stream Stream,
+bool            COMM_HasDevice              (const enum COMM_Device ComDevice);
+void            COMM_SetDevice              (const enum COMM_Device ComDevice,
                                              struct STREAM *const S);
-void            COMM_SetPacket              (const enum COMM_Packet Packet,
-                                             struct PACKET *const P);
-struct STREAM * COMM_GetStream              (const enum COMM_Stream Stream);
-struct PACKET * COMM_GetPacket              (const enum COMM_Packet Packet);
-const char *    COMM_StreamRoleDescription  (const enum COMM_Stream Stream);
-const char *    COMM_PacketRoleDescription  (const enum COMM_Packet Packet);
+struct STREAM * COMM_GetDevice              (const enum COMM_Device ComDevice);
+const char *    COMM_DeviceRoleDescription  (const enum COMM_Device ComDevice);

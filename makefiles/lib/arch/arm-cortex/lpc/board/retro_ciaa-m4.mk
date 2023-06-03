@@ -38,11 +38,11 @@ OBJS += \
     $(LIB_EMBEDULAR_ROOT)/source/drivers/io_lp5036.o \
 	$(LIB_EMBEDULAR_ROOT)/source/drivers/io_huewheel.o \
 	$(LIB_EMBEDULAR_ROOT)/source/drivers/io_pca9956b.o \
-	$(LIB_EMBEDULAR_ROOT)/source/drivers/packet_esp32at_tcp_server.o \
+	$(LIB_EMBEDULAR_ROOT)/source/drivers/stream_esp32at_tcp_server.o \
     $(TARGET_MFR)/boot/board_retro_ciaa.o \
     $(TARGET_MFR)/boot/shared_iface.o \
     $(TARGET_DRIVERS)/stream_usart.o \
-    $(TARGET_DRIVERS)/packet_i2c_controller.o \
+    $(TARGET_DRIVERS)/stream_i2c_controller.o \
     $(TARGET_DRIVERS)/rawstor_sd_sdmmc.o \
     $(TARGET_DRIVERS)/io_board_retro_ciaa.o
 

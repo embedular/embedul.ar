@@ -40,11 +40,14 @@
  *                  :c:enum:`ANIM_Type`.
  * :param Repeat: Animation repeat count. For infinite repeats use
  *                :c:macro:`ANIM_REPEAT_FOREVER`.
+ * :param Now: System time when this animation starts, usually
+ *             :c:func:`TICKS_Now`.
  */
 void ANIM_Start (struct ANIM *const A, const enum ANIM_Type Type,
                  const uint32_t VBegin, const uint32_t VEnd, 
                  const uint32_t Delay, const uint32_t Phase,
-                 const uint32_t Duration, const uint32_t Repeat)
+                 const uint32_t Duration, const uint32_t Repeat,
+                 const TIMER_Ticks Now)
 {
     BOARD_AssertParams (A);
 
@@ -65,8 +68,6 @@ void ANIM_Start (struct ANIM *const A, const enum ANIM_Type Type,
 	A->duration = (Phase > Duration)? Phase : Duration;
 	A->repeat	= Repeat;
 	A->vCurrent = (Phase)? VBegin : VEnd;
-
-	const TIMER_Ticks Now = TICKS_Now ();
 
 	if (!Delay)
 	{
@@ -102,9 +103,12 @@ void ANIM_TimeShift (struct ANIM *const A, const uint32_t Delta)
 
 
 /**
- * Update animation state with millisecond granularity at most.
+ * Update animation state.
+ *
+ * :param Now: System time when this update happens, usually
+ * :c:func:`TICKS_Now`.
  */
-void ANIM_Update (struct ANIM *const A)
+void ANIM_Update (struct ANIM *const A, const TIMER_Ticks Now)
 {
     BOARD_AssertParams (A);
 
@@ -113,15 +117,15 @@ void ANIM_Update (struct ANIM *const A)
         return;
     }
 
-	const TIMER_Ticks Now = TICKS_Now() + A->delta;
+	const TIMER_Ticks NowDelta = Now + A->delta;
 
 	if (A->delayStarted)
 	{
-		if (Now - A->delayStarted >= A->delay)
+		if (NowDelta - A->delayStarted >= A->delay)
 		{
 			A->delayStarted = 0;
-			A->animStarted	= Now;
-			A->phaseStarted	= (A->phase)? Now : 0;
+			A->animStarted	= NowDelta;
+			A->phaseStarted	= (A->phase)? NowDelta : 0;
 		}
 		else
         {
@@ -129,7 +133,7 @@ void ANIM_Update (struct ANIM *const A)
 		}
 	}
 
-	const TIMER_Ticks AnimElapsed = Now - A->animStarted;
+	const TIMER_Ticks AnimElapsed = NowDelta - A->animStarted;
 
 	if (AnimElapsed >= A->duration)
 	{
@@ -151,11 +155,11 @@ void ANIM_Update (struct ANIM *const A)
 
 		// Repeats don't have delay. Delay only occurs on the 1st animation.
 		ANIM_Start (A, A->type, A->vBegin, A->vEnd, A->delay,
-                    A->phase, A->duration, A->repeat);
+                    A->phase, A->duration, A->repeat, Now);
 		return;
 	}
 
-	const TIMER_Ticks PhaseElapsed = Now - A->phaseStarted;
+	const TIMER_Ticks PhaseElapsed = NowDelta - A->phaseStarted;
 
 	// In phase time...
 	if (A->phaseStarted)

@@ -83,7 +83,7 @@ static void animFlash (struct IO_HUEWHEEL *const H, const uint32_t Duration)
 
     ANIM_Start (&H->globalLuminance, ANIM_Type_PingPong,
                 CurrentLuminance, H->flashMaxLuminance, 0, H->flashPhase, 
-                Duration, 0);
+                Duration, 0, TICKS_Now());
 }
 
 

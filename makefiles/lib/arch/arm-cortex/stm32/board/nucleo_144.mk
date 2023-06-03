@@ -34,8 +34,6 @@ TARGET_CHIP_TMP := $(call emb_split_get,$(TARGET_NAME),2)
 # Include target core definitions
 $(call emb_include,cpu/arch/arm-cortex/stm32/$(TARGET_CHIP_TMP).mk)
 
-FLASH_BASE ?= 0x08000000
-
 CHIP_FAMILY_UC := $(shell echo $(CHIP_FAMILY) | tr f F)
 
 TARGET_REQUIRE_BIN_IMAGE := yes
@@ -51,7 +49,7 @@ CFLAGS += -I$(TARGET_BSP_BOARD)/cubemx/Core/Inc
 OBJS += \
 	$(TARGET_MFR)/boot/board_nucleo_144.o \
 	$(TARGET_DRIVERS)/io_board_nucleo_144.o \
-	$(TARGET_DRIVERS)/stream_usart.o \
+	$(TARGET_DRIVERS)/stream_uart.o \
 	$(TARGET_DRIVERS)/random_rng.o \
 	$(TARGET_BSP)/Drivers/BSP/STM32$(CHIP_FAMILY_UC)xx_Nucleo_144/stm32$(CHIP_FAMILY)xx_nucleo_144.o \
     $(TARGET_BSP_BOARD)/cubemx/Core/Src/eth.o \

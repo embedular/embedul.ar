@@ -25,7 +25,7 @@
 
 #include "embedul.ar/source/drivers/io_pca9956b.h"
 #include "embedul.ar/source/core/device/board.h"
-#include "embedul.ar/source/core/device/packet/error_log.h"
+#include "embedul.ar/source/core/device/stream/check.h"
 
 
 #define PCA9956B_UPDATE_IREF                0x01
@@ -35,6 +35,8 @@
 #define PCA9956B_CH_STATUS_NORMAL           0x00
 #define PCA9956B_CH_STATUS_SHORT            0x01
 #define PCA9956B_CH_STATUS_OPEN             0x02
+
+#define PCA9956B_I2C_TIMEOUT                8
 
 // Mode 2 register.
 #define PCA9956B_MODE2                      0x01
@@ -145,7 +147,7 @@ static const struct IO_IFACE IO_PCA9956B_IFACE =
 
 
 void IO_PCA9956B_Init (struct IO_PCA9956B *const P,
-                       const enum COMM_Packet Com, const uint8_t I2cAddr)
+                       const enum COMM_Device ComDevice, const uint8_t I2cAddr)
 {
     BOARD_AssertParams (P);
 
@@ -153,7 +155,7 @@ void IO_PCA9956B_Init (struct IO_PCA9956B *const P,
 
     IO_INIT_STATIC_PORT_INFO (P, PCA9956B);
 
-    P->packet   = COMM_GetPacket (Com);
+    P->stream   = COMM_GetDevice (ComDevice);
     P->i2cAddr  = I2cAddr;
 
     // Update at 60 Hz.
@@ -173,21 +175,21 @@ void IO_PCA9956B_Attach (struct IO_PCA9956B *const P,
 
     MIO_RegisterGateway (MIO_Dir_Input, (struct IO *)P, 0);
 
-    INPUT_Map (INPUT_PROFILE_Group_LIGHTDEV, IO_Type_Range,
-               INPUT_PROFILE_LIGHTDEV_Range_ChannelsShorted(DeviceOffset),
-               IO_PCA9956B_INR_CHANNELS_SHORTED_BITFIELD);
+    MIO_Map (MIO_Dir_Input, INPUT_PROFILE_Group_LIGHTDEV, IO_Type_Range,
+             INPUT_PROFILE_LIGHTDEV_Range_ChannelsShorted(DeviceOffset),
+             IO_PCA9956B_INR_CHANNELS_SHORTED_BITFIELD);
 
-    INPUT_Map (INPUT_PROFILE_Group_LIGHTDEV, IO_Type_Range,
-               INPUT_PROFILE_LIGHTDEV_Range_ChannelsOpen(DeviceOffset),
-               IO_PCA9956B_INR_CHANNELS_OPEN_BITFIELD);
+    MIO_Map (MIO_Dir_Input, INPUT_PROFILE_Group_LIGHTDEV, IO_Type_Range,
+             INPUT_PROFILE_LIGHTDEV_Range_ChannelsOpen(DeviceOffset),
+             IO_PCA9956B_INR_CHANNELS_OPEN_BITFIELD);
 
-    INPUT_Map (INPUT_PROFILE_Group_LIGHTDEV, IO_Type_Bit,
-                  INPUT_PROFILE_LIGHTDEV_Bit_Overtemp(DeviceOffset),
-                  IO_PCA9956B_INB_OVERTEMP);
+    MIO_Map (MIO_Dir_Input, INPUT_PROFILE_Group_LIGHTDEV, IO_Type_Bit,
+             INPUT_PROFILE_LIGHTDEV_Bit_Overtemp(DeviceOffset),
+             IO_PCA9956B_INB_OVERTEMP);
 
-    INPUT_Map (INPUT_PROFILE_Group_LIGHTDEV, IO_Type_Bit,
-               INPUT_PROFILE_LIGHTDEV_Bit_ChannelError(DeviceOffset),
-               IO_PCA9956B_INB_CHANNEL_ERROR);
+    MIO_Map (MIO_Dir_Input, INPUT_PROFILE_Group_LIGHTDEV, IO_Type_Bit,
+             INPUT_PROFILE_LIGHTDEV_Bit_ChannelError(DeviceOffset),
+             IO_PCA9956B_INB_CHANNEL_ERROR);
 
 
     MIO_RegisterGateway (MIO_Dir_Output, (struct IO *)P, 0);
@@ -200,10 +202,10 @@ void IO_PCA9956B_Attach (struct IO_PCA9956B *const P,
 
     for (uint32_t i = 0; i < IO_PCA9956B_CHANNEL_COUNT; ++i)
     {
-        OUTPUT_Map (OUTPUT_PROFILE_Group_LIGHTDEV, IO_Type_Range,
-                    IrefStart + i, IO_PCA9956B_OUTR_CH0_IREF + i);
-        OUTPUT_Map (OUTPUT_PROFILE_Group_LIGHTDEV, IO_Type_Range,
-                    PwmStart + i, IO_PCA9956B_OUTR_CH0_PWM + i);
+        MIO_Map (MIO_Dir_Output, OUTPUT_PROFILE_Group_LIGHTDEV, IO_Type_Range,
+                 IrefStart + i, IO_PCA9956B_OUTR_CH0_IREF + i);
+        MIO_Map (MIO_Dir_Output, OUTPUT_PROFILE_Group_LIGHTDEV, IO_Type_Range,
+                 PwmStart + i, IO_PCA9956B_OUTR_CH0_PWM + i);
     }
 }
 
@@ -232,10 +234,10 @@ static bool deviceMode2Status (struct IO_PCA9956B *const P)
     // Get MODE2 device status
     tx = PCA9956B_MODE2;
 
-    PACKET_SendTo   (P->packet, &VARIANT_SpawnUint(P->i2cAddr));
-    PACKET_Bidir    (P->packet, &tx, 1, &rx, 1);
+    STREAM_ADDRT_COMP_BUFFERS (P->stream, P->i2cAddr, PCA9956B_I2C_TIMEOUT,
+                               &tx, 1, &rx, 1);
 
-    if (PACKET_ERROR_LOG_nAck (P->packet))
+    if (!STREAM_CHECK_I2cControllerXferStatus (P->stream))
     {
         return false;
     }
@@ -272,10 +274,10 @@ static void deviceFullStatus (struct IO_PCA9956B *const P)
     // Retrieve EFLAGS[0-5]
     reg = PCA9956B_AUTOINC_EFLAG0;
 
-    PACKET_SendTo   (P->packet, &VARIANT_SpawnUint(P->i2cAddr));
-    PACKET_Bidir    (P->packet, &reg, 1, eflags, sizeof(eflags));
+    STREAM_ADDRT_COMP_BUFFERS (P->stream, P->i2cAddr, PCA9956B_I2C_TIMEOUT,
+                               &reg, 1, eflags, sizeof(eflags));
 
-    if (!PACKET_ERROR_LOG_Generic (P->packet))
+    if (STREAM_CHECK_I2cControllerXferStatus (P->stream))
     {
         // EFLAGS[0-5] to channel status. According to PCA9956B datasheet, 
         // only active channel status (Current > 8, PWM > 8) should be
@@ -292,8 +294,8 @@ static void deviceFullStatus (struct IO_PCA9956B *const P)
         eflags[0] = PCA9956B_MODE2;
         eflags[1] = 0x16;
 
-        PACKET_SendTo   (P->packet, &VARIANT_SpawnUint(P->i2cAddr));
-        PACKET_Send     (P->packet, eflags, 2);
+        STREAM_ADDRT_IN_BUFFER (P->stream, P->i2cAddr, PCA9956B_I2C_TIMEOUT,
+                                eflags, 2);
     }
 }
 
@@ -324,10 +326,10 @@ static void updateChannels (struct IO_PCA9956B *const P,
 {
     chData[0] = I2cReg;
 
-    PACKET_SendTo   (P->packet, &VARIANT_SpawnUint(P->i2cAddr));
-    PACKET_Send     (P->packet, chData, 1 + IO_PCA9956B_CHANNEL_COUNT);
+    STREAM_ADDRT_IN_BUFFER (P->stream, P->i2cAddr, PCA9956B_I2C_TIMEOUT,
+                            chData, 1 + IO_PCA9956B_CHANNEL_COUNT);
 
-    PACKET_ERROR_LOG_Generic (P->packet);
+    STREAM_CHECK_I2cControllerXferStatus (P->stream);
 }
 
 

@@ -151,6 +151,7 @@ void        BITFIELD_Init               (struct BITFIELD *const B,
                                          const uint16_t Capacity,
                                          const struct BITFIELD_RANGE *range,
                                          const uint16_t RangeCount);
+void        BITFIELD_Reset              (struct BITFIELD *const B);
 void        BITFIELD_SetBit             (struct BITFIELD *const B,
                                          const BITFIELD_Index BitIndex,
                                          const bool State);

@@ -26,7 +26,6 @@
 #pragma once
 
 #include "embedul.ar/source/core/device/io.h"
-#include "embedul.ar/source/core/device/packet.h"
 #include "embedul.ar/source/core/manager/comm.h"
 
 
@@ -99,7 +98,7 @@ struct IO_LP5036
 {
     struct IO           device;
     struct IO_PortInfo  portInfo[IO_LP5036_PORT_COUNT];
-    struct PACKET       * packet;
+    struct STREAM       * stream;
     // outData[0] reserved as the i2c register to write to.
     uint8_t             outData[IO_LP5036_OUTR__COUNT + 1];
     uint8_t             i2cAddr;
@@ -107,5 +106,6 @@ struct IO_LP5036
 };
 
 
-void IO_LP5036_Init (struct IO_LP5036 *const L, const enum COMM_Packet Com,
+void IO_LP5036_Init (struct IO_LP5036 *const L,
+                     const enum COMM_Device ComDevice,
                      const uint8_t I2cAddr, const uint8_t MaxIntensity);

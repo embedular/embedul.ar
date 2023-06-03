@@ -35,15 +35,22 @@
     #error This output profile requires OUTPUT_MAX_LIGHT_CHANNELS > 0
 #endif
 
-#define OUTPUT_PROFILE_LIGHTDEV(_ptype,_pname,_dev_i) \
-    (BOARD_AssertParams(_dev_i), ((enum OUTPUT_PROFILE_LIGHTDEV_ ## _ptype) \
-        OUTPUT_PROFILE_LIGHTDEV_ ## _ptype ## _ ## _pname ## __BEGIN + _dev_i))
+#define OUTPUT_PROFILE_LIGHTDEV(_ptype,_pname,_dev_c) \
+    ( \
+        BOARD_AssertParams( \
+            _dev_c < LIB_EMBEDULAR_CONFIG_OUTPUT_MAX_LIGHT_CHANNELS \
+            ), \
+        ((enum OUTPUT_PROFILE_LIGHTDEV_ ## _ptype) \
+            OUTPUT_PROFILE_LIGHTDEV_ ## _ptype ## _ ## _pname ## __BEGIN + \
+            _dev_c \
+            ) \
+    )
 
-#define OUTPUT_PROFILE_LIGHTDEV_Range_Iref(_dev_i) \
-    OUTPUT_PROFILE_LIGHTDEV(Range,Iref,_dev_i)
+#define OUTPUT_PROFILE_LIGHTDEV_Range_Iref(_dev_c) \
+    OUTPUT_PROFILE_LIGHTDEV(Range,Iref,_dev_c)
 
-#define OUTPUT_PROFILE_LIGHTDEV_Range_Pwm(_dev_i) \
-    OUTPUT_PROFILE_LIGHTDEV(Range,Pwm,_dev_i)
+#define OUTPUT_PROFILE_LIGHTDEV_Range_Pwm(_dev_c) \
+    OUTPUT_PROFILE_LIGHTDEV(Range,Pwm,_dev_c)
 
 
 enum OUTPUT_PROFILE_LIGHTDEV_Range

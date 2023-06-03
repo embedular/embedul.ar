@@ -57,7 +57,7 @@ else
 endif
 
 ifeq ($(TARGET_NAME), edu_ciaa_retro_poncho)
-	OBJS += $(LIB_EMBEDULAR_ROOT)/source/drivers/packet_esp32at_tcp_server.o
+	OBJS += $(LIB_EMBEDULAR_ROOT)/source/drivers/stream_esp32at_tcp_server.o
     OBJS += $(TARGET_DRIVERS)/io_dual_nes_videoex.o
 endif
 

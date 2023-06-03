@@ -37,8 +37,15 @@
 #endif
 
 #define INPUT_PROFILE_LIGHTDEV(_ptype,_pname,_dev_i) \
-    (BOARD_AssertParams(_dev_i), ((enum INPUT_PROFILE_LIGHTDEV_ ## _ptype) \
-        INPUT_PROFILE_LIGHTDEV_ ## _ptype ## _ ## _pname ## __BEGIN + _dev_i))
+    ( \
+        BOARD_AssertParams( \
+            _dev_i < LIB_EMBEDULAR_CONFIG_INPUT_MAX_LIGHTING_DEVICES \
+            ), \
+        ((enum INPUT_PROFILE_LIGHTDEV_ ## _ptype) \
+            INPUT_PROFILE_LIGHTDEV_ ## _ptype ## _ ## _pname ## __BEGIN + \
+            _dev_i \
+            ) \
+    )
 
 #define INPUT_PROFILE_LIGHTDEV_Bit_Overtemp(_dev_i) \
     INPUT_PROFILE_LIGHTDEV(Bit,Overtemp,_dev_i)

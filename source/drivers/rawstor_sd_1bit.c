@@ -128,7 +128,7 @@ static inline void setCSHigh (struct RAWSTOR_SD_1BIT *const S)
 static inline void setSlowClock (struct RAWSTOR_SD_1BIT *const S)
 {
     /* Set slow clock (100k-400k) */
-    PACKET_Command (S->packet, DEVICE_COMMAND_SET_SPEED, 
+    PACKET_Command (S->packet, STREAM_COMMAND_SET_SPEED, 
                     &VARIANT_SpawnUint(SPI_SLOW_CLOCK));
 }
 
@@ -136,7 +136,7 @@ static inline void setSlowClock (struct RAWSTOR_SD_1BIT *const S)
 static inline void setFastClock (struct RAWSTOR_SD_1BIT *const S)
 {
     /* Set fast clock (depends on the CSD) */
-    PACKET_Command (S->packet, DEVICE_COMMAND_SET_SPEED, 
+    PACKET_Command (S->packet, STREAM_COMMAND_SET_SPEED, 
                     &VARIANT_SpawnUint(SPI_FAST_CLOCK));
 }
 
@@ -391,9 +391,9 @@ static void hardwareInit (struct RAWSTOR *const R)
             MMC/SDC."
     */
 
-    PACKET_Command (P->packet, DEVICE_COMMAND_SET_FRAME_BITS,
+    PACKET_Command (P->packet, STREAM_COMMAND_SET_FRAME_BITS,
                     &VARIANT_SpawnUint(8));
-    PACKET_Command (P->packet, DEVICE_COMMAND_SET_SPEED,
+    PACKET_Command (P->packet, STREAM_COMMAND_SET_SPEED,
                     &VARIANT_SpawnUint(SPI_SLOW_CLOCK));
 
     deselectCard (P);

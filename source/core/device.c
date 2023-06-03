@@ -48,7 +48,7 @@ enum DEVICE_CommandResult DEVICE_Command (
         }
 
         // Any device command must follow the regular expression
-        // template "(s|g|x)|[a-zA-Z0-9]+"
+        // template "(s|g|x)|[a-zA-Z0-9]+" where s = Set, g = Get, x = Execute.
         if (strlen(Name) < 2
             || (Name[0] != 's' && Name[0] != 'g' && Name[0] != 'x')
             || Name[1] != '|')
@@ -63,8 +63,8 @@ enum DEVICE_CommandResult DEVICE_Command (
         {
             case 's':
                 LOG_Items (2,
-                            LANG_SET,       Name,
-                            LANG_VALUE,     VARIANT_ToString(Value));
+                            LANG_SET,   Name,
+                            LANG_VALUE, VARIANT_ToString(Value));
                 break;
 
             case 'g':
@@ -109,7 +109,8 @@ enum DEVICE_CommandResult DEVICE_Command (
                         }
                         else 
                         {
-                            LOG_Warn (DevInfo, LANG_COMMAND_MOD_VALUE_SET_FMT, Value);
+                            LOG_Warn (DevInfo, LANG_COMMAND_MOD_VALUE_SET_FMT,
+                                      Value);
                         }
                         break;
 

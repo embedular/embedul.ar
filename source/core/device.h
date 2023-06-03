@@ -30,40 +30,38 @@
 #include <string.h>
 
 
-#define DEVICE_COMMAND_GET_CONNECTED            "g|connected"
+#define DEVICE_COMMAND_STREAM_SET_HOSTNAME              "s|hostname"
+#define DEVICE_COMMAND_STREAM_SET_WIFI_SSID             "s|wifi.ssid"
+#define DEVICE_COMMAND_STREAM_SET_PASSWORD              "s|password"
+#define DEVICE_COMMAND_STREAM_SET_UART_BAUD             "s|uart.baud"
+#define DEVICE_COMMAND_STREAM_SET_UART_HWFLOW           "s|uart.hwflow"
+#define DEVICE_COMMAND_STREAM_SET_SPEED                 "s|speed"
+#define DEVICE_COMMAND_STREAM_SET_FRAME_BITS            "s|framebits"
+#define DEVICE_COMMAND_STREAM_SET_IP_TCP_PORT           "s|ip.tcp.port"
+#define DEVICE_COMMAND_STREAM_SET_IP_UDP_PORT           "s|ip.udp.port"
 
-#define DEVICE_COMMAND_SET_HOSTNAME             "s|hostname"
-#define DEVICE_COMMAND_SET_WIFI_SSID            "s|wifi.ssid"
-#define DEVICE_COMMAND_SET_PASSWORD             "s|password"
-#define DEVICE_COMMAND_SET_UART_BAUD            "s|uart.baud"
-#define DEVICE_COMMAND_SET_SPEED                "s|speed"
-#define DEVICE_COMMAND_SET_FRAME_BITS           "s|framebits"
-#define DEVICE_COMMAND_SET_IP_TCP_PORT          "s|ip.tcp.port"
-#define DEVICE_COMMAND_SET_IP_UDP_PORT          "s|ip.udp.port"
+/*
+#define DEVICE_COMMAND_STREAM_EXE_POWEROFF              "x|poweroff" 
+#define DEVICE_COMMAND_STREAM_EXE_UART_HWFLOW           "x|uart.hwflow"
+#define DEVICE_COMMAND_STREAM_EXE_UART_NOFLOW           "x|uart.noflow"
+*/
 
-// Param: automatic reconnect delay (0 == no reconnect)
-#define DEVICE_COMMAND_EXE_CONNECT              "x|connect"
-#define DEVICE_COMMAND_EXE_POWEROFF             "x|poweroff" 
-#define DEVICE_COMMAND_EXE_UART_HWFLOW          "x|uart.hwflow"
-#define DEVICE_COMMAND_EXE_UART_NOFLOW          "x|uart.noflow"
-
-
-#define DEVICE_COMMAND_CHECK_4(_c,...) \
-                !strcmp(Name, DEVICE_COMMAND_##_c) || \
+#define DEVICE_COMMAND_CHECK_4(_cmd,...) \
+                !strcmp(Name, DEVICE_COMMAND_##_cmd) || \
                 DEVICE_COMMAND_CHECK_3(__VA_ARGS__)
 
-#define DEVICE_COMMAND_CHECK_3(_c,...) \
-                !strcmp(Name, DEVICE_COMMAND_##_c) || \
+#define DEVICE_COMMAND_CHECK_3(_cmd,...) \
+                !strcmp(Name, DEVICE_COMMAND_##_cmd) || \
                 DEVICE_COMMAND_CHECK_2(__VA_ARGS__)
 
-#define DEVICE_COMMAND_CHECK_2(_c,...) \
-                !strcmp(Name, DEVICE_COMMAND_##_c) || \
+#define DEVICE_COMMAND_CHECK_2(_cmd,...) \
+                !strcmp(Name, DEVICE_COMMAND_##_cmd) || \
                 DEVICE_COMMAND_CHECK_1(__VA_ARGS__)
 
-#define DEVICE_COMMAND_CHECK_1(_c) \
-                !strcmp(Name, DEVICE_COMMAND_##_c)
+#define DEVICE_COMMAND_CHECK_1(_cmd) \
+                !strcmp(Name, DEVICE_COMMAND_##_cmd)
 
-#define DEVICE_COMMAND_CHECK_0(_c) \
+#define DEVICE_COMMAND_CHECK_0(_cmd) \
                 _Static_assert(0, LANG_COMMAND_REQUIRED);
 
 #define DEVICE_COMMAND_CHECK(...) \

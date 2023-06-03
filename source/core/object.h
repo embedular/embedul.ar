@@ -37,7 +37,6 @@
         struct IO *             : 1, \
         struct RAWSTOR *        : 1, \
         struct STREAM *         : 1, \
-        struct PACKET *         : 1, \
         struct RANDOM *         : 1, \
         struct SOUND *          : 1, \
         struct TICKS *          : 1, \
@@ -89,7 +88,6 @@
         struct IO *             : "dev" OBJECT_TYPE_SEPARATOR "io", \
         struct RAWSTOR *        : "dev" OBJECT_TYPE_SEPARATOR "rawstor", \
         struct STREAM *         : "dev" OBJECT_TYPE_SEPARATOR "stream", \
-        struct PACKET *         : "dev" OBJECT_TYPE_SEPARATOR "packet", \
         struct RANDOM *         : "dev" OBJECT_TYPE_SEPARATOR "random", \
         struct SOUND *          : "dev" OBJECT_TYPE_SEPARATOR "sound", \
         struct TICKS *          : "dev" OBJECT_TYPE_SEPARATOR "ticks", \
@@ -132,7 +130,6 @@
         struct IO *             : IO_Description((struct IO *)_p), \
         struct RAWSTOR *        : RAWSTOR_Description((struct RAWSTOR *)_p), \
         struct STREAM *         : STREAM_Description((struct STREAM *)_p), \
-        struct PACKET *         : PACKET_Description((struct PACKET *)_p), \
         struct RANDOM *         : RANDOM_Description(), \
         struct SOUND *          : SOUND_Description(), \
         struct TICKS *          : TICKS_Description(), \
@@ -175,7 +172,6 @@
         struct IO *             : _p, \
         struct RAWSTOR *        : _p, \
         struct STREAM *         : _p, \
-        struct PACKET *         : _p, \
         struct RANDOM *         : _p, \
         struct SOUND *          : _p, \
         struct TICKS *          : _p, \

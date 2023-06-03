@@ -37,7 +37,6 @@ OBJS += \
     $(TARGET_BSP_BOARD)/board.o \
     $(TARGET_BSP)/shared/i2cm.o
 
-FLASH_BASE ?= 0x1B000000
 
 ifneq ($(filter video-adapter,$(TARGET_SUBSYSTEMS)),)
     # Selected modeline.

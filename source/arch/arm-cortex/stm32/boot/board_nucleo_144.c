@@ -25,10 +25,9 @@
 
 #include "embedul.ar/source/core/device/board.h"
 #include "embedul.ar/source/arch/arm-cortex/stm32/drivers/io_board_nucleo_144.h"
-#include "embedul.ar/source/arch/arm-cortex/stm32/drivers/stream_usart.h"
+#include "embedul.ar/source/arch/arm-cortex/stm32/drivers/stream_uart.h"
 #include "embedul.ar/source/arch/arm-cortex/stm32/drivers/random_rng.h"
 // Selected nucleo-144 -based board
-#include "cubemx/Core/Inc/main.h"
 #include "cubemx/Core/Inc/gpio.h"
 #include "cubemx/Core/Inc/eth.h"
 #include "cubemx/Core/Inc/usart.h"
@@ -56,7 +55,7 @@ struct BOARD_NUCLEO_144
 {
     struct BOARD                device;
     struct IO_BOARD_NUCLEO_144  ioBoard;
-    struct STREAM_USART         streamDebugUsart;
+    struct STREAM_UART          streamDebugUart;
     struct RANDOM_RNG           randomRng;
     uint8_t                     debugInBuffer[16];
     uint8_t                     debugOutBuffer[16];
@@ -203,16 +202,15 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
 
         case BOARD_Stage_InitDebugStreamDriver:
         {
-            STREAM_USART3_Init (&N->streamDebugUsart,
-                                &huart3,
-                                N->debugInBuffer, sizeof(N->debugInBuffer),
-                                N->debugOutBuffer, sizeof(N->debugOutBuffer));
-            return &N->streamDebugUsart;
+            STREAM_UART3_Init (&N->streamDebugUart, &huart3,
+                               N->debugInBuffer, sizeof(N->debugInBuffer),
+                               N->debugOutBuffer, sizeof(N->debugOutBuffer));
+            return &N->streamDebugUart;
         }
 
         case BOARD_Stage_Greetings:
         {
-            greetings ((struct STREAM *)&N->streamDebugUsart);
+            greetings ((struct STREAM *)&N->streamDebugUart);
             break;
         }
 

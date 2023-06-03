@@ -28,10 +28,10 @@
 #include "embedul.ar/source/core/device/io.h"
 
 
-#define IO_BOARD_NUCLEO_144_PORT_COUNT             1
+#define IO_BOARD_NUCLEO_144_PORT_COUNT  1
 
 /*
-    ST NUCLEO-144 human interface input (x) and output [x] layout.
+    ST NUCLEO-144 human interface inputs (x) and outputs [x] layout.
 
          +-------------------+
          |     USER LEDS     |
@@ -52,14 +52,14 @@
 
 enum IO_BOARD_NUCLEO_144_INB
 {
-    IO_BOARD_NUCLEO_144_INB_USER = 0,
+    IO_BOARD_NUCLEO_144_INB_USER,
     IO_BOARD_NUCLEO_144_INB__COUNT
 };
 
 
 enum IO_BOARD_NUCLEO_144_OUTB
 {
-    IO_BOARD_NUCLEO_144_OUTB_LED_GREEN = 0,
+    IO_BOARD_NUCLEO_144_OUTB_LED_GREEN,
     IO_BOARD_NUCLEO_144_OUTB_LED_BLUE,
     IO_BOARD_NUCLEO_144_OUTB_LED_RED,
     IO_BOARD_NUCLEO_144_OUTB__COUNT

@@ -27,46 +27,6 @@
 #include "embedul.ar/source/core/device/board.h"
 
 
-//#define SUPPORTS_HOT_INSERTION
-
-#ifndef SPI_SLOW_CLOCK
-#define SPI_SLOW_CLOCK               100000
-#endif
-
-#ifndef SPI_FAST_CLOCK
-#define SPI_FAST_CLOCK               14000000
-#endif
-
-#define WAIT_READY_SELECT_TIMEOUT    500
-#define DATASTART_TOKEN_TIMEOUT      200
-#define WAIT_READY_XMIT_TIMEOUT      500
-#define INITIALIZATION_TIMEOUT       2000
-
-// MMC/SDC commands according to SD Group "Physical Layer Simplified 
-// Specification Version 6.00"
-#define SD_CMD0                 0           // GO_IDLE_STATE
-#define SD_CMD1                 1           // SEND_OP_COND (MMC)
-#define	SD_ACMD41               (0x80+41)   // SEND_OP_COND (SDC)
-#define SD_CMD8                 8           // SEND_IF_COND
-#define SD_CMD9                 9           // SEND_CSD
-#define SD_CMD10                10          // SEND_CID
-#define SD_CMD12                12          // STOP_TRANSMISSION
-#define SD_ACMD13               (0x80+13)	// SD_STATUS (SDC)
-#define SD_CMD16                16          // SET_BLOCKLEN
-#define SD_CMD17                17          // READ_SINGLE_BLOCK
-#define SD_CMD18                18          // READ_MULTIPLE_BLOCK
-#define SD_CMD23                23          // SET_BLOCK_COUNT (MMC)
-#define SD_ACMD23               (0x80+23)   // SET_WR_BLK_ERASE_COUNT (SDC)
-#define SD_CMD24                24          // WRITE_BLOCK
-#define SD_CMD25                25          // WRITE_MULTIPLE_BLOCK
-#define SD_CMD32                32          // ERASE_ER_BLK_START
-#define SD_CMD33                33          // ERASE_ER_BLK_END
-#define SD_CMD38                38          // ERASE
-// Faltan 48,49
-#define SD_CMD55                55          // APP_CMD
-#define SD_CMD58                58          // READ_OCR
-
-
 // Common IO interface
 static void                     hardwareInit    (struct RAWSTOR *const R);
 static RAWSTOR_Status_Result    mediaInit       (struct RAWSTOR *const R);
@@ -172,7 +132,7 @@ static void powerOn (struct RAWSTOR_SD_SDMMC *const M)
 {
     (void) M;
 
-    OUTPUT_SET_BIT_NOW (CONTROL, StoragePower, 1);
+    MIO_SET_OUTPUT_BIT_NOW (CONTROL, StoragePower, 1);
 
     // Wait a couple of milliseconds for power to stabilize
     TICKS_Delay (200);
@@ -183,7 +143,7 @@ static void powerOff (struct RAWSTOR_SD_SDMMC *const M)
 {
     (void) M;
 
-    OUTPUT_SET_BIT_NOW (CONTROL, StoragePower, 0);
+    MIO_SET_OUTPUT_BIT_NOW (CONTROL, StoragePower, 0);
 
     // Wait a couple of milliseconds for power to stabilize
     TICKS_Delay (200);
@@ -194,13 +154,13 @@ static bool powerCheck (struct RAWSTOR_SD_SDMMC *const M)
 {
     (void) M;
 
-    return INPUT_GET_BIT_NOW(CONTROL,StoragePower)? true : false;
+    return MIO_GET_INPUT_BIT_NOW(CONTROL, StoragePower)? true : false;
 }
 
 
-static bool cardDetect (struct RAWSTOR *const R)
+static bool cardDetect (struct RAWSTOR_SD_SDMMC *const M)
 {
-    (void) R;
+    (void) M;
 
     return (!LPC_SDMMC->CDETECT)? true : false;
 }
@@ -249,7 +209,7 @@ static void hardwareInit (struct RAWSTOR *const R)
 
 static RAWSTOR_Status_Result mediaInit (struct RAWSTOR *const R)
 {
-    struct RAWSTOR_SD_SDMMC *m = (struct RAWSTOR_SD_SDMMC *) R;
+    struct RAWSTOR_SD_SDMMC *const M = (struct RAWSTOR_SD_SDMMC *) R;
 
     if (R->status.disk & RAWSTOR_Status_Disk_NotPresent)
     {
@@ -274,13 +234,13 @@ static RAWSTOR_Status_Result mediaInit (struct RAWSTOR *const R)
                                0);
 
     // Socket power on
-    powerOn (m);
+    powerOn (M);
 
     // Enumerate SD card
-    if (!Chip_SDMMC_Acquire (LPC_SDMMC, &m->sdcardinfo))
+    if (!Chip_SDMMC_Acquire (LPC_SDMMC, &M->sdcardinfo))
     {
         // Failed
-        powerOff (m);
+        powerOff (M);
 
         RAWSTOR_UpdateStatusMedia (R, RAWSTOR_Status_Media_Error, 0, 0);
         RAWSTOR_UpdateStatusResult (R, RAWSTOR_Status_Result_NotReady);
@@ -306,8 +266,8 @@ static RAWSTOR_Status_Result mediaRead (struct RAWSTOR *const R,
     const uint32_t r = Chip_SDMMC_ReadBlocks (LPC_SDMMC, Data, SectorBegin,
                                               SectorCount);
 
-    return r? RAWSTOR_Status_Result_Ok :
-              RAWSTOR_Status_Result_ReadWriteError;
+    return (r)? RAWSTOR_Status_Result_Ok :
+                RAWSTOR_Status_Result_ReadWriteError;
 }
 
 
@@ -321,8 +281,8 @@ static RAWSTOR_Status_Result mediaWrite (struct RAWSTOR *const R,
     const uint32_t r = Chip_SDMMC_WriteBlocks (LPC_SDMMC, Data, SectorBegin,
                                                SectorCount);
 
-    return r? RAWSTOR_Status_Result_Ok :
-              RAWSTOR_Status_Result_ReadWriteError;
+    return (r)? RAWSTOR_Status_Result_Ok :
+                RAWSTOR_Status_Result_ReadWriteError;
 }
 
 
@@ -330,33 +290,33 @@ static RAWSTOR_Status_Result mediaIoctl (struct RAWSTOR *const R,
                                          const uint8_t Cmd,
                                          void *const Data)
 {
-    struct RAWSTOR_SD_SDMMC *m = (struct RAWSTOR_SD_SDMMC *) R;
+    struct RAWSTOR_SD_SDMMC *const M = (struct RAWSTOR_SD_SDMMC *) R;
 
 	RAWSTOR_Status_Result   res;
     int32_t                 stats;
-	uint8_t                 *ptr = Data;
+	uint8_t                 *const Ptr = Data;
 
 	res = RAWSTOR_Status_Result_ReadWriteError;
     
 	if (Cmd == RAWSTOR_IOCTL_CMD_POWER)
     {
-		switch (*ptr) 
+		switch (*Ptr) 
         {
-            case RAWSTOR_IOCTL_CMD_POWER_OFF:
-                if (powerCheck (m))
+            case RAWSTOR_IOCTL_CMD_POWER__OFF:
+                if (powerCheck (M))
                 {
-                    powerOff (m);
+                    powerOff (M);
                 }
                 res = RAWSTOR_Status_Result_Ok;
                 break;
                 
-            case RAWSTOR_IOCTL_CMD_POWER_ON:
-                powerOn (m);
+            case RAWSTOR_IOCTL_CMD_POWER__ON:
+                powerOn (M);
                 res = RAWSTOR_Status_Result_Ok;
                 break;
                 
-            case RAWSTOR_IOCTL_CMD_POWER_STATUS:
-                *(ptr+1) = powerCheck (m)? 1 : 0;
+            case RAWSTOR_IOCTL_CMD_POWER__STATUS:
+                *(Ptr+1) = powerCheck(M)? 1 : 0;
                 res = RAWSTOR_Status_Result_Ok;
                 break;
                 
@@ -385,7 +345,7 @@ static RAWSTOR_Status_Result mediaIoctl (struct RAWSTOR *const R,
 
         case RAWSTOR_IOCTL_CMD_GET_SECTOR_COUNT:
             // Get number of sectors on the disk (uint32_t)
-            *(uint32_t *) Data = m->sdcardinfo.card_info.blocknr;
+            *(uint32_t *) Data = M->sdcardinfo.card_info.blocknr;
             res = RAWSTOR_Status_Result_Ok;
             break;
 
@@ -417,31 +377,31 @@ static RAWSTOR_Status_Result mediaIoctl (struct RAWSTOR *const R,
         // ---------------------------------------------------------------------
         // The following commands are never used by FatFs module
         // ---------------------------------------------------------------------
-        case SDCARD_IOCTL_GET_TYPE:
+        case RAWSTOR_IOCTL_SDCARD_GET_TYPE:
             // Get card type flags (1 byte)
-            *ptr = (uint8_t) m->sdcardinfo.card_info.card_type;
+            *Ptr = (uint8_t) M->sdcardinfo.card_info.card_type;
             res = RAWSTOR_Status_Result_Ok;
             break;
 
-        case SDCARD_IOCTL_GET_CSD:
+        case RAWSTOR_IOCTL_SDCARD_GET_CSD:
             // Receive CSD as a data block (16 bytes)
-            *((uint32_t *) Data + 0) = m->sdcardinfo.card_info.csd[0];
-            *((uint32_t *) Data + 1) = m->sdcardinfo.card_info.csd[1];
-            *((uint32_t *) Data + 2) = m->sdcardinfo.card_info.csd[2];
-            *((uint32_t *) Data + 3) = m->sdcardinfo.card_info.csd[3];
+            *((uint32_t *) Data + 0) = M->sdcardinfo.card_info.csd[0];
+            *((uint32_t *) Data + 1) = M->sdcardinfo.card_info.csd[1];
+            *((uint32_t *) Data + 2) = M->sdcardinfo.card_info.csd[2];
+            *((uint32_t *) Data + 3) = M->sdcardinfo.card_info.csd[3];
             res = RAWSTOR_Status_Result_Ok;
             break;
 
-        case SDCARD_IOCTL_GET_CID:
+        case RAWSTOR_IOCTL_SDCARD_GET_CID:
             // Receive CID as a data block (16 bytes)
-            *((uint32_t *) Data + 0) = m->sdcardinfo.card_info.cid[0];
-            *((uint32_t *) Data + 1) = m->sdcardinfo.card_info.cid[1];
-            *((uint32_t *) Data + 2) = m->sdcardinfo.card_info.cid[2];
-            *((uint32_t *) Data + 3) = m->sdcardinfo.card_info.cid[3];
+            *((uint32_t *) Data + 0) = M->sdcardinfo.card_info.cid[0];
+            *((uint32_t *) Data + 1) = M->sdcardinfo.card_info.cid[1];
+            *((uint32_t *) Data + 2) = M->sdcardinfo.card_info.cid[2];
+            *((uint32_t *) Data + 3) = M->sdcardinfo.card_info.cid[3];
             res = RAWSTOR_Status_Result_Ok;
             break;
 
-        case SDCARD_IOCTL_GET_SDSTAT:
+        case RAWSTOR_IOCTL_SDCARD_GET_SDSTAT:
             // Receive SD stats
             if ((stats = Chip_SDMMC_GetState(LPC_SDMMC)) != -1)
             {

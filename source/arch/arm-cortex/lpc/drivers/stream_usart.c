@@ -67,8 +67,8 @@ static void usartInit (struct STREAM_USART *const U,
                        const uint32_t Baud, const uint32_t LcrFlags)
 {
     BOARD_AssertParams (U && Usart && 
-                         InBuffer && InOctets && OutBuffer && OutOctets &&
-                         Baud);
+                        InBuffer && InOctets && OutBuffer && OutOctets &&
+                        Baud);
 
     DEVICE_IMPLEMENTATION_Clear (U);
 
@@ -166,10 +166,6 @@ void hardwareInit (struct STREAM *const S)
 
     NVIC_SetPriority        (U->irq, STREAM_USART_LPC_IRQ_PRIORITY);
     NVIC_EnableIRQ          (U->irq);
-
-    // Default timeouts
-    S->inTimeout    = 5000;
-    S->outTimeout   = 50;
 }
 
 
@@ -324,7 +320,7 @@ enum DEVICE_CommandResult command (struct STREAM *const S,
 {
     struct STREAM_USART *const U = (struct STREAM_USART *const) S;
 
-    if (DEVICE_COMMAND_CHECK(SET_UART_BAUD, SET_SPEED))
+    if (DEVICE_COMMAND_CHECK(STREAM_SET_UART_BAUD, STREAM_SET_SPEED))
     {
         const uint32_t ReqBaud = (uint32_t) VARIANT_ToUint (Value);
         const uint32_t SetBaud = Chip_UART_SetBaudFDR (U->usart, ReqBaud);
@@ -337,19 +333,24 @@ enum DEVICE_CommandResult command (struct STREAM *const S,
         U->baud = SetBaud;
         VARIANT_SetUint (Value, SetBaud);
     }
-    else if (DEVICE_COMMAND_CHECK(EXE_UART_HWFLOW))
+    else if (DEVICE_COMMAND_CHECK(STREAM_SET_UART_HWFLOW))
     {
-        Chip_UART_SetModemControl (U->usart,
-                                UART_MCR_AUTO_RTS_EN |
-                                UART_MCR_AUTO_CTS_EN);
-        U->hwFlowCtrl = true;
-    }
-    else if (DEVICE_COMMAND_CHECK(EXE_UART_NOFLOW))
-    {
-        Chip_UART_ClearModemControl (U->usart,
-                                    UART_MCR_AUTO_RTS_EN |
-                                    UART_MCR_AUTO_CTS_EN);            
-        U->hwFlowCtrl = false;
+        const bool HwFlowEnabled = VARIANT_ToBoolean (Value);
+
+        if (HwFlowEnabled)
+        {
+            Chip_UART_SetModemControl (U->usart,
+                                        UART_MCR_AUTO_RTS_EN |
+                                        UART_MCR_AUTO_CTS_EN);
+        }
+        else 
+        {
+            Chip_UART_ClearModemControl (U->usart,
+                                        UART_MCR_AUTO_RTS_EN |
+                                        UART_MCR_AUTO_CTS_EN);              
+        }
+
+        U->hwFlowCtrl = HwFlowEnabled;
     }
     else
     {
