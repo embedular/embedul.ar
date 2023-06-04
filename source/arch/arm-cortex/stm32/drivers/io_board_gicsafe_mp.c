@@ -186,8 +186,8 @@ static uint8_t modSerInPinRead ()
 }
 
 
-static void modScan (struct IO_BOARD_GICSAFE_MP *const B,
-                     const enum IO_BOARD_GICSAFE_MP_INR ModuleInr)
+static void scanModule (struct IO_BOARD_GICSAFE_MP *const B,
+                        const enum IO_BOARD_GICSAFE_MP_INR ModuleInr)
 {
     const uint32_t Module = ModuleInr - IO_BOARD_GICSAFE_MP_INR_MOD1;
 
@@ -219,12 +219,12 @@ static void modScan (struct IO_BOARD_GICSAFE_MP *const B,
 }
 
 
-static void modUpdate (struct IO_BOARD_GICSAFE_MP *const B)
+static void updateModules (struct IO_BOARD_GICSAFE_MP *const B)
 {
     for (enum IO_BOARD_GICSAFE_MP_INR m = IO_BOARD_GICSAFE_MP_INR_MOD1;
          m <= IO_BOARD_GICSAFE_MP_INR_MOD16; ++m)
     {
-        modScan (B, m);
+        scanModule (B, m);
     }
 }
 
@@ -240,7 +240,7 @@ static void updateRangeInput (struct IO_BOARD_GICSAFE_MP *const B)
     // 3) Adjust values accordingly.
     // 4) Store in inrData[inr].
 
-    modUpdate (B);
+    updateModules (B);
 }
 
 

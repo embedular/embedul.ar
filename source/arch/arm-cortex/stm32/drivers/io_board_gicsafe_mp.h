@@ -37,29 +37,35 @@
     Bit inputs (x), Bit outputs [x], and Range inputs <x> layout shown below.
 
     +-------------------------------------+
-    |                              AIn2<5>|
-    |                              AIn1<4>|
-    |[3][2][1][0]                     ~<2>|
+    |                              <3>AIn2|
+    |                              <2>AIn1|
+    |[3][2][1][0]                     <0>~|
     |                                   - |
-    |[4-10]                 V_In<3><---{ }|
-    |J9 (0) (1)  (2)                    + |
-    |    B1  B2   SD_DET                  |
-    +-------------------------------------+   
+    |J10<7-22>             <1>DC_In<---{ }|
+    |J9[4-10]                           + |
+    |          +----+                     |
+    |  (0) (1) |(2) |                     |
+    |   B1  B2 | SD_DET                   |
+    +----------+----+---------------------+   
 
         [0] = LED1 (red)
         [1] = LED2 (red)
         [2] = LED3 (red)
         [3] = LED4 (red)
-        [4-10] = Digital Output 1 to 6, on J9.
+        [4-10] = J9 Connector: Discrete digital outputs 1-6.
 
         (0) = SW1/B1
         (1) = SW2/B2
         (2) = SD_DET, sd socket card detect switch.
 
-        <0> = Mains to 6V transformer.
+        <0> = Mains to 6V transformer input.
         <1> = DC In power gauge, 24V nominal. 
         <2> = Analog input 1 (4-20ma or 0-10V)
         <3> = Analog input 2 (4-20ma or 0-10V)
+        <4> = [MCU internal] Temperature.
+        <5> = [MCU internal] VRef.
+        <6> = [MCU internal] VBAT.
+        <7-22> = J10 Connector: Serial input modules 1-16 (eight bits each).
 */
 
 
