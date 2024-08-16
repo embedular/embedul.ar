@@ -32,10 +32,10 @@
 struct RAWSTOR_SD_1BIT
 {
     struct RAWSTOR      device;
-    struct PACKET       * packet;
+    struct STREAM       * stream;
     RAWSTOR_SD_TYPE     tFlags;
 };
 
 
 void RAWSTOR_SD_1BIT_Init (struct RAWSTOR_SD_1BIT *const S,
-                           const enum COMM_Packet Com);
+                           const enum COMM_Device Com);

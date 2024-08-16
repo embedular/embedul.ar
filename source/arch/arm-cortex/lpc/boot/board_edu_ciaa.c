@@ -26,7 +26,7 @@
 
 #include "embedul.ar/source/core/device/board.h"
 #include "embedul.ar/source/drivers/random_sfmt.h"
-#include "embedul.ar/source/drivers/socket_esp32at_tcp_server.h"
+#include "embedul.ar/source/drivers/stream_esp32at_tcp_server.h"
 #include "embedul.ar/source/drivers/rawstor_sd_1bit.h"
 #include "embedul.ar/source/arch/arm-cortex/lpc/drivers/io_board_edu_ciaa.h"
 #include "embedul.ar/source/arch/arm-cortex/lpc/drivers/stream_usart.h"
@@ -94,10 +94,10 @@ struct BOARD_EDU_CIAA
     struct RANDOM_SFMT                      randomSfmt;
     struct STREAM_USART                     streamDebugUsart;
     struct STREAM_USART                     streamExtUsart;
-    struct PACKET_SSP                       packetSsp;
+    struct STREAM_SSP                       streamSsp;
 #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
     struct IO_DUAL_NES_VIDEOEX              ioDualNes;
-    struct PACKET_ESP32AT_TCP_SERVER        packetEsp32Tcp;
+    struct STREAM_ESP32AT_TCP_SERVER        streamEsp32Tcp;
     struct RAWSTOR_SD_1BIT                  rawstorSd1Bit;
     struct VIDEO_DUALCORE                   videoDualcore;
     struct SOUND_PCM5100                    soundPcm5100;
@@ -239,14 +239,14 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
 
         case BOARD_Stage_InitCommDrivers:
         {
-            PACKET_SSP_Init (&E->packetSsp, BOARD_SPI_INTERFACE,
-                    PACKET_SSP_Role_Controller,
-                    PACKET_SSP_FrameFmt_Spi,
+            STREAM_SSP_Init (&E->streamSsp, BOARD_SPI_INTERFACE,
+                    STREAM_SSP_Role_Controller,
+                    STREAM_SSP_FrameFmt_Spi,
                     BOARD_SPI_SPEED, BOARD_SPI_BITS, 
-                    PACKET_SSP_ClockFmt_Cpha0_Cpol0);
+                    STREAM_SSP_ClockFmt_Cpha0_Cpol0);
 
-            COMM_SetPacket (COMM_Packet_HighSpeedDeviceExpansion,
-                            (struct PACKET *)&E->packetSsp);
+            COMM_SetDevice (COMM_Device_HighSpeedDeviceExpansion,
+                            (struct STREAM *)&E->streamSsp);
 
         #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
             BOARD_AssertState (BOARD_EXT_USART_INTERFACE == LPC_USART3);
@@ -256,14 +256,14 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
                         E->tcpServerOutBuffer, sizeof(E->tcpServerOutBuffer),
                         BOARD_EXT_USART_BAUD_RATE, BOARD_EXT_USART_CONFIG);
 
-            COMM_SetStream (COMM_Stream_IPNetworkSerialConfig,
+            COMM_SetDevice (COMM_Device_IPNetworkSerialConfig,
                             (struct STREAM *)&E->streamExtUsart);
 
-            SOCKET_ESP32AT_TCP_SERVER_Init (&E->packetEsp32Tcp,
+            STREAM_ESP32AT_TCP_SERVER_Init (&E->streamEsp32Tcp,
                                     (struct STREAM *)&E->streamExtUsart);
 
-            COMM_SetPacket (COMM_Packet_IPNetwork,
-                            (struct PACKET *)&E->packetEsp32Tcp);
+            COMM_SetDevice (COMM_Device_IPNetwork,
+                            (struct STREAM *)&E->streamEsp32Tcp);
         #endif
             break;
         }
@@ -272,7 +272,7 @@ static void * stageChange (struct BOARD *const B, const enum BOARD_Stage Stage)
         {
         #ifdef BOARD_EDU_CIAA_WITH_RETRO_PONCHO
             RAWSTOR_SD_1BIT_Init (&E->rawstorSd1Bit,
-                                  COMM_Packet_HighSpeedDeviceExpansion);
+                                  COMM_Device_HighSpeedDeviceExpansion);
             STORAGE_SetDevice ((struct RAWSTOR *)&E->rawstorSd1Bit);
         #endif
             break;

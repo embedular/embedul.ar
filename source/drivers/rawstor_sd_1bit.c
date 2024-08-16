@@ -95,12 +95,12 @@ static const struct RAWSTOR_IFACE RAWSTOR_SD_1BIT_IFACE =
 
 
 void RAWSTOR_SD_1BIT_Init (struct RAWSTOR_SD_1BIT *const S,
-                           const enum COMM_Packet Com)
+                           const enum COMM_Device Com)
 {
     BOARD_AssertParams (S);
 
     S->tFlags   = RAWSTOR_SD_TYPE_UNKNOWN;
-    S->packet   = COMM_GetPacket (Com);
+    S->stream   = COMM_GetDevice (Com);
 
     RAWSTOR_Init ((struct RAWSTOR *)S, &RAWSTOR_SD_1BIT_IFACE);
 }
@@ -112,7 +112,7 @@ static inline void setCSLow (struct RAWSTOR_SD_1BIT *const S)
 {
     (void) S;
 
-    OUTPUT_SET_BIT_NOW (CONTROL, StorageEnable, 1);
+    MIO_SET_OUTPUT_BIT_NOW (CONTROL, StorageEnable, 1);
 }
 
 
@@ -121,14 +121,14 @@ static inline void setCSHigh (struct RAWSTOR_SD_1BIT *const S)
 {
     (void) S;
 
-    OUTPUT_SET_BIT_NOW (CONTROL, StorageEnable, 0);
+    MIO_SET_OUTPUT_BIT_NOW (CONTROL, StorageEnable, 0);
 }
 
 
 static inline void setSlowClock (struct RAWSTOR_SD_1BIT *const S)
 {
     /* Set slow clock (100k-400k) */
-    PACKET_Command (S->packet, STREAM_COMMAND_SET_SPEED, 
+    STREAM_Command (S->stream, DEVICE_COMMAND_STREAM_SET_SPEED, 
                     &VARIANT_SpawnUint(SPI_SLOW_CLOCK));
 }
 
@@ -136,7 +136,7 @@ static inline void setSlowClock (struct RAWSTOR_SD_1BIT *const S)
 static inline void setFastClock (struct RAWSTOR_SD_1BIT *const S)
 {
     /* Set fast clock (depends on the CSD) */
-    PACKET_Command (S->packet, STREAM_COMMAND_SET_SPEED, 
+    STREAM_Command (S->stream, DEVICE_COMMAND_STREAM_SET_SPEED, 
                     &VARIANT_SpawnUint(SPI_FAST_CLOCK));
 }
 
@@ -144,29 +144,27 @@ static inline void setFastClock (struct RAWSTOR_SD_1BIT *const S)
 static void sendBuffer (struct RAWSTOR_SD_1BIT *const S, 
                         const uint8_t *const Data, const uint32_t Size)
 {
-    PACKET_Send (S->packet, Data, Size);
+    STREAM_IN_FromBuffer (S->stream, Data, Size);
 }
 
 
 static void sendOctet (struct RAWSTOR_SD_1BIT *const S, const uint8_t Octet)
 {
-    sendBuffer (S, &Octet, 1);
+    STREAM_IN_FromOctet (S->stream, Octet);
 }
 
 
 static void recvBuffer (struct RAWSTOR_SD_1BIT *const S,
                         uint8_t *const Data, const uint32_t Size)
 {
-    PACKET_Recv (S->packet, Data, Size);
+    STREAM_OUT_ToBuffer (S->stream, Data, Size);
 }
 
 
 static uint8_t recvOctet (struct RAWSTOR_SD_1BIT *const S)
 {
-    uint8_t octet;
-    // On SPI, it send 0xFF for each actual octet received. 
-    recvBuffer (S, &octet, 1);
-    return octet;
+    // On SPI, it send 0xFF in exchange of each actual octet received. 
+    return STREAM_OUT_ToOctet (S->stream);
 }
 
 
@@ -219,7 +217,7 @@ static void powerOn (struct RAWSTOR_SD_1BIT *const S)
 {
     (void) S;
 
-    OUTPUT_SET_BIT_NOW (CONTROL, StoragePower, 1);
+    MIO_SET_OUTPUT_BIT_NOW (CONTROL, StoragePower, 1);
 }
 
 
@@ -227,7 +225,7 @@ static void powerOff (struct RAWSTOR_SD_1BIT *const S)
 {
     (void) S;
 
-    OUTPUT_SET_BIT_NOW (CONTROL, StoragePower, 0);
+    MIO_SET_OUTPUT_BIT_NOW (CONTROL, StoragePower, 0);
 }
 
 
@@ -235,13 +233,13 @@ static bool powerStatus (struct RAWSTOR_SD_1BIT *const S)
 {
     (void) S;
 
-    if (!INPUT_BIT_IS_MAPPED(CONTROL, StoragePower))
+    if (!MIO_IS_INPUT_BIT_MAPPED(CONTROL, StoragePower))
     {
         return true;
     }
 
     const bool PowerStatus = 
-                    INPUT_GET_BIT_NOW(CONTROL,StoragePower)? true : false;
+                    MIO_GET_INPUT_BIT_NOW(CONTROL,StoragePower)? true : false;
 
     return PowerStatus;
 }
@@ -372,7 +370,7 @@ static bool detectCard (struct RAWSTOR *const R)
 {
     (void) R;
 
-    return INPUT_GET_BIT_NOW(CONTROL,StorageDetect)? true : false;
+    return MIO_GET_INPUT_BIT_NOW(CONTROL,StorageDetect)? true : false;
 }
 
 
@@ -391,9 +389,9 @@ static void hardwareInit (struct RAWSTOR *const R)
             MMC/SDC."
     */
 
-    PACKET_Command (P->packet, STREAM_COMMAND_SET_FRAME_BITS,
+    STREAM_Command (P->stream, DEVICE_COMMAND_STREAM_SET_FRAME_BITS,
                     &VARIANT_SpawnUint(8));
-    PACKET_Command (P->packet, STREAM_COMMAND_SET_SPEED,
+    STREAM_Command (P->stream, DEVICE_COMMAND_STREAM_SET_SPEED,
                     &VARIANT_SpawnUint(SPI_SLOW_CLOCK));
 
     deselectCard (P);
@@ -685,7 +683,7 @@ static RAWSTOR_Status_Result mediaIoctl (struct RAWSTOR *const R,
     {
 		switch (*ptr) 
         {
-            case RAWSTOR_IOCTL_CMD_POWER_OFF:
+            case RAWSTOR_IOCTL_CMD_POWER__OFF:
                 if (powerStatus (p))
                 {
                     powerOff (p);
@@ -693,12 +691,12 @@ static RAWSTOR_Status_Result mediaIoctl (struct RAWSTOR *const R,
                 res = RAWSTOR_Status_Result_Ok;
                 break;
                 
-            case RAWSTOR_IOCTL_CMD_POWER_ON:
+            case RAWSTOR_IOCTL_CMD_POWER__ON:
                 powerOn (p);
                 res = RAWSTOR_Status_Result_Ok;
                 break;
                 
-            case RAWSTOR_IOCTL_CMD_POWER_STATUS:
+            case RAWSTOR_IOCTL_CMD_POWER__STATUS:
                 *(ptr+1) = powerStatus(p)? 1 : 0;
                 res = RAWSTOR_Status_Result_Ok;
                 break;

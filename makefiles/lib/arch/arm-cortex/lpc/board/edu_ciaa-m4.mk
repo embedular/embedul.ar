@@ -45,7 +45,7 @@ OBJS += \
     $(TARGET_MFR)/boot/board_edu_ciaa.o \
     $(TARGET_MFR)/boot/shared_iface.o \
     $(TARGET_DRIVERS)/stream_usart.o \
-    $(TARGET_DRIVERS)/packet_ssp.o \
+    $(TARGET_DRIVERS)/stream_ssp.o \
     $(TARGET_DRIVERS)/io_board_edu_ciaa.o
 
 ifneq ($(findstring freertos,$(BUILD_LIBS)),)
