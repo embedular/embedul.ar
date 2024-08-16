@@ -74,7 +74,7 @@ LDFLAGS += -T $(TARGET_BSP_BOARD)/cubemx/STM32F407VGTx_FLASH.ld
 LIB_STM32CUBE_HAL_DRIVERS += rcc rcc_ex flash flash_ex flash_ramfunc gpio \
                              dma_ex dma pwr pwr_ex cortex exti tim tim_ex \
 						     uart pcd pcd_ex rng adc adc_ex can i2c i2c_ex \
-							 sd rtc spi
+							 sd rtc rtc_ex spi
 LIB_STM32CUBE_LL_DRIVERS += sdmmc
 
 # Required libraries

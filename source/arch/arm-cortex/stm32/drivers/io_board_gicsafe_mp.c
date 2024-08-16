@@ -26,7 +26,65 @@
 
 #include "embedul.ar/source/arch/arm-cortex/stm32/drivers/io_board_gicsafe_mp.h"
 #include "embedul.ar/source/arch/arm-cortex/stm32/f4/boards/gicsafe_mp/cubemx/Core/Inc/gpio.h"
+#include "embedul.ar/source/arch/arm-cortex/stm32/f4/boards/gicsafe_mp/cubemx/Core/Inc/rtc.h"
 #include "embedul.ar/source/core/device/board.h"
+
+
+#warning move to new rtc driver
+void RTC_WKUP_IRQHandler(void)
+{
+  /* USER CODE BEGIN RTC_WKUP_IRQn 0 */
+
+  /* USER CODE END RTC_WKUP_IRQn 0 */
+  HAL_RTCEx_WakeUpTimerIRQHandler(&hrtc);
+  /* USER CODE BEGIN RTC_WKUP_IRQn 1 */
+
+  /* USER CODE END RTC_WKUP_IRQn 1 */
+}
+
+static void rtcSetDateTime ()
+{
+    RTC_DateTypeDef sDate = {0};
+    RTC_TimeTypeDef sTime = {0};
+
+    sTime.Hours = 0x10;
+    sTime.Minutes = 0x20;
+    sTime.Seconds = 0x30;
+    sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
+    sTime.StoreOperation = RTC_STOREOPERATION_RESET;
+    if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD) != HAL_OK)
+    {
+        Error_Handler();
+    }
+
+    sDate.WeekDay = RTC_WEEKDAY_MONDAY;
+    sDate.Month = RTC_MONTH_JANUARY;
+    sDate.Date = 0x9;
+    sDate.Year = 0x23;
+    if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BCD) != HAL_OK)
+    {
+        Error_Handler();
+    }
+
+
+
+    /** Enable the WakeUp
+    */
+    if (HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 0, RTC_WAKEUPCLOCK_CK_SPRE_16BITS) != HAL_OK)
+    {
+        Error_Handler();
+    }
+
+    /* RTC interrupt Init */
+    HAL_NVIC_SetPriority(RTC_WKUP_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(RTC_WKUP_IRQn);
+
+
+    /* RTC interrupt Deinit */
+    HAL_NVIC_DisableIRQ(RTC_WKUP_IRQn);
+}
+
+
 
 
 #define GPIO_INB(_b,_name,_rev) \
@@ -201,8 +259,15 @@ static void scanModule (struct IO_BOARD_GICSAFE_MP *const B,
         *Mdb |= modSerInPinRead ();
 
         modClockPin (true);
-        // check max clock frequency
+        // At 5V
+        // Max clock frequency (fCL): 3 MHz.
+        // Clock rise and fall time (trCL, tfCL): 15 us.
+        // Serial set-up time (ts): 120 ns.
+        // Parallel-Serial pulse-width (tW): 160 ns.
+        // Parallel-Serial removal time (tREM): 280 ns.
 
+        // Debounce: three successive readings either all ones or zeroes
+        // (111 or 000) required to change state in inrData.
         if ((*Mdb & 0x7) == 0x7)
         {
             B->inrData[ModuleInr] |= 1 << b;
