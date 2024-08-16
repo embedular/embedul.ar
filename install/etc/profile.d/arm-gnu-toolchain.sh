@@ -1,3 +1,4 @@
+#!/bin/bash
 # shellcheck shell=sh
 
 # Add Arm GNU toolchain to $PATH
