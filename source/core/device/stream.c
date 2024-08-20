@@ -30,7 +30,7 @@
 static bool validIface (const struct STREAM_IFACE *const Iface)
 {
     return (Iface && Iface->Description && 
-                        (Iface->DataIn || Iface->DataOut || Iface->DataComp));
+                        (Iface->DataIn || Iface->DataOut || Iface->DataExchange));
 }
 
 
@@ -382,14 +382,14 @@ void STREAM_OUT_Discard (struct STREAM *const S)
 }
 
 
-void STREAM_COMP_Buffers (struct STREAM *const S,
-                          const uint8_t *const InData,
-                          const uint32_t InOctets,
-                          uint8_t *const OutBuffer,
-                          const uint32_t OutOctets)
+void STREAM_EXCHANGE_Buffers (struct STREAM *const S,
+                                const uint8_t *const InData,
+                                const uint32_t InOctets,
+                                uint8_t *const OutBuffer,
+                                const uint32_t OutOctets)
 {
     BOARD_AssertParams      (STREAM_IsValid(S) && InData && OutBuffer);
-    BOARD_AssertInterface   (S->iface->DataComp);
+    BOARD_AssertInterface   (S->iface->DataExchange);
 
     const TIMER_Ticks   Timeout     = TICKS_Now() + S->timeout;
     const uint32_t      TotalOctets = InOctets + OutOctets;
@@ -408,7 +408,7 @@ void STREAM_COMP_Buffers (struct STREAM *const S,
 
     do
     {
-        const struct STREAM_CompResult Cr = S->iface->DataComp (S, 
+        const struct STREAM_DataExchangeResult Cr = S->iface->DataExchange (S, 
                                 &InData[inCount], InOctets - inCount,
                                 &OutBuffer[outCount], OutOctets - outCount);
 

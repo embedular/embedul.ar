@@ -25,11 +25,6 @@
 
 #pragma once
 
-#include "embedul.ar/source/core/timer.h"
-#include "embedul.ar/source/core/variant.h"
-#include "embedul.ar/source/core/ansi.h"
-#include "embedul.ar/source/core/object.h"
-#include "embedul.ar/source/core/device.h"
 #include "embedul.ar/source/core/device/oswrap.h"
 #include "embedul.ar/source/core/device/ticks.h"
 #include "embedul.ar/source/core/device/random.h"

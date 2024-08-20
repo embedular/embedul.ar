@@ -239,7 +239,7 @@ static bool processHardwareState (struct IO_DUAL_GENESIS_PCA9673 *const G,
     G->txData[1] &= (* Gp2Count)? ~CHCFG_2OK : 0xFF;
 
     // Keep inputs HIGH, flip TH, and get input status for both controllers.
-    STREAM_ADDRT_COMP_BUFFERS (G->stream, &VARIANT_SpawnUint(G->i2cAddr),
+    STREAM_ADDRT_EXCHANGE_BUFFERS (G->stream, &VARIANT_SpawnUint(G->i2cAddr),
                                IO_DUAL_GENESIS_I2C_TIMEOUT,
                                G->txData, 2, G->rxData, 2);
 

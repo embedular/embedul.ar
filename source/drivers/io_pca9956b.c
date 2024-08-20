@@ -234,7 +234,7 @@ static bool deviceMode2Status (struct IO_PCA9956B *const P)
     // Get MODE2 device status
     tx = PCA9956B_MODE2;
 
-    STREAM_ADDRT_COMP_BUFFERS (P->stream, P->i2cAddr, PCA9956B_I2C_TIMEOUT,
+    STREAM_ADDRT_EXCHANGE_BUFFERS (P->stream, P->i2cAddr, PCA9956B_I2C_TIMEOUT,
                                &tx, 1, &rx, 1);
 
     if (!STREAM_CHECK_I2cControllerXferStatus (P->stream))
@@ -274,7 +274,7 @@ static void deviceFullStatus (struct IO_PCA9956B *const P)
     // Retrieve EFLAGS[0-5]
     reg = PCA9956B_AUTOINC_EFLAG0;
 
-    STREAM_ADDRT_COMP_BUFFERS (P->stream, P->i2cAddr, PCA9956B_I2C_TIMEOUT,
+    STREAM_ADDRT_EXCHANGE_BUFFERS (P->stream, P->i2cAddr, PCA9956B_I2C_TIMEOUT,
                                &reg, 1, eflags, sizeof(eflags));
 
     if (STREAM_CHECK_I2cControllerXferStatus (P->stream))

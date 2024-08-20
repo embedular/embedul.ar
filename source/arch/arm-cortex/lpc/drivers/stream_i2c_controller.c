@@ -36,8 +36,8 @@ static enum DEVICE_CommandResult
 static uint32_t     dataIn          (struct STREAM *const S, 
                                      const uint8_t *const Data,
                                      const uint32_t Octets);
-static struct STREAM_CompResult
-                    dataComp        (struct STREAM *const S,
+static struct STREAM_DataExchangeResult
+                    DataExchange        (struct STREAM *const S,
                                      const uint8_t *const InData,
                                      const uint32_t InOctets,
                                      uint8_t *const OutBuffer,
@@ -50,7 +50,7 @@ static const struct STREAM_IFACE STREAM_I2C_CONTROLLER_IFACE =
     .HardwareInit   = hardwareInit,
     .Command        = command,
     .DataIn         = dataIn,
-    .DataComp       = dataComp
+    .DataExchange       = DataExchange
 };
 
 
@@ -252,7 +252,7 @@ static uint32_t dataIn (struct STREAM *const S, const uint8_t *const Data,
 }
 
 
-static struct STREAM_CompResult dataComp (struct STREAM *const S,
+static struct STREAM_DataExchangeResult DataExchange (struct STREAM *const S,
                                           const uint8_t *const InData,
                                           const uint32_t InOctets,
                                           uint8_t *const OutBuffer,
@@ -266,7 +266,7 @@ static struct STREAM_CompResult dataComp (struct STREAM *const S,
     xferBlocking (I, InData, InOctets, OutBuffer, OutOctets);
 #endif
 
-    return (struct STREAM_CompResult)
+    return (struct STREAM_DataExchangeResult)
     {
         .inCount    = InOctets  - I->xfer.txSz,
         .outCount   = OutOctets - I->xfer.rxSz

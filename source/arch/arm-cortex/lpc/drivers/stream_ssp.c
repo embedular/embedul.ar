@@ -40,8 +40,8 @@ static uint32_t     dataIn          (struct STREAM *const S,
 static uint32_t     dataOut         (struct STREAM *const S,
                                      uint8_t *const Buffer,
                                      const uint32_t Octets);
-static struct STREAM_CompResult
-                    dataComp       (struct STREAM *const S,
+static struct STREAM_DataExchangeResult
+                    DataExchange       (struct STREAM *const S,
                                      const uint8_t *const InData,
                                      const uint32_t InOctets,
                                      uint8_t *const OutBuffer,
@@ -55,7 +55,7 @@ static const struct STREAM_IFACE STREAM_SSP_IFACE =
     .Command        = command,
     .DataIn         = dataIn,
     .DataOut        = dataOut,
-    .DataComp       = dataComp
+    .DataExchange       = DataExchange
 };
 
 
@@ -181,7 +181,7 @@ static uint32_t dataOut (struct STREAM *const S, uint8_t *const Buffer,
 }
 
 
-static struct STREAM_CompResult dataComp (struct STREAM *const S,
+static struct STREAM_DataExchangeResult DataExchange (struct STREAM *const S,
                                             const uint8_t *const InData,
                                             const uint32_t InOctets,
                                             uint8_t *const OutBuffer,
@@ -201,7 +201,7 @@ static struct STREAM_CompResult dataComp (struct STREAM *const S,
 
     BOARD_AssertState ((P->ds.tx_cnt == P->ds.rx_cnt) == InOctets);
 
-    return (struct STREAM_CompResult) 
+    return (struct STREAM_DataExchangeResult) 
     {
         .inCount    = P->ds.tx_cnt,
         .outCount   = P->ds.rx_cnt

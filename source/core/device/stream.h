@@ -28,7 +28,6 @@
 #include "embedul.ar/source/core/cyclic.h"
 #include "embedul.ar/source/core/variant.h"
 #include "embedul.ar/source/core/timer.h"
-#include "embedul.ar/source/core/cc.h"
 
 
 #define STREAM_IN_FromParsedString(_s,_c,_m,_str,...) \
@@ -40,16 +39,16 @@
     STREAM_Timeout (_stream, _timeout); \
     STREAM_IN_FromBuffer (_stream, _data, _size);
 
-#define STREAM_ADDRT_COMP_BUFFERS(_stream,_addr,_timeout,_in_data,_in_size,\
-                                  _out_data,_out_size) \
+#define STREAM_ADDRT_EXCHANGE_BUFFERS(_stream,_addr,_timeout,_in_data,_in_size,\
+                                        _out_data,_out_size) \
     STREAM_Address (_stream, &VARIANT_SpawnAuto(_addr)); \
     STREAM_Timeout (_stream, _timeout); \
-    STREAM_COMP_Buffers (_stream, _in_data, _in_size, _out_data, _out_size);
+    STREAM_EXCHANGE_Buffers (_stream, _in_data, _in_size, _out_data, _out_size);
 
 
 struct STREAM;
 
-struct STREAM_CompResult
+struct STREAM_DataExchangeResult
 {
     uint32_t inCount;
     uint32_t outCount;
@@ -68,8 +67,8 @@ typedef uint32_t    (* STREAM_DataInFunc)(struct STREAM *const S,
 typedef uint32_t    (* STREAM_DataOutFunc)(struct STREAM *const S,
                                             uint8_t *const Buffer,
                                             const uint32_t Octets);
-typedef struct STREAM_CompResult
-                    (* STREAM_DataCompFunc)(struct STREAM *const S,
+typedef struct STREAM_DataExchangeResult
+                    (* STREAM_DataExchangeFunc)(struct STREAM *const S,
                                             const uint8_t *const InData,
                                             const uint32_t InOctets,
                                             uint8_t *const OutBuffer,
@@ -108,7 +107,7 @@ struct STREAM_IFACE
     const STREAM_CommandFunc        Command;
     const STREAM_DataInFunc         DataIn;
     const STREAM_DataOutFunc        DataOut;
-    const STREAM_DataCompFunc       DataComp;
+    const STREAM_DataExchangeFunc   DataExchange;
 };
 
 
@@ -169,7 +168,7 @@ uint8_t         STREAM_OUT_ToOctet          (struct STREAM *const S);
 void            STREAM_OUT_ToStream         (struct STREAM *const S,
                                              struct STREAM *const In);
 void            STREAM_OUT_Discard          (struct STREAM *const S);
-void            STREAM_COMP_Buffers         (struct STREAM *const S,
+void            STREAM_EXCHANGE_Buffers     (struct STREAM *const S,
                                              const uint8_t *const InData,
                                              const uint32_t InOctets,
                                              uint8_t *const OutBuffer,
