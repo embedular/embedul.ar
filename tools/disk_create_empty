@@ -1,0 +1,114 @@
+#!/bin/bash
+
+cat << "EOF"
+
+                                   _________
+                                  /\       /\
+                                 /  \_____/  \
+                                /   /\   '\   \
+                               /___/..\_'__\___\
+                               \   \  / '  /   /
+                                \   \/___'/   /
+                                 \  /     \  /
+                                  \/_______\/
+
+                           |             |     |
+                 ,---.,-.-.|---.,---.,---|.   .|     ,---.,---.
+                 |---'| | ||   ||---'|   ||   ||     ,---||
+                 `---'` ' '`---'`---'`---'`---'`---'o`---^`
+
+                                   Disk Tool
+
+EOF
+
+TOOLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+source $TOOLS_DIR/disk_ops.bash
+
+# Function to convert the value with a suffix to bytes
+convert_to_bytes() {
+    local input=$1
+    local value=${input%[KMG]}
+    local unit=${input##*[0-9]}
+
+    case "$unit" in
+        K) echo $((value * 1024)) ;;
+        M) echo $((value * 1024 * 1024)) ;;
+        G) echo $((value * 1024 * 1024 * 1024)) ;;
+        '') echo "$value" ;;  # No suffix, interpreted as bytes
+        *) echo $(error "Unknown unit: $unit"); exit 1 ;;
+    esac
+}
+
+# Check if two parameters were passed
+if [ "$#" -ne 2 ]; then
+    echo $(title "Usage" "$(basename $0) <fat32_partition_size> <raw_partition_size>")
+    echo $(title "Example" "$(basename $0) 100M 512K")
+	echo ""
+	set -- "$1" 128M
+	set -- "$2" 128M
+	echo $(warning "No parameters specified, running with default values of $1 and $2")
+fi
+
+# Check if disk.bin already exists
+if [ -f "disk.bin" ]; then
+    echo $(error "The file 'disk.bin' already exists. Please remove it manually before running this script")
+    exit 1
+fi
+
+# Convert parameters to bytes using the convert_to_bytes function
+BYTES_FAT32=$(convert_to_bytes $1)
+BYTES_RAW=$(convert_to_bytes $2)
+
+# Convert bytes to sectors (each sector is 512 bytes)
+SECTOR_SIZE=512
+
+SECTORS_FAT32=$(( (BYTES_FAT32 + SECTOR_SIZE - 1) / SECTOR_SIZE ))
+SECTORS_RAW=$(( (BYTES_RAW + SECTOR_SIZE - 1) / SECTOR_SIZE ))
+
+echo "Rounded sectors: FAT32 = $SECTORS_FAT32, RAW = $SECTORS_RAW, Total = $(( SECTORS_FAT32 + SECTORS_RAW ))"
+
+# Update rounded user input
+BYTES_FAT32=$(( SECTORS_FAT32 * SECTOR_SIZE ))
+BYTES_RAW=$(( SECTORS_RAW * SECTOR_SIZE ))
+
+# Disk image size, taking into account start offsets of 2048 sectors
+BYTES_IMAGE=$(( 1048576 + BYTES_FAT32 + 1048576 + BYTES_RAW ))
+
+# Create a new disk image
+printf "Creating new disk image of $BYTES_IMAGE bytes ... "
+truncate --size="$BYTES_IMAGE" disk.bin
+(ok_or_exit)
+
+# Generate a random 8-digit hexadecimal number
+RANDOM_HEX=$(od -An -N4 -tx1 /dev/urandom | tr -d ' \n' | head -c 8)
+
+# Create the sfdisk script with a random label-id and custom sizes for the disk.bin file
+sfdisk_script=$(cat <<EOF
+label: dos
+label-id: 0x$RANDOM_HEX
+device: disk.bin
+unit: sectors
+sector-size: 512
+disk.bin1: start=2048, size=$SECTORS_FAT32, type=c
+disk.bin2: start=$((2048 + SECTORS_FAT32)), size=$SECTORS_RAW, type=da
+EOF
+)
+
+# Display the generated script (optional, for verification purposes)
+#echo "Generated sfdisk script below:"
+#echo "----------------------------------------------------------------------"
+#echo "$sfdisk_script"
+#echo "----------------------------------------------------------------------"
+
+# Apply the sfdisk script to the disk.bin file
+echo "$sfdisk_script" | sfdisk disk.bin || { echo $(error "Failed to apply sfdisk changes"); exit 1; }
+
+disk_ops_attach || exit 1
+
+printf "Setting up a new FAT32 filesystem in loop device $EMBEDULAR_DISK_DEVICE_FAT32 ... "
+MKFS_RESULTS="$(sudo mkfs.fat -F 32 -n EMBDISK $EMBEDULAR_DISK_DEVICE_FAT32)"
+(ok_or_exit "${MKFS_RESULTS[@]}")
+
+disk_ops_detach || exit 1
+
+echo $(highlight "New empty disk image in $(pwd)/disk.bin")

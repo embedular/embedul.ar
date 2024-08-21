@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Create an empty ~256M disk image
+TOOLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+source $TOOLS_DIR/disk_create_empty $1 $2
+
+function disk_copy_cache() {
+	cp -r "$1/fs-cache/EMBEDUL.AR" "$EMBEDULAR_DISK_MOUNT" || { echo $(error); disk_ops_unmount; exit 1; }
+	echo $(success)
+}
+
+if [[ ! -v LIB_EMBEDULAR_PATH ]]; then
+	echo $(error "LIB_EMBEDULAR_PATH not defined")
+	exit 1
+fi
+
+disk_ops_mount || exit 1
+
+LIB_EMBEDULAR_ROOT=$LIB_EMBEDULAR_PATH/embedul.ar
+
+# Copy framework fs-cache contents
+printf "Copying fs-cache contents from $LIB_EMBEDULAR_ROOT ... "
+(disk_copy_cache $LIB_EMBEDULAR_ROOT)
+
+# If there is a fs-cache directory in the CWD and is not the framework itself, also copy its contents
+if [ "$(pwd)" != "$LIB_EMBEDULAR_ROOT" ] && [ -d "$(pwd)/fs-cache" ]; then
+	printf "Copying supplementary fs-cache contents from $(pwd) ... "
+	(disk_copy_cache $(pwd))
+fi
+
+echo $(highlight "Cache contents copied to disk image")
+
+disk_ops_unmount || exit 1
