@@ -90,8 +90,8 @@ function disk_ops_detach() {
 }
 
 function disk_ops_mount() {
-	if [[ ! -v LIB_EMBEDULAR_PATH ]]; then
-		echo $(error "LIB_EMBEDULAR_PATH not defined")
+	if [[ ! -v LIB_EMBEDULAR_BASE ]]; then
+		echo $(error "LIB_EMBEDULAR_BASE not defined")
 		return 1
 	fi
 
@@ -100,7 +100,7 @@ function disk_ops_mount() {
 		return 1
 	fi
 
-	EMBEDULAR_DISK_MOUNT=$LIB_EMBEDULAR_PATH/embedul.ar/disk
+	EMBEDULAR_DISK_MOUNT=$LIB_EMBEDULAR_BASE/embedul.ar/disk
 
 	if grep -qs "${EMBEDULAR_DISK_MOUNT} " /proc/mounts; then
 		echo $(error "Mount point $EMBEDULAR_DISK_MOUNT already exists in /proc/mounts")

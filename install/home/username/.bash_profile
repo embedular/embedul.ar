@@ -10,9 +10,9 @@
 # -----------------------------------
 #   Path where the ./embedul.ar directory resides (not the embedul.ar directory
 #   itself!) In this example path, the embedul.ar directory is located in 
-#   "/home/sgermino/embedul.ar". Therefore, the embedul.ar directory resides in
+#   "/home/sgermino/embedul.ar". Therefore, the embedul.ar base directory is
 #   "/home/sgermino".
-export LIB_EMBEDULAR_PATH="/home/sgermino"
+export LIB_EMBEDULAR_BASE="/home/sgermino"
 
 # pip3 scripts absolute path
 # --------------------------
@@ -23,4 +23,4 @@ export PATH="$PATH:/home/sgermino/.local/bin"
 
 # embedul.ar framework tools absolute path
 # ----------------------------------------
-export PATH="$PATH:${LIB_EMBEDULAR_PATH}/embedul.ar/tools"
+export PATH="$PATH:${LIB_EMBEDULAR_BASE}/embedul.ar/tools"

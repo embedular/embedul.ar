@@ -32,7 +32,7 @@ OLEVEL ?= 0
 GLEVEL ?= 
 
 # Framework base directory, environment variable.
-$(call emb_need_var,LIB_EMBEDULAR_PATH)
+$(call emb_need_var,LIB_EMBEDULAR_BASE)
 # Framework root directory, defined by system.mk.
 $(call emb_need_var,LIB_EMBEDULAR_ROOT)
 # Passed as parameter on the call to 'make -f Makefile'
@@ -53,7 +53,7 @@ CFLAGS += -I$(APP_ROOT)
 CFLAGS += -D'CC_AppNameStr=CC_Str($(APP_NAME))'
 
 # Access to embedul.ar framework base from headers.
-CFLAGS += -I$(LIB_EMBEDULAR_PATH)
+CFLAGS += -I$(LIB_EMBEDULAR_BASE)
 
 # Default initialization of properties later defined by the target.
 TARGET_REQUIRE_BIN_IMAGE := no

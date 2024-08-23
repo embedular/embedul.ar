@@ -100,8 +100,8 @@ LIB_EMBEDULAR_SUBSYSTEMS := $(sort $(LIB_EMBEDULAR_SUBSYSTEMS))
 # Include subsystems (may modify required base modules)
 # RetrOS (Real-time Preemtive Multitasking Operating System)
 ifneq ($(filter retros,$(LIB_EMBEDULAR_SUBSYSTEMS)),)
-    # Required base modules
-    LIB_EMBEDULAR_BASE += queue mempool
+    # Required core modules
+    LIB_EMBEDULAR_CORE += queue mempool
     OBJS += $(LIB_EMBEDULAR)/retros/api.o \
             $(LIB_EMBEDULAR)/retros/semaphore.o \
             $(LIB_EMBEDULAR)/retros/mutex.o \
@@ -117,8 +117,8 @@ endif
 # Video subsystem
 ifneq ($(filter video,$(LIB_EMBEDULAR_SUBSYSTEMS)),)
     CFLAGS += -DLIB_EMBEDULAR_HAS_VIDEO
-    # Required base modules
-    LIB_EMBEDULAR_BASE += anim
+    # Required core modules
+    LIB_EMBEDULAR_CORE += anim
     OBJS += $(LIB_EMBEDULAR)/device/video.o \
             $(LIB_EMBEDULAR)/manager/screen/dotmap.o \
             $(LIB_EMBEDULAR)/manager/screen/font.o \
@@ -164,7 +164,7 @@ endif
 
 
 # Required core modules
-LIB_EMBEDULAR_BASE += \
+LIB_EMBEDULAR_CORE += \
     main \
     object \
     device \
@@ -175,12 +175,12 @@ LIB_EMBEDULAR_BASE += \
     utf8 \
     sequence
 
-# Remove base duplicates
-LIB_EMBEDULAR_BASE := $(sort $(LIB_EMBEDULAR_BASE))
+# Remove core modules duplicates
+LIB_EMBEDULAR_CORE := $(sort $(LIB_EMBEDULAR_CORE))
 
-$(foreach name,$(LIB_EMBEDULAR_BASE),$(eval OBJS += $(LIB_EMBEDULAR)/$(name).o))
+$(foreach name,$(LIB_EMBEDULAR_CORE),$(eval OBJS += $(LIB_EMBEDULAR)/$(name).o))
 
-$(call emb_info,Using CORE modules '$(LIB_EMBEDULAR_BASE)')
+$(call emb_info,Using CORE modules '$(LIB_EMBEDULAR_CORE)')
 $(call emb_info,Using SUBSYSTEMS '$(LIB_EMBEDULAR_SUBSYSTEMS)')
 
 # ---------------------------------------

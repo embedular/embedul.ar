@@ -255,24 +255,24 @@ $(call emb_info,Date/time '$(BUILD_DATE)')
 
 # Framework base directory (where ./embedul.ar resides), environment variable.
 #
-# Calling system.mk with an undefined LIB_EMBEDULAR_PATH implies the caller
+# Calling system.mk with an undefined LIB_EMBEDULAR_BASE implies the caller
 # already knows where to include system.mk. We assume that can only happen
 # inside the framework, and the goal is to build framework examples.
 #
 # Applications reside outside the framework and must be independent of the
 # framework installation path. Therefore, an application relies on a correctly
-# set LIB_EMBEDULAR_PATH environment variable.
-ifeq ($(LIB_EMBEDULAR_PATH),)
-    $(call emb_warning,Undefined LIB_EMBEDULAR_PATH)
+# set LIB_EMBEDULAR_BASE environment variable.
+ifeq ($(LIB_EMBEDULAR_BASE),)
+    $(call emb_warning,Undefined LIB_EMBEDULAR_BASE)
     $(call emb_warning,Assuming the build of "in-tree" framework examples)
-    LIB_EMBEDULAR_PATH := $(realpath $(dir $(lastword $(MAKEFILE_LIST)))../../)
+    LIB_EMBEDULAR_BASE := $(realpath $(dir $(lastword $(MAKEFILE_LIST)))../../)
 endif
 
 # Check framework base directory (where ./embedul.ar resides)
-$(call emb_need_dir,$(LIB_EMBEDULAR_PATH),LIB_EMBEDULAR_PATH '$(LIB_EMBEDULAR_PATH)')
+$(call emb_need_dir,$(LIB_EMBEDULAR_BASE),LIB_EMBEDULAR_BASE '$(LIB_EMBEDULAR_BASE)')
 
 # Actual framework root
-LIB_EMBEDULAR_ROOT := $(LIB_EMBEDULAR_PATH)/embedul.ar
+LIB_EMBEDULAR_ROOT := $(LIB_EMBEDULAR_BASE)/embedul.ar
 
 # Check actual framework root
 $(call emb_need_dir,$(LIB_EMBEDULAR_ROOT),LIB_EMBEDULAR_ROOT '$(LIB_EMBEDULAR_ROOT)')

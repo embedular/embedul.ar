@@ -1,4 +1,4 @@
-include $(LIB_EMBEDULAR_PATH)/embedul.ar/makefiles/system.mk
+include $(LIB_EMBEDULAR_BASE)/embedul.ar/makefiles/system.mk
 
 VIDEO_ADAPTER_MODELINE := EDID_1280x720_60Hz
 VIDEO_ADAPTER_LINEOUT := fb256-17239ns

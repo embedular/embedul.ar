@@ -9,14 +9,14 @@ function disk_copy_cache() {
 	echo $(success)
 }
 
-if [[ ! -v LIB_EMBEDULAR_PATH ]]; then
-	echo $(error "LIB_EMBEDULAR_PATH not defined")
+if [[ ! -v LIB_EMBEDULAR_BASE ]]; then
+	echo $(error "LIB_EMBEDULAR_BASE not defined")
 	exit 1
 fi
 
 disk_ops_mount || exit 1
 
-LIB_EMBEDULAR_ROOT=$LIB_EMBEDULAR_PATH/embedul.ar
+LIB_EMBEDULAR_ROOT=$LIB_EMBEDULAR_BASE/embedul.ar
 
 # Copy framework fs-cache contents
 printf "Copying fs-cache contents from $LIB_EMBEDULAR_ROOT ... "
