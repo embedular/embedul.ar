@@ -28,6 +28,7 @@
 #include "embedul.ar/source/core/cyclic.h"
 #include "embedul.ar/source/core/variant.h"
 #include "embedul.ar/source/core/timer.h"
+#include "embedul.ar/source/core/device.h"
 
 
 #define STREAM_IN_FromParsedString(_s,_c,_m,_str,...) \

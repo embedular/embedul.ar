@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include "embedul.ar/source/core/manager/screen/role.h"
 #include "embedul.ar/source/core/misc/rgb332.h"
 #include "embedul.ar/source/core/variant.h"
 
@@ -99,9 +100,6 @@ struct SCREEN_FONT
 
 
 typedef void (* SCREEN_FONT_SetGlyphsFunc) (struct SCREEN_FONT *const F);
-
-
-enum SCREEN_Role;
 
 
 void        SCREEN_FONT_Init            (struct SCREEN_FONT *const F,

@@ -30,16 +30,16 @@
 
 #define OUTPUT_PROFILE_BIT_MAP_0(_pname)
 #define OUTPUT_PROFILE_BIT_MAP_1(_pname) struct IO_PROFILE_Map \
-                        bitMap[OUTPUT_PROFILE_ ## _pname ## _Bit__COUNT]
+                        bitMap[OUTPUT_PROFILE_ ## _pname ## _Bit__COUNT];
 
 #define OUTPUT_PROFILE_RANGE_MAP_0(_pname)
 #define OUTPUT_PROFILE_RANGE_MAP_1(_pname) struct IO_PROFILE_Map \
-                        rangeMap[OUTPUT_PROFILE_ ## _pname ## _Range__COUNT]
+                        rangeMap[OUTPUT_PROFILE_ ## _pname ## _Range__COUNT];
 
 #define OUTPUT_PROFILE_STRUCT__(_pname,_bm,_rm) \
     struct OUTPUT_PROFILE_ ## _pname { \
-        CC_ExpPaste(OUTPUT_PROFILE_BIT_MAP_,_bm)(_pname); \
-        CC_ExpPaste(OUTPUT_PROFILE_RANGE_MAP_,_rm)(_pname); \
+        CC_ExpPaste(OUTPUT_PROFILE_BIT_MAP_,_bm)(_pname) \
+        CC_ExpPaste(OUTPUT_PROFILE_RANGE_MAP_,_rm)(_pname) \
     }
 
 #define OUTPUT_PROFILE_STRUCT(_pname) \

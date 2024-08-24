@@ -25,11 +25,9 @@
 
 #pragma once
 
+#include "embedul.ar/source/core/manager/screen/role.h"
 #include "embedul.ar/source/core/misc/rgb332.h"
 #include <stdbool.h>
-
-
-enum SCREEN_Role;
 
 
 bool SCREEN_PIXEL_Draw (const enum SCREEN_Role Role,

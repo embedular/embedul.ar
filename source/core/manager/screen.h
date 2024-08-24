@@ -26,6 +26,7 @@
 #pragma once
 
 #include "embedul.ar/source/core/device/video.h"
+#include "embedul.ar/source/core/manager/screen/role.h"
 #include "embedul.ar/source/core/manager/screen/font.h"
 #include "embedul.ar/source/core/misc/rgb332.h"
 #include <stdint.h>
@@ -34,16 +35,6 @@
 #ifndef SCREEN_SPLASH_THEME_ROLE
     #define SCREEN_SPLASH_THEME_ROLE    SCREEN_Role_Primary
 #endif
-
-
-enum SCREEN_Role
-{
-    SCREEN_Role_Primary,
-    SCREEN_Role_Secondary,
-    SCREEN_Role_Menu,
-    SCREEN_Role_Console,
-    SCREEN_Role__COUNT
-};
 
 
 struct SCREEN_Clip

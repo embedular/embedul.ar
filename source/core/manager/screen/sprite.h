@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include "embedul.ar/source/core/manager/screen/role.h"
 #include "embedul.ar/source/core/manager/screen/tilemap.h"
 #include <stdint.h>
 
@@ -39,9 +40,6 @@ struct SCREEN_SPRITE
     uint16_t                        animation;
     uint16_t                        frame;
 };
-
-
-enum SCREEN_Role;
 
 
 void SCREEN_SPRITE_Init                 (struct SCREEN_SPRITE *const S,

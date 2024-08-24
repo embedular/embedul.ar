@@ -31,21 +31,21 @@
 
 #define INPUT_PROFILE_BIT_MAP_0(_pname)
 #define INPUT_PROFILE_BIT_MAP_1(_pname) struct IO_PROFILE_Map \
-                        bitMap[INPUT_PROFILE_ ## _pname ## _Bit__COUNT]
+                        bitMap[INPUT_PROFILE_ ## _pname ## _Bit__COUNT];
 
 #define INPUT_PROFILE_BIT_ACTION_0(_pname)
 #define INPUT_PROFILE_BIT_ACTION_1(_pname) struct INPUT_ACTION \
-                        bitAction[INPUT_PROFILE_ ## _pname ## _Bit__COUNT]
+                        bitAction[INPUT_PROFILE_ ## _pname ## _Bit__COUNT];
 
 #define INPUT_PROFILE_RANGE_MAP_0(_pname)
 #define INPUT_PROFILE_RANGE_MAP_1(_pname) struct IO_PROFILE_Map \
-                        rangeMap[INPUT_PROFILE_ ## _pname ## _Range__COUNT]
+                        rangeMap[INPUT_PROFILE_ ## _pname ## _Range__COUNT];
 
 #define INPUT_PROFILE_STRUCT__(_pname,_bm,_ba,_rm) \
     struct INPUT_PROFILE_ ## _pname { \
-        CC_ExpPaste(INPUT_PROFILE_BIT_MAP_,_bm)(_pname); \
-        CC_ExpPaste(INPUT_PROFILE_BIT_ACTION_,_ba)(_pname); \
-        CC_ExpPaste(INPUT_PROFILE_RANGE_MAP_,_rm)(_pname); \
+        CC_ExpPaste(INPUT_PROFILE_BIT_MAP_,_bm)(_pname) \
+        CC_ExpPaste(INPUT_PROFILE_BIT_ACTION_,_ba)(_pname) \
+        CC_ExpPaste(INPUT_PROFILE_RANGE_MAP_,_rm)(_pname) \
     }
 
 #define INPUT_PROFILE_STRUCT(_pname) \

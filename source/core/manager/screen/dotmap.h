@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include "embedul.ar/source/core/manager/screen/role.h"
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -39,9 +40,6 @@ struct SCREEN_DOTMAP
     int32_t         y;
     uint8_t         around[9];    
 };
-
-
-enum SCREEN_Role;
 
 
 void        SCREEN_DOTMAP_Init              (struct SCREEN_DOTMAP *const M, 

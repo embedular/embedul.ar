@@ -1,7 +1,7 @@
 /*
   embedul.ar™ embedded systems framework - http://embedul.ar
   
-  [SCREEN MANAGER] clipped line drawing algorithm.
+  [SCREEN MANAGER] role.
 
   Copyright 2018-2022 Santiago Germino
   <sgermino@embedul.ar> https://www.linkedin.com/in/royconejo
@@ -25,17 +25,12 @@
 
 #pragma once
 
-#include "embedul.ar/source/core/manager/screen/role.h"
-#include "embedul.ar/source/core/misc/rgb332.h"
-#include <stdbool.h>
 
-
-bool SCREEN_LINE_Draw (const enum SCREEN_Role Role, 
-                       int32_t x1, int32_t y1, int32_t x2, int32_t y2,
-                       const RGB332_Select ColorSel);
-bool SCREEN_LINE_DrawHoriz (const enum SCREEN_Role Role, 
-                            int32_t x1, int32_t y1, const int32_t W,
-                            const RGB332_Select ColorSel);
-bool SCREEN_LINE_DrawVert (const enum SCREEN_Role Role, 
-                           int32_t x1, int32_t y1, const int32_t H,
-                           const RGB332_Select ColorSel);
+enum SCREEN_Role
+{
+    SCREEN_Role_Primary,
+    SCREEN_Role_Secondary,
+    SCREEN_Role_Menu,
+    SCREEN_Role_Console,
+    SCREEN_Role__COUNT
+};

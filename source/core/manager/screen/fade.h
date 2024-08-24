@@ -25,7 +25,8 @@
 
 #pragma once
 
-#include "embedul.ar/source/core/manager/screen.h"
+#include "embedul.ar/source/core/device/video.h"
+#include "embedul.ar/source/core/manager/screen/role.h"
 #include "embedul.ar/source/core/anim.h"
 
 
