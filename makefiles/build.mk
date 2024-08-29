@@ -82,6 +82,11 @@ define execute =
     $(VN)stdbuf -o0 $(1)
 endef
 
+define tool =
+    $(if $(VN), $(info $(emb_term_bold)[..]$(emb_term_sgr0) Starting '$(1)'))
+    $(VN)$(2)
+endef
+
 # Relative framework paths to relative current build
 OBJS := $(foreach fp,$(OBJS),$(abspath $(fp)))
 OBJS := $(patsubst $(abspath $(LIB_EMBEDULAR_ROOT))/%,$(BUILD_ROOT)/embedul.ar/%,$(OBJS))
@@ -131,6 +136,8 @@ $(BUILD_ROOT)/$(APP_NAME)/%.o: $(APP_ROOT)/%.S
 $(BUILD_ROOT)/$(APP_NAME)/%.o: $(APP_ROOT)/%.s
 	$(call compile,$<,$@,$(@D),AS)
 
+SOURCES_C_EMBEDULAR = $(patsubst $(BUILD_ROOT)/embedul.ar/%.o,$(LIB_EMBEDULAR_ROOT)/%.c,$(filter %.o,$(OBJS)))
+SOURCES_C_APP = $(patsubst $(BUILD_ROOT)/$(APP_NAME)/%.o,$(APP_ROOT)/%.c,$(filter %.o,$(APP_OBJS)))
 
 clean:
 	$(foreach fp,$(OBJS),$(call remove,$(fp)))
@@ -144,6 +151,8 @@ clean:
 run:
 	$(call execute,$(EXECUTABLE))
 
+frama-c: prog
+	$(call tool,Frama-C,eval $$(opam env) && frama-c -machdep="gcc_x86_64" -cpp-extra-args="-std=c17 -I/usr/include/x86_64-linux-gnu -DSDL_DISABLE_IMMINTRIN_H -DSDL_DISABLE_MMINTRIN_H -DSDL_DISABLE_XMMINTRIN_H -DSDL_DISABLE_EMMINTRIN_H -DSDL_DISABLE_PMMINTRIN_H" -json-compilation-database="./compile_commands.json" $(SOURCES_C_EMBEDULAR) $(SOURCES_C_APP))
 
 # include required flash build directive
 $(call emb_info,Flash tool '$(FLASH_TOOL)')

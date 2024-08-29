@@ -39,7 +39,7 @@
 
 
 #define BOARD_Assert(_c,_s) \
-    BOARD_AssertContext (__func__, __FILE__, __LINE__, _c, _s)
+    BOARD_AssertContext (__func__, __FILE__, __LINE__, (_c)? true : false, _s)
 
 #define BOARD_AssertParams(_c) \
     BOARD_Assert (_c, LANG_ASSERT_INVALID_PARAMS)
