@@ -72,7 +72,7 @@ function disk_ops_attach {
 	echo $(highlight "Disk attached")
 }
 
-function disk_ops_detach() {
+function disk_ops_detach {
 	if [[ ! -v EMBEDULAR_DISK_DEVICE ]]; then
 		echo $(error "Disk is not attached")
 		return 1
@@ -89,7 +89,7 @@ function disk_ops_detach() {
 	echo $(highlight "Disk detached")
 }
 
-function disk_ops_mount() {
+function disk_ops_mount {
 	if [[ ! -v LIB_EMBEDULAR_BASE ]]; then
 		echo $(error "LIB_EMBEDULAR_BASE not defined")
 		return 1
@@ -121,7 +121,7 @@ function disk_ops_mount() {
 	echo $(highlight "Disk mounted")
 }
 
-function disk_ops_unmount() {
+function disk_ops_unmount {
 	if [[ ! -v EMBEDULAR_DISK_MOUNT ]]; then
 		echo $(error "Disk not mounted")
 		return 1

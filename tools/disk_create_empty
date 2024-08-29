@@ -25,7 +25,7 @@ TOOLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 source $TOOLS_DIR/disk_ops.bash
 
 # Function to convert the value with a suffix to bytes
-convert_to_bytes() {
+function convert_to_bytes {
     local input=$1
     local value=${input%[KMG]}
     local unit=${input##*[0-9]}
@@ -46,7 +46,7 @@ if [ "$#" -ne 2 ]; then
 	echo ""
 	set -- "$1" 128M
 	set -- "$2" 128M
-	echo $(warning "No parameters specified, running with default values of $1 and $2")
+	echo $(warning "No parameters specified, running with default values of <$1> <$2>")
 fi
 
 # Check if disk.bin already exists

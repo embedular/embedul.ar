@@ -4,7 +4,7 @@
 TOOLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 source $TOOLS_DIR/disk_create_empty $1 $2
 
-function disk_copy_cache() {
+function disk_copy_cache {
 	cp -r "$1/fs-cache/EMBEDUL.AR" "$EMBEDULAR_DISK_MOUNT" || { echo $(error); disk_ops_unmount; exit 1; }
 	echo $(success)
 }
