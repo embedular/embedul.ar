@@ -204,7 +204,7 @@ static void cyclicOutProc (void *const Param, const uint8_t *const Buffer,
     struct CYCLIC *const C = (struct CYCLIC *) Param;
     // lastIn reflects the whole operation, not a partial data insertion
     const uint32_t LastIn = C->lastIn;
-    CYCLIC_IN_FromBuffer (Param, Buffer, Count);
+    CYCLIC_IN_FromBuffer (C, Buffer, Count);
     C->lastIn += LastIn;
 }
 

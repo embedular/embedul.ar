@@ -184,7 +184,7 @@ struct LOG_Table
 {
     const char                  * const Title;
     const uint32_t              FieldCount;
-    const struct LOG_TableItem  Fields[];
+    const struct LOG_TableItem  * Fields;
 };
 
 

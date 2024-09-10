@@ -178,14 +178,14 @@ void ANIM_Update (struct ANIM *const A, const TIMER_Ticks Now)
             {
                 A->vCurrent = (uint32_t)((Dp
                                           * (float)(A->vEnd - A->vBegin)
-                                          + 0.4999f) + A->vBegin);
+                                          + 0.499989986419677734375f) + A->vBegin);
             }
             // From vEnd to vBegin
             else
             {
                 A->vCurrent = (uint32_t)(((1.0f - Dp)
                                           * (float)(A->vBegin - A->vEnd)
-                                          + 0.4999f) + A->vEnd);
+                                          + 0.499989986419677734375f) + A->vEnd);
             }
 		}
 	}
@@ -199,13 +199,13 @@ void ANIM_Update (struct ANIM *const A, const TIMER_Ticks Now)
         {
             A->vCurrent = (uint32_t)(((1.0f - Dp)
                                       * (float)(A->vEnd - A->vBegin)
-                                      + 0.4999f) + A->vBegin);
+                                      + 0.499989986419677734375f) + A->vBegin);
         }
         else
         {
             A->vCurrent = (uint32_t)((Dp
                                       * (float)(A->vBegin - A->vEnd)
-                                      + 0.4999f) + A->vEnd);
+                                      + 0.499989986419677734375f) + A->vEnd);
         }
 	}
 }

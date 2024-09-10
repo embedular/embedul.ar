@@ -973,7 +973,7 @@ static void processMenu (struct IO_GUI *const G, const uint32_t PointerX,
                                             ProfileCodes - 1U;
 
         snprintf (page, sizeof(page), "%u-%u (%u total)",
-                ElementsBegin, ElementsEnd, ProfileCodes);
+                ElementsBegin, ElementsEnd, (uint32_t)ProfileCodes);
 
         drawMenuItem (G, 3, "Element codes", page, itemPressed == 4);
     }

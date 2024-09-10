@@ -58,10 +58,6 @@ struct STREAM_DataExchangeResult
 typedef void        (* STREAM_HardwareInitFunc)(struct STREAM *const S);
 typedef void        (* STREAM_ConnectFunc)(struct STREAM *const S);
 typedef bool        (* STREAM_AssertConnectedFunc)(struct STREAM *const S);
-typedef enum DEVICE_CommandResult
-                    (* STREAM_CommandFunc)(struct STREAM *const S, 
-                                            const char *const Name,
-                                            struct VARIANT *const Value);
 typedef uint32_t    (* STREAM_DataInFunc)(struct STREAM *const S, 
                                             const uint8_t *const Data,
                                             const uint32_t Octets);
@@ -105,7 +101,7 @@ struct STREAM_IFACE
     const char                      * const Description;
     const STREAM_HardwareInitFunc   HardwareInit;
     const STREAM_ConnectFunc        Connect;
-    const STREAM_CommandFunc        Command;
+    const DEVICE_CommandFunc        Command;
     const STREAM_DataInFunc         DataIn;
     const STREAM_DataOutFunc        DataOut;
     const STREAM_DataExchangeFunc   DataExchange;

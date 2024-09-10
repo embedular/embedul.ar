@@ -41,7 +41,7 @@ extern FILE * stderr;
 // Common IO interface
 static void         hardwareInit    (struct STREAM *const S);
 static uint32_t     dataIn          (struct STREAM *const S,
-                                     const uint8_t* Data,
+                                     const uint8_t *const Data,
                                      const uint32_t Octets);
 static uint32_t     dataOut         (struct STREAM *const S,
                                      uint8_t *const Buffer,

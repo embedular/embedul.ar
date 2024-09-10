@@ -157,7 +157,7 @@ enum DEVICE_CommandResult STREAM_Command (struct STREAM *const S,
     BOARD_AssertParams (STREAM_IsValid(S) && Name && Value);
 
     return DEVICE_Command (LANG_STREAM_COMMAND, &OBJECT_INFO_Spawn(S),
-                           (DEVICE_CommandFunc)S->iface->Command, Name, Value);
+                           S->iface->Command, Name, Value);
 }
 
 

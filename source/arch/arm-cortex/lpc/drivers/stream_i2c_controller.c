@@ -30,7 +30,7 @@
 // Common IO interface
 static void         hardwareInit    (struct STREAM *const S);
 static enum DEVICE_CommandResult
-                    command         (struct STREAM *const S,
+                    command         (const void *const D,
                                      const char *const Name,
                                      struct VARIANT *const Value);
 static uint32_t     dataIn          (struct STREAM *const S, 
@@ -50,7 +50,7 @@ static const struct STREAM_IFACE STREAM_I2C_CONTROLLER_IFACE =
     .HardwareInit   = hardwareInit,
     .Command        = command,
     .DataIn         = dataIn,
-    .DataExchange       = DataExchange
+    .DataExchange   = DataExchange
 };
 
 
@@ -83,11 +83,11 @@ static void hardwareInit (struct STREAM *const S)
 }
 
 
-static enum DEVICE_CommandResult command (struct STREAM *const S,
+static enum DEVICE_CommandResult command (const void *const D,
                                           const char *const Name,
                                           struct VARIANT *const Value)
 {
-    struct STREAM_I2C_CONTROLLER *const I = (struct STREAM_I2C_CONTROLLER *) S;
+    struct STREAM_I2C_CONTROLLER *const I = (struct STREAM_I2C_CONTROLLER *) D;
 
     if (DEVICE_COMMAND_CHECK(STREAM_SET_SPEED))
     {

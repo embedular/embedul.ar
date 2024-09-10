@@ -239,5 +239,5 @@ void OSWRAP__delay (const TIMER_Ticks Ticks)
 {
     BOARD_AssertState (s_o->iface->Delay);
 
-    return s_o->iface->Delay (s_o, Ticks);
+    s_o->iface->Delay (s_o, Ticks);
 }

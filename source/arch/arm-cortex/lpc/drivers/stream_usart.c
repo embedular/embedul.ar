@@ -39,7 +39,7 @@ static struct STREAM_USART * s_streamUsart3 = NULL;
 // Common IO interface
 static void         hardwareInit    (struct STREAM *const S);
 static enum DEVICE_CommandResult
-                    command         (struct STREAM *const S,
+                    command         (const void *const D,
                                      const char *const Name,
                                      struct VARIANT *const Value);
 static uint32_t     dataIn          (struct STREAM *const S, 
@@ -314,11 +314,11 @@ uint32_t dataOut (struct STREAM *const S, uint8_t *const Buffer,
 }
 
 
-enum DEVICE_CommandResult command (struct STREAM *const S, 
+enum DEVICE_CommandResult command (const void *const D, 
                                    const char *const Name,
                                    struct VARIANT *const Value)
 {
-    struct STREAM_USART *const U = (struct STREAM_USART *const) S;
+    struct STREAM_USART *const U = (struct STREAM_USART *const) D;
 
     if (DEVICE_COMMAND_CHECK(STREAM_SET_UART_BAUD, STREAM_SET_SPEED))
     {

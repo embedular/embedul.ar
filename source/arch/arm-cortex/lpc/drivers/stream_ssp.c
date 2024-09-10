@@ -31,7 +31,7 @@
 // Common IO interface
 static void         hardwareInit    (struct STREAM *const S);
 static enum DEVICE_CommandResult
-                    command         (struct STREAM *const S,
+                    command         (const void *const D,
                                      const char *const Name,
                                      struct VARIANT *const Value);
 static uint32_t     dataIn          (struct STREAM *const S, 
@@ -55,7 +55,7 @@ static const struct STREAM_IFACE STREAM_SSP_IFACE =
     .Command        = command,
     .DataIn         = dataIn,
     .DataOut        = dataOut,
-    .DataExchange       = DataExchange
+    .DataExchange   = DataExchange
 };
 
 
@@ -127,11 +127,11 @@ static void hardwareInit (struct STREAM *const S)
 }
 
 
-static enum DEVICE_CommandResult command (struct STREAM *const S,
+static enum DEVICE_CommandResult command (const void *const D,
                                           const char *const Name,
                                           struct VARIANT *const Value)
 {
-    struct STREAM_SSP *const P = (struct STREAM_SSP *) S;
+    struct STREAM_SSP *const P = (struct STREAM_SSP *) D;
 
     if (DEVICE_COMMAND_CHECK(STREAM_SET_SPEED))
     {

@@ -231,7 +231,7 @@ static void boardGreetings (struct BOARD *const B)
 static const struct LOG_Table s_IOProfilesTable =
 {
     LANG_IO_PROFILES, 4,
-    {
+    (struct LOG_TableItem[]) {
         {
             LANG_NAME, 32, 0
         },
@@ -251,7 +251,7 @@ static const struct LOG_Table s_IOProfilesTable =
 static const struct LOG_Table s_CommMgrTable =
 {
     LANG_RESOURCES, 3,
-    {
+    (struct LOG_TableItem[]) {
         {
             LANG_TYPE, 14, 0
         },
@@ -268,7 +268,7 @@ static const struct LOG_Table s_CommMgrTable =
 static const struct LOG_Table s_IOGatewayTable =
 {
     LANG_GATEWAYS, 3,
-    {
+    (struct LOG_TableItem[]) {
         {
             LANG_ID, 14, 0
         },
@@ -285,7 +285,7 @@ static const struct LOG_Table s_IOGatewayTable =
 static const struct LOG_Table s_ProfileMappingTable =
 {
     LANG_MAPPINGS, 5,
-    {
+    (struct LOG_TableItem[]) {
         {
             LANG_TYPE, 14, 0
         },
@@ -308,7 +308,7 @@ static const struct LOG_Table s_ProfileMappingTable =
 static const struct LOG_Table s_StorageVolumeTable =
 {
     LANG_VOLUMES, 6,
-    {
+    (struct LOG_TableItem[]) {
         {
             LANG_ROLE, 7, 0
         },
@@ -334,7 +334,7 @@ static const struct LOG_Table s_StorageVolumeTable =
 static const struct LOG_Table s_CheckSector0Table =
 {
     LANG_SECTOR_0, 8,
-    {
+    (struct LOG_TableItem[]) {
         {
             LANG_VOLUME, 11, 0
         },
@@ -367,7 +367,7 @@ static const struct LOG_Table s_CheckSector0Table =
 static const struct LOG_Table s_ScreenMgrTable =
 {
     LANG_SCREENS, 5,
-    {
+    (struct LOG_TableItem[]) {
         {
             LANG_ROLE, 14, 0
         },
