@@ -76,7 +76,7 @@ struct IO_GUI_Element
 };
 
 
-const struct IO_GUI_Element s_InputBitNames[IO_GUI_INB__COUNT] = 
+static const struct IO_GUI_Element s_InputBitNames[IO_GUI_INB__COUNT] = 
 {
     [IO_GUI_INB_ControlBacklight] =
         {
@@ -225,7 +225,7 @@ const struct IO_GUI_Element s_InputBitNames[IO_GUI_INB__COUNT] =
 };
 
 
-const struct IO_GUI_Element s_InputRangeNames[IO_GUI_INR__COUNT] = 
+static const struct IO_GUI_Element s_InputRangeNames[IO_GUI_INR__COUNT] = 
 {
     [IO_GUI_INR_LightdevChannelsShorted__BEGIN] =
         {
@@ -250,7 +250,7 @@ const struct IO_GUI_Element s_InputRangeNames[IO_GUI_INR__COUNT] =
 };
 
 
-const struct IO_GUI_Element s_OutputBitNames[IO_GUI_OUTB__COUNT] = 
+static const struct IO_GUI_Element s_OutputBitNames[IO_GUI_OUTB__COUNT] = 
 {
     [IO_GUI_OUTB_ControlBacklight] =
         {
@@ -295,7 +295,7 @@ const struct IO_GUI_Element s_OutputBitNames[IO_GUI_OUTB__COUNT] =
 };
 
 
-const struct IO_GUI_Element s_OutputRangeNames[IO_GUI_OUTR__COUNT] = 
+static const struct IO_GUI_Element s_OutputRangeNames[IO_GUI_OUTR__COUNT] = 
 {
     [IO_GUI_OUTR_LightdevIref__BEGIN] =
         { 
@@ -324,7 +324,8 @@ const struct IO_GUI_Element s_OutputRangeNames[IO_GUI_OUTR__COUNT] =
 };
 
 
-const struct IO_GUI_Element *const s_IONames[MIO_Dir__COUNT][IO_Type__COUNT] =
+static const struct IO_GUI_Element *const
+    s_IONames[MIO_Dir__COUNT][IO_Type__COUNT] =
 {
     [MIO_Dir_Input][IO_Type_Bit]    = s_InputBitNames,
     [MIO_Dir_Input][IO_Type_Range]  = s_InputRangeNames,
@@ -383,17 +384,20 @@ void IO_GUI_Init (struct IO_GUI *const G, const enum SCREEN_Role Screen)
     resetShowSelectedElement (G);
 
     G->showType                     = IO_Type_Bit;
-    G->showDir                 = MIO_Dir_Input;
+    G->showDir                      = MIO_Dir_Input;
     G->showProfile[MIO_Dir_Input]   = INPUT_PROFILE_Group_MAIN;
     G->showProfile[MIO_Dir_Output]  = OUTPUT_PROFILE_Group_SIGN;        
 
     BITFIELD_Init (&G->inBitfield, G->inBitBuffer,
-                   BITFIELD_COUNT(IO_GUI_INB__COUNT), NULL, 0);
+            BITFIELD_COUNT(IO_GUI_INB__COUNT), NULL, 0);
     BITFIELD_Init (&G->outBitfield, G->outBitBuffer,
-                   BITFIELD_COUNT(IO_GUI_OUTB__COUNT), NULL, 0);
+            BITFIELD_COUNT(IO_GUI_OUTB__COUNT), NULL, 0);
 
     memset (G->inRanges, 0, sizeof(G->inRanges));
     memset (G->outRanges, 0, sizeof(G->outRanges));
+
+    CYCLIC_Init (&G->nameRegionBufferCyclic, (uint8_t *)G->nameRegionBuffer, 
+            sizeof(G->nameRegionBuffer));
 
     // Update once per frame (~60 Hz).
     IO_Init ((struct IO *)G, &IO_GUI_IFACE, G->portInfo, 15);
@@ -828,11 +832,10 @@ static void processProfileCode (
                                        ProfileCode);
 
             char driverDesc[64];
-
-            snprintf (driverDesc, sizeof(driverDesc),
-                        "Mapped to port %u of \"%s\"",
-                        Gateway.DriverPort,
-                        OBJECT_Description((struct IO *)Gateway.Driver));
+            struct CYCLIC c;
+            CYCLIC_Init (&c, (uint8_t *)driverDesc, sizeof(driverDesc));
+            CYCLIC_IN_FromParsedString(&c, sizeof(driverDesc), "Mapped to port `0 of \"`1\"", 
+                Gateway.DriverPort, OBJECT_Description((struct IO *)Gateway.Driver));
 
             drawElementBackground (G, X, Y, ProfileCode, driverDesc, 0x01);
         }
@@ -972,7 +975,9 @@ static void processMenu (struct IO_GUI *const G, const uint32_t PointerX,
                                             ElementsBegin + 13 - 1 :
                                             ProfileCodes - 1U;
 
-        snprintf (page, sizeof(page), "%u-%u (%u total)",
+        struct CYCLIC c;
+        CYCLIC_Init (&c, (uint8_t *)page, sizeof(page));
+        CYCLIC_IN_FromParsedString(&c, sizeof(page), "`0-`1 (`2 total)",
                 ElementsBegin, ElementsEnd, (uint32_t)ProfileCodes);
 
         drawMenuItem (G, 3, "Element codes", page, itemPressed == 4);
@@ -984,7 +989,7 @@ static void processMenu (struct IO_GUI *const G, const uint32_t PointerX,
 }
 
 
-void update (struct IO *const Io)
+static void update (struct IO *const Io)
 {
     struct IO_GUI *const G = (struct IO_GUI *) Io;
 
@@ -1020,8 +1025,8 @@ void update (struct IO *const Io)
 }
 
 
-IO_Value getInput (struct IO *const Io, const enum IO_Type IoType,
-                   const IO_Code DriverCode, const IO_Port Port)
+static IO_Value getInput (struct IO *const Io, const enum IO_Type IoType,
+                          const IO_Code DriverCode, const IO_Port Port)
 {
     (void) Port;
 
@@ -1058,13 +1063,15 @@ static void setNameRegionBuffer (struct IO_GUI *const G,
                                  const char *const NameFmt,
                                  const uint32_t Index)
 {
-    snprintf (G->nameRegionBuffer, sizeof(G->nameRegionBuffer), NameFmt, Index);
+    CYCLIC_Reset (&G->nameRegionBufferCyclic);
+    CYCLIC_IN_FromParsedString(&G->nameRegionBufferCyclic,
+        sizeof(G->nameRegionBuffer), NameFmt, &VARIANT_SpawnUint(Index), 1);
 }
 
 
-const char * inputName (struct IO *const Io,
-                        const enum IO_Type IoType,
-                        const IO_Code DriverCode)
+static const char * inputName (struct IO *const Io,
+                               const enum IO_Type IoType,
+                               const IO_Code DriverCode)
 {
     struct IO_GUI *const G = (struct IO_GUI *) Io;
 
@@ -1078,13 +1085,13 @@ const char * inputName (struct IO *const Io,
         if (DriverCode >= IO_GUI_INB_LightdevOvertemp__BEGIN &&
             DriverCode <= IO_GUI_INB_lightdevOvertemp__END)
         {
-            setNameRegionBuffer (G, "Device %u overtemp.",
+            setNameRegionBuffer (G, "Device `0 overtemp.",
                         DriverCode - IO_GUI_INB_LightdevOvertemp__BEGIN);
         }
         else if (DriverCode >= IO_GUI_INB_LightdevChannelError__BEGIN &&
                  DriverCode <= IO_GUI_INB_lightdevChannelError__END)
         {
-            setNameRegionBuffer (G, "Device %u channel(s) error",
+            setNameRegionBuffer (G, "Device `0 channel(s) error",
                         DriverCode - IO_GUI_INB_LightdevChannelError__BEGIN);
         }
         else
@@ -1104,13 +1111,13 @@ const char * inputName (struct IO *const Io,
     if (DriverCode >= IO_GUI_INR_LightdevChannelsShorted__BEGIN &&
         DriverCode <= IO_GUI_INR_LightdevChannelsShorted__END)
     {
-        setNameRegionBuffer (G, "Device %u channels shorted",
+        setNameRegionBuffer (G, "Device `0 channels shorted",
                     DriverCode - IO_GUI_INR_LightdevChannelsShorted__BEGIN);
     }
     else if (DriverCode >= IO_GUI_INR_LightdevChannelsOpen__BEGIN &&
              DriverCode <= IO_GUI_INR_LightdevChannelsOpen__END)
     {
-        setNameRegionBuffer (G, "Device %u channels open",
+        setNameRegionBuffer (G, "Device `0 channels open",
                     DriverCode - IO_GUI_INR_LightdevChannelsOpen__BEGIN);
     }
     else
@@ -1141,13 +1148,13 @@ static const char * outputName (struct IO *const Io, const enum IO_Type IoType,
     if (DriverCode >= IO_GUI_OUTR_LightdevIref__BEGIN &&
         DriverCode <= IO_GUI_OUTR_LightdevIref__END)
     {
-        setNameRegionBuffer (G, "Channel %u Iref",
+        setNameRegionBuffer (G, "Channel `0 Iref",
                     DriverCode - IO_GUI_OUTR_LightdevIref__BEGIN);
     }
     else if (DriverCode >= IO_GUI_OUTR_LightdevPwm__BEGIN &&
              DriverCode <= IO_GUI_OUTR_LightdevPwm__END)
     {
-        setNameRegionBuffer (G, "Channel %u PWM",
+        setNameRegionBuffer (G, "Channel `0 PWM",
                     DriverCode - IO_GUI_OUTR_LightdevPwm__BEGIN);
     }
     else

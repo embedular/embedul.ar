@@ -27,8 +27,7 @@
 
 #include "embedul.ar/source/core/device/sound.h"
 #include "embedul.ar/source/core/device/sound/mixer.h"
-#include "SDL.h"
-#include "SDL_thread.h"
+#include "SDL_mutex.h"
 
 
 #if SOUND_MIXER_BITS != 16

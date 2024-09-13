@@ -25,6 +25,7 @@
 
 #include "embedul.ar/source/arch/native/sdl/drivers/io_keyboard.h"
 #include "embedul.ar/source/core/device/board.h"
+#include "SDL.h"
 
 
 static void         update              (struct IO *const Io);
@@ -95,7 +96,7 @@ void IO_KEYBOARD_Attach (struct IO_KEYBOARD *const K)
 }
 
 
-void update (struct IO *const Io)
+static void update (struct IO *const Io)
 {
     struct IO_KEYBOARD *const K = (struct IO_KEYBOARD *) Io;
 
@@ -113,8 +114,8 @@ void update (struct IO *const Io)
 }
 
 
-uint32_t getInput (struct IO *const Io, const enum IO_Type IoType,
-                   const IO_Code DriverCode, const IO_Port Port)
+static uint32_t getInput (struct IO *const Io, const enum IO_Type IoType,
+                          const IO_Code DriverCode, const IO_Port Port)
 {
     (void) IoType;
     (void) Port;
@@ -125,9 +126,9 @@ uint32_t getInput (struct IO *const Io, const enum IO_Type IoType,
 }
 
 
-const char * inputName (struct IO *const Io,
-                        const enum IO_Type IoType,
-                        const IO_Code DriverCode)
+static const char * inputName (struct IO *const Io,
+                               const enum IO_Type IoType,
+                               const IO_Code DriverCode)
 {
     (void) Io;
     (void) IoType;

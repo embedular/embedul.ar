@@ -39,9 +39,8 @@ void CYCLIC_Init (struct CYCLIC *const C, uint8_t *const Buffer,
                   const uint32_t Capacity)
 {
     BOARD_AssertParams (C && Buffer && Capacity);
-
-    // Capacity must be a power of two.
-    BOARD_AssertParams (!(Capacity & (Capacity - 1)));
+    BOARD_Assert (!(Capacity & (Capacity - 1)),
+                        "'Capacity' must be a power of two");
 
     OBJECT_Clear (C);
 

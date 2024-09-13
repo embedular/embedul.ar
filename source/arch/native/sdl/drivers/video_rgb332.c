@@ -47,10 +47,11 @@ void VIDEO_RGB332__hardwareInit (struct VIDEO *const V)
                              S->updateSurface);
 
     {
-        char windowName[80];
-
-        snprintf (windowName, sizeof(windowName),
-                                        "%s [embedul.ar] - %s%s%s",
+        char windowName[128];
+        struct CYCLIC c;
+        CYCLIC_Init (&c, (uint8_t *)windowName, sizeof(windowName));
+        CYCLIC_IN_FromParsedString (&c, sizeof(windowName),
+                                        "`0 [embedul.ar] - `1`2`3",
                                         CC_AppNameStr,
                                         OBJECT_Type(V),
                                         OBJECT_TYPE_SEPARATOR,

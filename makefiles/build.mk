@@ -54,6 +54,8 @@ BIN_IMAGE := $(BUILD_ROOT)/$(APP_NAME).bin
 HEX_IMAGE := $(BUILD_ROOT)/$(APP_NAME).hex
 EXE_LISTING := $(BUILD_ROOT)/$(APP_NAME).lst
 EXE_MAP := $(BUILD_ROOT)/$(APP_NAME).map
+FRAMA_C_PARSE := $(BUILD_ROOT)/$(APP_NAME).parse
+FRAMA_C_EVA := $(BUILD_ROOT)/$(APP_NAME).eva
 
 ifneq (yes,$(VERBOSE))
     VN := @
@@ -151,8 +153,14 @@ clean:
 run:
 	$(call execute,$(EXECUTABLE))
 
-frama-c: prog
-	$(call tool,Frama-C,eval $$(opam env) && frama-c -machdep="gcc_x86_64" -cpp-extra-args="-std=c17 -I/usr/include/x86_64-linux-gnu -DSDL_DISABLE_IMMINTRIN_H -DSDL_DISABLE_MMINTRIN_H -DSDL_DISABLE_XMMINTRIN_H -DSDL_DISABLE_EMMINTRIN_H -DSDL_DISABLE_PMMINTRIN_H" -json-compilation-database="./compile_commands.json" $(SOURCES_C_EMBEDULAR) $(SOURCES_C_APP))
+frama-c-parse: $(OBJS)
+frama-c-parse: $(APP_OBJS)
+	$(call tool,Frama-C: Parsing sources,eval $$(opam env) && frama-c -machdep="gcc_x86_64" -cpp-extra-args="-I/usr/include/x86_64-linux-gnu -DSDL_DISABLE_IMMINTRIN_H -DSDL_DISABLE_MMINTRIN_H -DSDL_DISABLE_XMMINTRIN_H -DSDL_DISABLE_EMMINTRIN_H -DSDL_DISABLE_PMMINTRIN_H" -json-compilation-database="./compile_commands.json" $(SOURCES_C_EMBEDULAR) $(SOURCES_C_APP) -save $(FRAMA_C_PARSE))
+
+frama-c-eva: frama-c-parse
+	$(call tool,Frama-C: EVA,eval $$(opam env) && frama-c -load $(FRAMA_C_PARSE) -eva -save $(FRAMA_C_EVA))
+
+frama-c: frama-c-eva
 
 # include required flash build directive
 $(call emb_info,Flash tool '$(FLASH_TOOL)')

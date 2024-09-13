@@ -458,14 +458,14 @@ static void outTableEntry (struct STREAM *const S,
     for (uint32_t i = 0; i < Table->FieldCount; ++i)
     {
         const enum VARIANT_Base LastBase = 
-            VARIANT_ChangeBaseUint (&ArgValues[i], Table->Fields[i].UintBase);
+            VARIANT_ChangeBase (&ArgValues[i], Table->Fields[i].UintBase);
         
         outColumn = outStrAutoArgs (S, outColumn, Fmt->EntryField,
                                     Fmt->VBorder,
                                     VARIANT_ToString(&ArgValues[i]),
                                     Table->Fields[i].RowEnd);
 
-        VARIANT_ChangeBaseUint (&ArgValues[i], LastBase);
+        VARIANT_ChangeBase (&ArgValues[i], LastBase);
     }
 
     outStrAutoArgs (S, outColumn, Fmt->EntryEnd,
@@ -509,7 +509,7 @@ void LOG__itemsArg (const bool Timestamp, const uint32_t ItemCount,
 
         for (uint32_t i = 0; i < BaseCount; ++i)
         {
-            origBase[i] = VARIANT_ChangeBaseUint (&ArgValues[(i * 2) + 1],
+            origBase[i] = VARIANT_ChangeBase (&ArgValues[(i * 2) + 1],
                                 VARIANT_ToUint(&ArgValues[i + MinItemArgs]));
         }
 
@@ -520,7 +520,7 @@ void LOG__itemsArg (const bool Timestamp, const uint32_t ItemCount,
 
         for (uint32_t i = 0; i < BaseCount; ++i)
         {
-            VARIANT_ChangeBaseUint (&ArgValues[(i * 2) + 1], origBase[i]);
+            VARIANT_ChangeBase (&ArgValues[(i * 2) + 1], origBase[i]);
         }
     }
     else

@@ -27,7 +27,7 @@
 
 #include "embedul.ar/source/core/device/io.h"
 #include "embedul.ar/source/core/bitfield.h"
-#include "SDL.h"
+#include "SDL_scancode.h"
 
 
 #define IO_KEYBOARD_SDL_PORT_COUNT      1

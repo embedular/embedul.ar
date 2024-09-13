@@ -104,7 +104,7 @@ void SOUND_SDL_Init (struct SOUND_SDLMIXER *const D)
 }
 
 
-void hardwareInit (struct SOUND *const S)
+static void hardwareInit (struct SOUND *const S)
 {
     if (Mix_OpenAudio (SOUND_MIXER_SAMPLE_RATE, AUDIO_S16LSB,
                        SOUND_MIXER_CHANNELS, SOUND_MIXER_BUFFER_SIZE))
@@ -119,7 +119,7 @@ void hardwareInit (struct SOUND *const S)
 }
 
 
-bool mixBegin (struct SOUND *const S)
+static bool mixBegin (struct SOUND *const S)
 {
     struct SOUND_SDLMIXER *const D = (struct SOUND_SDLMIXER *) S;
 
@@ -127,7 +127,7 @@ bool mixBegin (struct SOUND *const S)
 }
 
 
-void mixEnd (struct SOUND *const S)
+static void mixEnd (struct SOUND *const S)
 {
     struct SOUND_SDLMIXER *const D = (struct SOUND_SDLMIXER *) S;
 

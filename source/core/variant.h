@@ -216,13 +216,12 @@ enum VARIANT_Type
 };
 
 
+#define VARIANT_BASE_FLAG_SUFFIX        0x0100
+#define VARIANT_BASE_FLAG_UPPER         0x0200
+#define VARIANT_BASE_OCT                0x0008
+#define VARIANT_BASE_DEC                0x000A
+#define VARIANT_BASE_HEX                0x0010
 #define VARIANT_BASE_MASK               0x00FF
-#define VARIANT_BASE_SUFFIX_MASK        0x1000
-#define VARIANT_BASE_UPPER_MASK         0x0100
-#define VARIANT_BASE_OCT_VALUE          0x0008
-#define VARIANT_BASE_DEC_VALUE          0x000A
-#define VARIANT_BASE_HEX_VALUE          0x0010
-
 
 /**
  * Variant numeric bases. Used to convert an unsigned integer value to string
@@ -233,36 +232,36 @@ enum VARIANT_Base
     /**
      * Default decimal style: no suffix.
      */
-    VARIANT_Base_Dec_NoSuffix = VARIANT_BASE_DEC_VALUE,
+    VARIANT_Base_Dec_NoSuffix = VARIANT_BASE_DEC,
     /**
      * Octal, "o" suffix.
      */
-    VARIANT_Base_Oct_Suffix = VARIANT_BASE_OCT_VALUE |
-                              VARIANT_BASE_SUFFIX_MASK,
+    VARIANT_Base_Oct_Suffix = VARIANT_BASE_OCT |
+                              VARIANT_BASE_FLAG_SUFFIX,
     /**
      * Octal, no suffix.
      */
-    VARIANT_Base_Oct_NoSuffix = VARIANT_BASE_OCT_VALUE,
+    VARIANT_Base_Oct_NoSuffix = VARIANT_BASE_OCT,
     /**
      * Hexadecimal. Lowercase digits, "h" suffix.
      */
-    VARIANT_Base_Hex_LowerSuffix = VARIANT_BASE_HEX_VALUE |
-                                   VARIANT_BASE_SUFFIX_MASK,
+    VARIANT_Base_Hex_LowerSuffix = VARIANT_BASE_HEX |
+                                   VARIANT_BASE_FLAG_SUFFIX,
     /**
      * Hexadecimal. Lowercase digits.
      */
-    VARIANT_Base_Hex_LowerNoSuffix = VARIANT_BASE_HEX_VALUE,
+    VARIANT_Base_Hex_LowerNoSuffix = VARIANT_BASE_HEX,
     /**
      * Hexadecimal. Uppercase digits, "h" suffix.
      */
-    VARIANT_Base_Hex_UpperSuffix = VARIANT_BASE_HEX_VALUE | 
-                                   VARIANT_BASE_SUFFIX_MASK |
-                                   VARIANT_BASE_UPPER_MASK,
+    VARIANT_Base_Hex_UpperSuffix = VARIANT_BASE_HEX | 
+                                   VARIANT_BASE_FLAG_SUFFIX |
+                                   VARIANT_BASE_FLAG_UPPER,
     /**
      * Hexadecimal. Uppercase digits.
      */
-    VARIANT_Base_Hex_UpperNoSuffix = VARIANT_BASE_HEX_VALUE | 
-                                     VARIANT_BASE_UPPER_MASK,
+    VARIANT_Base_Hex_UpperNoSuffix = VARIANT_BASE_HEX | 
+                                     VARIANT_BASE_FLAG_UPPER,
     /**
      * Default octal style: suffix.
      */
@@ -278,6 +277,9 @@ enum VARIANT_Base
 };
 
 
+typedef uint32_t VARIANT_Digits;
+
+
 /**
  * The user should treat this as an opaque structure. No member should be
  * directly accessed or modified.
@@ -288,6 +290,8 @@ struct VARIANT
     // Base is ignored on integer, floating-point, boolean and pointer types.
     // On string, it is used to correctly interpret the numeric base format.
     enum VARIANT_Base   base;
+    // Floating-point decimal digits when converting to string
+    VARIANT_Digits      digits;
     char                conv[VARIANT_CONV_SIZE_MAX_OCTETS];
     union
     {
@@ -590,12 +594,15 @@ void            VARIANT_ToStringBuffer      (struct VARIANT *const V,
                                              const uint32_t Size);
 _Bool           VARIANT_ToBoolean           (struct VARIANT *const V);
 enum VARIANT_Type
-                VARIANT_ActualType          (struct VARIANT *const V);
+                VARIANT_GetType             (struct VARIANT *const V);
 enum VARIANT_Base
-                VARIANT_CurrentBase         (struct VARIANT *const V);
+                VARIANT_GetBase             (struct VARIANT *const V);
+VARIANT_Digits  VARIANT_GetDigits           (struct VARIANT *const V);
 enum VARIANT_Base   
-                VARIANT_ChangeBaseUint      (struct VARIANT *const V,
+                VARIANT_ChangeBase          (struct VARIANT *const V,
                                              const enum VARIANT_Base Base);
+VARIANT_Digits  VARIANT_ChangeDigits        (struct VARIANT *const V,
+                                             const VARIANT_Digits Digits);
 uint32_t        VARIANT_StringOctetCount    (struct VARIANT *const V);
 bool            VARIANT_IsEqual             (struct VARIANT *const V,
                                              struct VARIANT *const A);

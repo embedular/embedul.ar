@@ -82,6 +82,7 @@
                 "log_functions",
                 "log_context",
                 "log_assert",
+                "log_floating_point",
                 "empty",
             ],
             "default": "log_context"

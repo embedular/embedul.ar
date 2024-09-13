@@ -24,7 +24,6 @@
 */
 
 #include "embedul.ar/source/core/device/ticks.h"
-#include "embedul.ar/source/core/device/board.h"
 #include "SDL.h"
 
 

@@ -27,36 +27,12 @@
 #include "embedul.ar/source/core/device/board.h"
 #include "embedul.ar/source/core/utf8.h"
 #include <stdint.h>
-#include <stdio.h>
-#include <limits.h>
 #include <stdlib.h>
-#include <sys/types.h>
 
 
-#ifndef __WORDSIZE
-    // Assumes 32 bit
-    #define FMT_64L     "%ll"
-    #define FMT_32L     "%"
-#elif (__WORDSIZE == 64)
-    #define FMT_64L     "%l"
-    #define FMT_32L     "%l"
-#else
-    #error Unknown word size
-#endif
+#define BOOL_TRUE                               "true"
+#define BOOL_FALSE                              "false"
 
-#define FMT_INT                                 FMT_64L "i"
-#define FMT_UINT_DEC_NOSUFFIX                   FMT_64L "u"
-#define FMT_UINT_OCT_NOSUFFIX                   FMT_64L "o"
-#define FMT_UINT_OCT_SUFFIX                     FMT_64L "oo"
-#define FMT_UINT_HEX_UPPER_NOSUFFIX             FMT_64L "X"
-#define FMT_UINT_HEX_UPPER_SUFFIX               FMT_64L "Xh"
-#define FMT_UINT_HEX_LOWER_NOSUFFIX             FMT_64L "x"
-#define FMT_UINT_HEX_LOWER_SUFFIX               FMT_64L "xh"
-#define FMT_POINTER                             FMT_32L "xh"
-
-#define VARIANT_BOOL_TRUE                       "true"
-#define VARIANT_BOOL_FALSE                      "false"
-        
 #define REPLACEMENT_CHAR                        "�"
         
 #define STRING_ARGS_MAX_CHAR_OCTETS             3
@@ -68,6 +44,186 @@
 
 const uint8_t s_stringArgsStringStyles[STRING_ARGS_HINT_STRING_STYLES] =
     { '\"', '\'' };
+
+
+static void intToConv(struct VARIANT *const V)
+{
+    BOARD_AssertParams (V && V->type == VARIANT_Type_Int);
+
+    char        * front     = V->conv;
+    const int   IsNegative  = V->i < 0;
+    uint64_t    n           = IsNegative? -(uint64_t)V->i : (uint64_t)V->i;
+
+    if (V->i == 0)
+    {
+        *front++ = '0';
+    }
+    else
+    {
+        // Write digits in reverse order
+        char *digit = front;
+        while (n != 0) 
+        {
+            *front++ = '0' + (n % 10);
+            n /= 10;
+        }
+
+        if (IsNegative)
+        {
+            *front++ = '-';
+        }
+
+        // Reverse the digits in place
+        char *back = front - 1;
+        while (digit < back)
+        {
+            char tmp = *digit;
+            *digit = *back;
+            *back = tmp;
+            digit++;
+            back--;
+        }
+    }
+
+    *front = '\0';
+}
+
+
+static void uintToConv(struct VARIANT *const V)
+{
+    BOARD_AssertParams (V && V->type == VARIANT_Type_Uint);
+
+    static const char   DigitsUppercase[] = "0123456789ABCDEF";
+    static const char   DigitsLowercase[] = "0123456789abcdef";
+
+    const char *const   Digits      = (V->base & VARIANT_BASE_FLAG_UPPER)?
+                                        DigitsUppercase : DigitsLowercase;
+    const uint32_t      Base        = V->base & VARIANT_BASE_MASK;
+    const char          Suffix      = (V->base & VARIANT_BASE_FLAG_SUFFIX)?
+                                        ((Base == VARIANT_BASE_HEX)? 'h' :
+                                            (Base == VARIANT_BASE_OCT)? 'o'
+                                            : '\0')
+                                        : '\0';
+    char                * front     = V->conv;
+
+    if (Base != VARIANT_BASE_DEC &&
+        Base != VARIANT_BASE_OCT &&
+        Base != VARIANT_BASE_HEX)
+    {
+        BOARD_AssertUnexpectedValue (V, (uint32_t)Base);
+    }
+
+    if (V->u == 0)
+    {
+        *front++ = '0';
+        if (Suffix) 
+        {
+            *front++ = Suffix;
+        }
+        *front = '\0';
+    }
+    else 
+    {
+        uint64_t n = V->u;
+        uint32_t i = 0;
+
+        // Fills from end to start leaving space for suffix
+        while (n != 0)
+        {
+            V->conv[i++] = Digits[n % Base];
+            n /= Base;
+        }
+
+        if (Suffix) {
+            V->conv[i++] = Suffix;
+        }
+
+        V->conv[i] = '\0';
+
+        // Reverse the string (in-place reversal) excluding suffix
+        for (int start = 0, end = i - 2; start < end; start++, end--)
+        { 
+            char temp = V->conv[start];
+            V->conv[start] = V->conv[end];
+            V->conv[end] = temp;
+        }
+    }
+}
+
+
+static void fpToConv(struct VARIANT *const V)
+{
+    BOARD_AssertParams (V && V->type == VARIANT_Type_Fp);
+
+    const double    InitialValue    = V->d;
+    const int64_t   IntPart         = (int64_t)InitialValue;
+    double          fractionalPart  = InitialValue - (double)IntPart;
+
+    V->type = VARIANT_Type_Int;
+    V->i    = IntPart;
+
+    intToConv(V);
+
+    V->type = VARIANT_Type_Fp;
+    V->d    = InitialValue;
+
+    size_t len = strnlen(V->conv, sizeof(V->conv));
+
+    if (len >= sizeof(V->conv) - 3)
+    {
+        // No space left for at least the dot, one decimal digit and
+        // string termination
+        return;
+    }
+
+    V->conv[len++] = '.';
+
+    const size_t MaxLen = (V->digits)? 
+                            (len + V->digits < sizeof(V->conv) - 2)?
+                                len + V->digits
+                                : sizeof(V->conv) - 2
+                            : sizeof(V->conv) - 2;
+
+    while (len < MaxLen)
+    {
+        if (fractionalPart > 0.0)
+        {
+            fractionalPart *= 10.0;
+            const uint8_t Digit = (uint8_t)fractionalPart;
+            V->conv[len] = '0' + Digit;
+            fractionalPart -= (double)Digit;
+        }
+        else if (!V->digits) {
+            break;
+        }
+        else
+        {
+            V->conv[len] = '0';
+        }
+        ++ len;
+    }
+
+    V->conv[len] = '\0';
+}
+
+
+static void pointerToConv(struct VARIANT *const V)
+{
+    BOARD_AssertParams (V && V->type == VARIANT_Type_Pointer);
+
+    const void *const           InitialValue    = V->p;
+    const enum VARIANT_Base     InitialBase     = V->base;
+
+    V->type = VARIANT_Type_Uint;
+    V->base = VARIANT_Base_Hex_LowerSuffix;
+    V->u    = (uintptr_t)V->p;
+
+    uintToConv(V);
+
+    V->type = VARIANT_Type_Pointer;
+    V->base = InitialBase;
+    V->p    = InitialValue;
+}
 
 
 /**
@@ -572,12 +728,11 @@ double VARIANT_ToDouble (struct VARIANT *const V)
  *
  *          .. warning::
  *
- *             Except for a :c:struct:`VARIANT` of type
+ *             The :c:struct:`VARIANT` instance owns the string buffer returned,
+ *             with the exeption of type
  *             :c:enum:`VARIANT_Type.VARIANT_Type_Boolean` where values are
- *             statically allocated, the returned string
- *             pointer contents are temporary and may change
- *             on subsequent calls. The caller must
- *             duplicate the contents immediately to preserve them.
+ *             statically allocated. The caller
+ *             must duplicate the contents immediately to preserve them.
  */
 const char* VARIANT_ToString (struct VARIANT *const V)
 {
@@ -588,65 +743,26 @@ const char* VARIANT_ToString (struct VARIANT *const V)
     switch (V->type)
     {
         case VARIANT_Type_Uint:
-        {
-            const char *fmt = FMT_UINT_DEC_NOSUFFIX;
-
-            switch (V->base)
-            {
-                case VARIANT_Base_Dec_NoSuffix:
-                    fmt = FMT_UINT_DEC_NOSUFFIX;
-                    break;
-
-                case VARIANT_Base_Oct_Suffix:
-                    fmt = FMT_UINT_OCT_SUFFIX;
-                    break;
-
-                case VARIANT_Base_Oct_NoSuffix:
-                    fmt = FMT_UINT_OCT_NOSUFFIX;
-                    break;
-
-                case VARIANT_Base_Hex_LowerSuffix:
-                    fmt = FMT_UINT_HEX_LOWER_SUFFIX;
-                    break;
-
-                case VARIANT_Base_Hex_LowerNoSuffix:
-                    fmt = FMT_UINT_HEX_LOWER_NOSUFFIX;
-                    break;
-
-                case VARIANT_Base_Hex_UpperSuffix:
-                    fmt = FMT_UINT_HEX_UPPER_SUFFIX;
-                    break;
-
-                case VARIANT_Base_Hex_UpperNoSuffix:
-                    fmt = FMT_UINT_HEX_UPPER_NOSUFFIX;
-                    break;
-
-                default:
-                    BOARD_AssertUnexpectedValue (V, (uint32_t)V->base);
-                    break;
-            }
-
-            snprintf (V->conv, sizeof(V->conv), fmt, V->u);
+            uintToConv(V);
             break;
-        }
 
         case VARIANT_Type_Int:
-            snprintf (V->conv, sizeof(V->conv), FMT_INT, V->i);
+            intToConv(V);
             break;
 
         case VARIANT_Type_Fp:
-            snprintf (V->conv, sizeof(V->conv), "%f", V->d);
+            fpToConv(V);
             break;
 
         case VARIANT_Type_Pointer:
-            snprintf (V->conv, sizeof(V->conv), FMT_POINTER, (uintptr_t)V->p);
+            pointerToConv(V);
             break;
 
         case VARIANT_Type_String:
             return V->s;
 
         case VARIANT_Type_Boolean:
-            return V->b? VARIANT_BOOL_TRUE : VARIANT_BOOL_FALSE;
+            return V->b? BOOL_TRUE : BOOL_FALSE;
     }
 
     return V->conv;
@@ -711,33 +827,39 @@ _Bool VARIANT_ToBoolean (struct VARIANT *const V)
 }
 
 
-enum VARIANT_Type VARIANT_ActualType (struct VARIANT *const V)
+enum VARIANT_Type VARIANT_GetType (struct VARIANT *const V)
 {
     BOARD_AssertParams (V);
     return V->type;
 }
 
 
-enum VARIANT_Base VARIANT_CurrentBase (struct VARIANT *const V)
+enum VARIANT_Base VARIANT_GetBase (struct VARIANT *const V)
 {
     BOARD_AssertParams (V);
     return V->base;
 }
 
 
+VARIANT_Digits VARIANT_GetDigits (struct VARIANT *const V)
+{
+    BOARD_AssertParams (V);
+    return V->digits;
+}
+
+
 /**
  * Changes base conversion on a :c:struct:`VARIANT` instance of type 
- * :c:enum:`VARIANT_Type.VARIANT_Type_Uint`. It does nothing on other types.
+ * :c:enum:`VARIANT_Type.VARIANT_Type_Uint`; it does nothing otherwise.
  *
  * :param Base: New base. :c:func:`VARIANT_ToString` will format this
  *              unsigned value accordingly. If zero, nothing will be changed 
  *              and the return value will be zero.
- * :return: Last base. Zero if the :c:struct:`VARIANT` instance is
- *          not of type :c:enum:`VARIANT_Type.VARIANT_Type_Uint` or ``Base``
- *          is zero.
+ * :return: Previous base or zero if the :c:struct:`VARIANT` instance is not
+ *          of type :c:enum:`VARIANT_Type.VARIANT_Type_Uint`
  */
-enum VARIANT_Base VARIANT_ChangeBaseUint (struct VARIANT *const V,
-                                          const enum VARIANT_Base Base)
+enum VARIANT_Base VARIANT_ChangeBase (struct VARIANT *const V,
+                                      const enum VARIANT_Base Base)
 {
     BOARD_AssertParams (V);
 
@@ -746,10 +868,34 @@ enum VARIANT_Base VARIANT_ChangeBaseUint (struct VARIANT *const V,
         return 0;
     }
 
-    const enum VARIANT_Base LastBase = V->base;
+    const enum VARIANT_Base PrevBase = V->base;
     V->base = Base;
 
-    return LastBase;
+    return PrevBase;
+}
+
+
+/**
+ * Changes the number of fixed decimal digits or padding zeros when converting
+ * a floating-point number to string. Use with :c:struct:`VARIANT` instances of
+ * type :c:enum:`VARIANT_Type.VARIANT_Type_Fp` only; that condition is asserted.
+ *
+ * :param Digits: Decimal digits or padding zeros to output when converting
+ *                this floating-point value to string. If 'x' is zero, the
+ *                string conversion will output decimals as necessary.
+ *                In both cases, the upper limit will be the :c:struct:`VARIANT`
+ *                internal conversion buffer capacity.
+ * :return: Previous decimal digits.
+ */
+VARIANT_Digits VARIANT_ChangeDigits (struct VARIANT *const V,
+                                     const VARIANT_Digits Digits)
+{
+    BOARD_AssertParams (V && V->type == VARIANT_Type_Fp);
+
+    const VARIANT_Digits PrevDigits = V->digits;
+    V->digits = Digits;
+
+    return PrevDigits;
 }
 
 
@@ -1276,8 +1422,8 @@ static void outProcHint (void *const Param, const uint8_t *const Data,
 static void outProcHintNewArg (struct OutProcHintParams *const Hp,
                                struct VARIANT *V)
 {
-    Hp->variantType = VARIANT_ActualType (V);
-    Hp->variantBase = VARIANT_CurrentBase (V);
+    Hp->variantType = VARIANT_GetType (V);
+    Hp->variantBase = VARIANT_GetBase (V);
     Hp->extraChars  = 0;
 }
 
@@ -1417,10 +1563,7 @@ static uint32_t countCSIAsciiChars (const uint8_t *const ArgS,
  *
  *    Base conversion will only work with a :c:struct:`VARIANT` whose original
  *    data type is an unsigned integer. it will do nothing on a signed integer,
- *    double, string or pointer values. While it is possible to represent signed
- *    integers with different bases, it is a limitation of snprintf; the
- *    standard function internally used by :c:struct:`VARIANT` to convert an
- *    integer to string.
+ *    double, string or pointer values.
  *
  *    The default representation for all numeric types is decimal.    
  *
@@ -1445,11 +1588,11 @@ static uint32_t countCSIAsciiChars (const uint8_t *const ArgS,
  *    modifies the foremost marker. Sequences like "\`X\`l1" are invalid.
  *
  *
- * The purpose of **Commands** is to generate spacing, tabulation and centering
- * by inserting a number of characters from a character pattern. A command
- * follows the format "\`Xp", where 'X' is a single letter that represents
- * the command and 'p' is the command parameter: a decimal number from 0 to 
- * 99 inclusive.
+ * The purpose of **Commands** is to create spacing, tabulation, and centering
+ * by inserting characters based on a specific pattern. A command
+ * follows the format "\`Xp", where 'X' is a single letter describing the
+ * command and 'p' is the command parameter, which is a decimal number ranging
+ * from 0 to 99, inclusive.
  *
  * The following commands are available:
  *
@@ -1519,6 +1662,8 @@ static uint32_t countCSIAsciiChars (const uint8_t *const ArgS,
  *
  * Finally, **Parser state options** changes the parser behavior on
  * *command parameters* and controls printing of hints on argument types.
+ * It also determines the number of decimal digits in all floating-point to
+ * string conversions, overriding individual VARIANT preferentes.
  *
  * \`# - Command parameter behaviour: immediate mode.
  *   Command parameter ('p') is passed as-is to the command.
@@ -1557,6 +1702,12 @@ static uint32_t countCSIAsciiChars (const uint8_t *const ArgS,
  *   +-----------+-----------------------+----------------------------+
  *   |1          |Base as subscript      |FF₁₆                        |
  *   +-----------+-----------------------+----------------------------+
+ *
+ * \`.\ *x* - Global Floating-point to string decimal digits
+ *   All :c:struct:`VARIANT` of type
+ *   :c:enum:`VARIANT_Type.VARIANT_Type_Fp` will follow 'x' ignoring their
+ *   internal setting for decimal digits. Set 'x' to zero to disable this
+ *   global setting.
  *
  *   For example, let ``ArgValues[0]`` == "String value", 
  *   ``ArgValues[1]`` == false, and parser string "Sample: \`^21\`0, \`1".
@@ -1650,7 +1801,8 @@ uint32_t VARIANT_ParseStringArgs (const uint32_t OutColumn,
     {
         Parser_None = 0,
         Parser_HintStrings,
-        Parser_HintNumbers
+        Parser_HintNumbers,
+        Parser_GlobalDecimalDigits
     };
 
     enum Command    command         = Command_None;
@@ -1662,6 +1814,7 @@ uint32_t VARIANT_ParseStringArgs (const uint32_t OutColumn,
     uint32_t        tabCol          = 0;
     bool            tabMiddle       = false;
     bool            immediateCmd    = true;
+    uint32_t        globalFpDigits  = 0;
     const uint8_t   * sp8           = (const uint8_t *)Str;
 
     struct OutProcHintParams outProcHintParams =
@@ -1755,6 +1908,10 @@ uint32_t VARIANT_ParseStringArgs (const uint32_t OutColumn,
                 {
                     outProcHintNumbers (&outProcHintParams, marker);
                 }
+                else if (parser == Parser_GlobalDecimalDigits)
+                {
+                    globalFpDigits = marker;
+                }
 
                 parser = Parser_None;
             }
@@ -1784,12 +1941,30 @@ uint32_t VARIANT_ParseStringArgs (const uint32_t OutColumn,
 
                         if (marker < ArgCount)
                         {
-                            struct VARIANT * const ArgV = &ArgValues[marker];
+                            struct VARIANT * const  ArgV = &ArgValues[marker];
+                            const enum VARIANT_Base ArgVbase = ArgV->base;
+                            const VARIANT_Digits    ArgVdigits = ArgV->digits; 
 
-                            // Change base to the specified in `style`, if any
-                            const enum VARIANT_Base Base = 
-                                    VARIANT_ChangeBaseUint (ArgV, 
+                            switch (ArgV->type)
+                            {
+                                case VARIANT_Type_Uint:
+                                    // Change base to the one specified in
+                                    // `style`
+                                    VARIANT_ChangeBase (ArgV, 
                                             style & StringStyle__VARIANT_MASK);
+                                    break;
+
+                                case VARIANT_Type_Fp:
+                                    if (globalFpDigits)
+                                    {
+                                        VARIANT_ChangeDigits(ArgV, 
+                                            globalFpDigits);
+                                    }
+                                    break;
+
+                                default:
+                                    break;
+                            }
 
                             argS = (uint8_t *)VARIANT_ToString (ArgV);
                             argO = (uint32_t)strlen ((char *)argS);
@@ -1799,8 +1974,8 @@ uint32_t VARIANT_ParseStringArgs (const uint32_t OutColumn,
 
                             outProcHintNewArg (&outProcHintParams, ArgV);
 
-                            // Restore previous base
-                            VARIANT_ChangeBaseUint (ArgV, Base);
+                            ArgV->base      = ArgVbase;
+                            ArgV->digits    = ArgVdigits;
                         }
 
                         // Tabulate argument if requested and viable
@@ -2020,6 +2195,10 @@ uint32_t VARIANT_ParseStringArgs (const uint32_t OutColumn,
         else if (Next == '&')
         {
             parser = Parser_HintNumbers;
+        }
+        else if (Next == '.')
+        {
+            parser = Parser_GlobalDecimalDigits;
         }
         else
         {

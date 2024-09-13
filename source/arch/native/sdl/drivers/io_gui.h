@@ -26,9 +26,9 @@
 #pragma once
 
 #include "embedul.ar/source/core/manager/mio.h"
-#include "embedul.ar/source/core/manager/screen.h"
+#include "embedul.ar/source/core/manager/screen/role.h"
 #include "embedul.ar/source/core/bitfield.h"
-#include "SDL.h"
+#include "embedul.ar/source/core/cyclic.h"
 
 
 #define IO_GUI_PORT_COUNT      1
@@ -147,6 +147,7 @@ struct IO_GUI
     struct BITFIELD         inBitfield;
     struct BITFIELD         outBitfield;
     char                    nameRegionBuffer[32];
+    struct CYCLIC           nameRegionBufferCyclic;
     bool                    lastPointerPressed;
     TIMER_Ticks             lastRangeTimeout;
     uint32_t                rangeIncrement;
