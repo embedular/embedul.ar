@@ -1,7 +1,7 @@
 include $(realpath ./makefiles/system.mk)
 
 # To build a default example from the command-line with default parameters
-EXAMPLE ?= log_hello_world
+EXAMPLE ?= hello_world
 BUILD_TARGET ?= native_hosted
 
 $(call emb_need_var,EXAMPLE)

@@ -52,6 +52,12 @@
             "type": "pickString",
             "description": "Framework example",
             "options": [
+                "hello_world",
+                "log_functions",
+                "log_context",
+                "log_assert",
+                "variant",
+                "empty",
                 "freertos_book_01_task_functions",
                 "freertos_book_02_task_single_function",
                 "freertos_book_03_task_priority",
@@ -77,13 +83,7 @@
                 "freertos_book_23_event_group_sync",
                 "freertos_book_24_task_notify",
                 "freertos_book_25_task_notify_many",
-                "freertos_book_2_6",
-                "log_hello_world",
-                "log_functions",
-                "log_context",
-                "log_assert",
-                "log_floating_point",
-                "empty",
+                "freertos_book_2_6"
             ],
             "default": "log_context"
         },

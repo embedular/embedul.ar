@@ -50,42 +50,44 @@ static void intToConv(struct VARIANT *const V)
 {
     BOARD_AssertParams (V && V->type == VARIANT_Type_Int);
 
-    char        * front     = V->conv;
-    const int   IsNegative  = V->i < 0;
+    const bool  IsNegative  = (V->i < 0);
     uint64_t    n           = IsNegative? -(uint64_t)V->i : (uint64_t)V->i;
+    char        * p         = V->conv;
 
     if (V->i == 0)
     {
-        *front++ = '0';
+        *p++ = '0';
+        *p = '\0';
     }
     else
     {
         // Write digits in reverse order
-        char *digit = front;
         while (n != 0) 
         {
-            *front++ = '0' + (n % 10);
+            *p++ = '0' + (n % 10);
             n /= 10;
         }
 
         if (IsNegative)
         {
-            *front++ = '-';
+            *p++ = '-';
         }
+
+        *p = '\0';
 
         // Reverse the digits in place
-        char *back = front - 1;
-        while (digit < back)
+        char *front = V->conv;
+        char *back  = p - 1;
+
+        while (front < back)
         {
-            char tmp = *digit;
-            *digit = *back;
-            *back = tmp;
-            digit++;
-            back--;
+            const char D = *front;
+            *front = *back;
+            *back = D;
+            front ++;
+            back --;
         }
     }
-
-    *front = '\0';
 }
 
 
@@ -104,7 +106,6 @@ static void uintToConv(struct VARIANT *const V)
                                             (Base == VARIANT_BASE_OCT)? 'o'
                                             : '\0')
                                         : '\0';
-    char                * front     = V->conv;
 
     if (Base != VARIANT_BASE_DEC &&
         Base != VARIANT_BASE_OCT &&
@@ -113,39 +114,45 @@ static void uintToConv(struct VARIANT *const V)
         BOARD_AssertUnexpectedValue (V, (uint32_t)Base);
     }
 
+    char * p = V->conv;
+
     if (V->u == 0)
     {
-        *front++ = '0';
+        *p++ = '0';
         if (Suffix) 
         {
-            *front++ = Suffix;
+            *p++ = Suffix;
         }
-        *front = '\0';
+        *p = '\0';
     }
     else 
     {
         uint64_t n = V->u;
-        uint32_t i = 0;
 
         // Fills from end to start leaving space for suffix
         while (n != 0)
         {
-            V->conv[i++] = Digits[n % Base];
+            *p++ = Digits[n % Base];
             n /= Base;
         }
 
         if (Suffix) {
-            V->conv[i++] = Suffix;
+            *p++ = Suffix;
         }
 
-        V->conv[i] = '\0';
+        *p = '\0';
 
-        // Reverse the string (in-place reversal) excluding suffix
-        for (int start = 0, end = i - 2; start < end; start++, end--)
-        { 
-            char temp = V->conv[start];
-            V->conv[start] = V->conv[end];
-            V->conv[end] = temp;
+        // Reverse the digits in place, excluding suffix if present
+        char *front = V->conv;
+        char *back  = p - ((Suffix)? 2 : 1);
+
+        while (front < back)
+        {
+            const char D = *front;
+            *front = *back;
+            *back = D;
+            front ++;
+            back --;
         }
     }
 }
@@ -172,7 +179,7 @@ static void fpToConv(struct VARIANT *const V)
     if (len >= sizeof(V->conv) - 3)
     {
         // No space left for at least the dot, one decimal digit and
-        // string termination
+        // string termination: print no decimals.
         return;
     }
 
@@ -2114,6 +2121,10 @@ uint32_t VARIANT_ParseStringArgs (const uint32_t OutColumn,
         else if (Next == 'o')
         {
             style = VARIANT_Base_Oct_NoSuffix;
+        }
+        else if (Next == 'O')
+        {
+            style = VARIANT_Base_Oct_Suffix;
         }
         else if (Next == 'd')
         {
