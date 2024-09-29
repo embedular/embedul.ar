@@ -155,12 +155,15 @@ run:
 
 frama-c-parse: $(OBJS)
 frama-c-parse: $(APP_OBJS)
-	$(call tool,Frama-C: Parsing sources,eval $$(opam env) && frama-c -machdep="gcc_x86_64" -cpp-extra-args="-I/usr/include/x86_64-linux-gnu -DSDL_DISABLE_IMMINTRIN_H -DSDL_DISABLE_MMINTRIN_H -DSDL_DISABLE_XMMINTRIN_H -DSDL_DISABLE_EMMINTRIN_H -DSDL_DISABLE_PMMINTRIN_H" -json-compilation-database="./compile_commands.json" $(SOURCES_C_EMBEDULAR) $(SOURCES_C_APP) -save $(FRAMA_C_PARSE))
+	$(call tool,Frama-C: Parsing sources,eval $$(opam env) && frama-c -machdep="gcc_x86_64" -cpp-extra-args="-I/usr/include/x86_64-linux-gnu -DSDL_FALLTHROUGH -DSDL_DISABLE_IMMINTRIN_H -DSDL_DISABLE_MMINTRIN_H -DSDL_DISABLE_XMMINTRIN_H -DSDL_DISABLE_EMMINTRIN_H -DSDL_DISABLE_PMMINTRIN_H" -json-compilation-database="./compile_commands.json" $(SOURCES_C_EMBEDULAR) $(SOURCES_C_APP) -save $(FRAMA_C_PARSE))
 
 frama-c-eva: frama-c-parse
-	$(call tool,Frama-C: EVA,eval $$(opam env) && frama-c -load $(FRAMA_C_PARSE) -eva -save $(FRAMA_C_EVA))
+	$(call tool,Frama-C: EVA,eval $$(opam env) && frama-c -load $(FRAMA_C_PARSE) -eva -eva-precision 3 -save $(FRAMA_C_EVA))
 
-frama-c: frama-c-eva
+frama-c-gui: frama-c-eva
+	$(call tool,Frama-C: GUI,frama-c-gui -load $(FRAMA_C_EVA))
+
+frama-c: frama-c-gui
 
 # include required flash build directive
 $(call emb_info,Flash tool '$(FLASH_TOOL)')

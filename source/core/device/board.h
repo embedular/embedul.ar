@@ -128,6 +128,7 @@ struct BOARD
     const char                      ** argv;
     int                             returnValue;
     enum BOARD_Stage                currentStage;
+    uint32_t                        inhibitAssert;
     bool                            exit;
     // Singleton device drivers
     struct TICKS                    * ticks;

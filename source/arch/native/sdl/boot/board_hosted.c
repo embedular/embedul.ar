@@ -117,7 +117,8 @@ struct BOARD * BOARD__boot (const int Argc, const char **const Argv,
                                         Argc, Argv, R);
     if (ErrorMsg)
     {
-        fprintf (stderr, "BOARD_Init() failed: %s.", ErrorMsg);
+        fputs ("BOARD_Init() failed: ", stderr);
+        fputs (ErrorMsg, stderr);
         exit (1);
     }
 
@@ -149,21 +150,13 @@ void * initComponent (struct BOARD *const B,
         case BOARD_Stage_InitPreTicksHardware:
         {
             // initialize SDL
-            if (SDL_InitSubSystem (SDL_INIT_EVENTS) < 0)
+            if (SDL_InitSubSystem (SDL_INIT_EVENTS) < 0 || 
+                SDL_InitSubSystem (SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
             {
                 // No log messages or assert output yet
-                fprintf (stderr, "SDL_InitSubSystem() failed: %s.\r\n",
-                         SDL_GetError());
-
-                BOARD_AssertInitialized (false);
-                break;
-            }
-
-            if (SDL_InitSubSystem (SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
-            {
-                // No log messages or assert output yet
-                fprintf (stderr, "SDL_InitSubSystem() failed: %s.\r\n",
-                         SDL_GetError());
+                fputs ("SDL_InitSubSystem() failed: ", stderr);
+                fputs (SDL_GetError(), stderr);
+                fputs ("\r\n", stderr);
 
                 BOARD_AssertInitialized (false);
                 break;

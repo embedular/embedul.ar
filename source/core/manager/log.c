@@ -699,9 +699,16 @@ void LOG__contextBegin (void)
 {
     BOARD_AssertInitialized (s_l);
 
-    const uint32_t I = s_l->contextIndent % LOG_CONTEXT_TICKS_DEPTH;
-    s_l->contextStartTicks[I] = TICKS_Now();
-    ++ s_l->contextIndent;
+    if  (s_l->contextIndent < LOG_CONTEXT_TICKS_DEPTH)
+    {
+        s_l->contextStartTicks[s_l->contextIndent] = TICKS_Now();
+        ++ s_l->contextIndent;
+    }
+    else
+    {
+        LOG_Warn (s_l, LANG_INVALID_CONTEXT_INDENT_FMT, s_l->contextIndent);
+        BOARD_AssertState (false);
+    }
 }
 
 
@@ -716,7 +723,8 @@ void LOG_ContextEnd (void)
         // Default stream timeout for outgoing data; data going into the stream.
         STREAM_Timeout (S, LOG_DEBUG_STREAM_TIMEOUT);
 
-        if (s_l->contextIndent)
+        if (s_l->contextIndent > 0 &&
+            s_l->contextIndent <= LOG_CONTEXT_TICKS_DEPTH)
         {
             const TIMER_Ticks Elapsed =
                 TICKS_Now() - s_l->contextStartTicks[s_l->contextIndent - 1];
@@ -730,7 +738,7 @@ void LOG_ContextEnd (void)
         }
         else
         {
-            LOG_Warn (s_l, LANG_INVALID_CONTEXT_END_FMT, s_l->contextIndent);
+            LOG_Warn (s_l, LANG_INVALID_CONTEXT_INDENT_FMT, s_l->contextIndent);
             BOARD_AssertState (false);
         }
     }

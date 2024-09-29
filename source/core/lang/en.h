@@ -124,7 +124,7 @@
 #define LANG_INPUT_SUMMARY                  "input summary"
 #define LANG_INSERTED                       "inserted"
 #define LANG_INVALID_COMMAND_FORMAT_FMT     "invalid command format '`0'"
-#define LANG_INVALID_CONTEXT_END_FMT        "invalid context end '`0'"
+#define LANG_INVALID_CONTEXT_INDENT_FMT     "invalid context indent '`0'"
 #define LANG_INVALID_FILESYSTEM_ROLE_NO_MBR "invalid filesystem role on media with no mbr"
 #define LANG_INVALID_IMPLEMENTATION         "invalid implementation"
 #define LANG_INVALID_INDEX                  "invalid index"

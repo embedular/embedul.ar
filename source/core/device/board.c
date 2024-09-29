@@ -26,9 +26,8 @@
 #include "embedul.ar/source/core/device/board.h"
 
 
-#define BOARD_DEFAULT_SEED             0xbf8e18f1a02a2e49
-#define BOARD_STRARG_FMT_MAX_SIZE      512
-
+#define BOARD_DEFAULT_SEED              0xbf8e18f1a02a2e49
+#define BOARD_STRARG_FMT_MAX_SIZE       512
 
 static struct BOARD * s_board = NULL;
 
@@ -104,13 +103,26 @@ void LOG__assertFailed (struct STREAM *const S, const char *const Func,
                         const char *const File, const int Line,
                         const char *const Msg);
 
-
+/*@ 
+    assigns s_board->inhibitAssert;
+ */
 void BOARD_AssertContext (const char *const Func, const char *const File,
                            const int Line, const bool Condition,
                            const char *const Str)
 {
+    if (s_board->inhibitAssert == 0xDEADC0DE)
+    {
+        return;
+    }
+
+    //@ assert s_board->inhibitAssert != 0xDEADC0DE;
     if (!Condition)
     {
+        // Inhibit further asserts (potential nested calls). This is required
+        // since LOG__assertFailed employs STREAM_* and VARIANT_* methods to
+        // ensemble the message in a state of already non-recoverable system
+        // failure.
+        s_board->inhibitAssert = 0xDEADC0DE;
         LOG__assertFailed (s_board->debugStream, Func, File, Line, Str);
     }
 
