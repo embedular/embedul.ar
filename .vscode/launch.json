@@ -8,8 +8,11 @@
             "name": "[GDB] host",
             "cwd": "${workspaceFolder}",
             "request": "launch",
-            "type": "gdb",
-            "target": "${workspaceFolder}/build/binary/native_hosted/gcc/debug_generic_O0/${workspaceFolderBasename}.elf"
+            "type": "cppdbg",
+            "program": "${workspaceFolder}/build/binary/native_hosted/gcc/debug_generic_O0/${workspaceFolderBasename}.elf",
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "stopAtEntry": false
         },
         {
             "name": "[JLink] edu_ciaa_retro_poncho",

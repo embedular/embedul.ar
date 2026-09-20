@@ -51,8 +51,7 @@ void OUTPUT_PROFILE__attach (
     struct IO_PROFILE_Map *const RangeMap,
     const uint32_t RangeCount)
 {
-    BOARD_AssertParams (OutProfiles &&
-                        OutProfileGroup < OUTPUT_PROFILE_Group__COUNT);
+    BOARD_AssertParams (OutProfileGroup < OUTPUT_PROFILE_Group__COUNT);
 
     BOARD_AssertParams ((BitMap && BitCount) || (RangeMap && RangeCount));
 

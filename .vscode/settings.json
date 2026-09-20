@@ -22,5 +22,6 @@
         {"column":  40, "color": "#5a5a5a20"}, // center line
         {"column":  76, "color": "#5a5a5a20"}, // right rule minus one
         {"column":  80, "color": "#5a5a5a80"}, // right rule, 80 columns max.
-    ]
+    ],
+    "cmake.sourceDirectory": "/home/royconejo/embedul.ar/source/3rd_party/lwip-2.1.3"
 }

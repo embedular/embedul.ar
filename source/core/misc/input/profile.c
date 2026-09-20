@@ -54,8 +54,7 @@ void INPUT_PROFILE__attach (
     struct IO_PROFILE_Map *const RangeMap,
     const uint32_t RangeCount)
 {
-    BOARD_AssertParams (inProfiles && InBitActions &&
-                        InProfileGroup < INPUT_PROFILE_Group__COUNT);
+    BOARD_AssertParams (InProfileGroup < INPUT_PROFILE_Group__COUNT);
     BOARD_AssertParams ((BitAction && (BitMap && BitCount)) || !BitAction);
     BOARD_AssertParams ((BitMap && BitCount) || (RangeMap && RangeCount));
 

@@ -192,7 +192,7 @@ static void hardwareInit (struct RAWSTOR *const R)
 	Chip_SDIF_Init (LPC_SDMMC);
 
     // Initial status
-    if (cardDetect (R))
+    if (cardDetect (M))
     {
         R->status.disk &= ~RAWSTOR_Status_Disk_NotPresent;
         RAWSTOR_UpdateStatusMedia (R, RAWSTOR_Status_Media_Inserted, 0, 0);
@@ -213,7 +213,7 @@ static RAWSTOR_Status_Result mediaInit (struct RAWSTOR *const R)
 
     if (R->status.disk & RAWSTOR_Status_Disk_NotPresent)
     {
-        if (!cardDetect (R))
+        if (!cardDetect (M))
         {
             return RAWSTOR_Status_Result_NotReady;
         }
@@ -417,3 +417,7 @@ static RAWSTOR_Status_Result mediaIoctl (struct RAWSTOR *const R,
 
 	return res;
 }
+
+
+
+

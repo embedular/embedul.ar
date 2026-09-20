@@ -42,7 +42,7 @@
 static void         hardwareInit    (struct STREAM *const S);
 static void         connect         (struct STREAM *const S);
 static enum DEVICE_CommandResult
-                    command         (struct STREAM *const S,
+                    command         (const void *const V,
                                      const char *const Name,
                                      struct VARIANT *const Value);
 static uint32_t     dataIn          (struct STREAM *const S, 
@@ -914,12 +914,12 @@ static inline bool setConfString (char *const String,
 }
 
 
-static enum DEVICE_CommandResult command (struct STREAM *const S,
+static enum DEVICE_CommandResult command (const void *const V,
                                           const char *const Name,
                                           struct VARIANT *const Value)
 {
     struct STREAM_ESP32AT_TCP_SERVER *const E =
-                                (struct STREAM_ESP32AT_TCP_SERVER *const) S;
+                                (struct STREAM_ESP32AT_TCP_SERVER *const) V;
 
     if (DEVICE_COMMAND_CHECK(STREAM_SET_HOSTNAME))
     {
@@ -1265,3 +1265,5 @@ static uint32_t dataOut (struct STREAM *const S, uint8_t *const Buffer,
 
     return ReadCount;
 }
+
+

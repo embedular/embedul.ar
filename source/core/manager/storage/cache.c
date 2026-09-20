@@ -866,8 +866,7 @@ RAWSTOR_Status_Result STORAGE_CACHE_ElementInfo (
                             const uint32_t Retries)
 {
     BOARD_AssertParams (Ei &&
-                        Element < STORAGE_CachedElementsCount() && 
-                        SectorData);
+                        Element < STORAGE_CachedElementsCount());
 
     const RAWSTOR_Status_Result Rsr =
                 readElementInfoSector (Element, SectorData, Retries);
