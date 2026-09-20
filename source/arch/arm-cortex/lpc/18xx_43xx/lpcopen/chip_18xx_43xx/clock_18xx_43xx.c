@@ -573,9 +573,9 @@ void Chip_Clock_SetBaseClock(CHIP_CGU_BASE_CLK_T BaseClock, CHIP_CGU_CLKIN_T Inp
 
 			LPC_CGU->BASE_CLK[BaseClock] = reg;
 		}
-	}
-	else {
-		LPC_CGU->BASE_CLK[BaseClock] = reg | 1;	/* Power down this base clock */
+        else {
+		    LPC_CGU->BASE_CLK[BaseClock] = reg | 1;	/* Power down this base clock */
+        }
 	}
 }
 

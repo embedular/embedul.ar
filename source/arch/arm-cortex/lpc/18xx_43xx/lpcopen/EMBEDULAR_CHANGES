@@ -17,3 +17,6 @@ Changes made by Santiago Germino:
 - Fixed comparisons between signed and unsigned integers.
   Opportunity for improvement: An appropriate data type may give free, partial protection from unwanted or unforeseen input.
   Why allow signed quantities if the intended input was unsigned only?
+
+- clock_18xx_43xx.c: fixed Chip_Clock_SetBaseClock() function by moving the else block to the innermost if.
+  Input != CLKINPUT_PD -else- power down this base clock.
