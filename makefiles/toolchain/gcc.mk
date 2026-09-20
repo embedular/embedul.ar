@@ -53,7 +53,7 @@ LINK_CMD ?= $(CC) $(CFLAGS) $(OBJS) $(APP_OBJS) $(foreach flag,$(LDFLAGS),-Wl$(e
 $(call emb_info,Toolchain version '$(shell $(CC) -dumpversion)')
 
 # Basic configurations
-CFLAGS += -std=c17 -Wall -Wextra
+CFLAGS += -std=c23 -Wall -Wextra -Werror
 CFLAGS += -O$(OLEVEL)
 
 # Expose strnlen
