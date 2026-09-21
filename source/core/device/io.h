@@ -39,17 +39,28 @@
     .OutCount[IO_Type_Bit]      = IO_ ## _name ## _OUTB__COUNT, \
     .OutCount[IO_Type_Range]    = IO_ ## _name ## _OUTR__COUNT
 
-#define IO_INIT_STATIC_PORT_INFO(_impl,_name) \
-    for (unsigned int i = 0; i < IO_ ## _name ## _PORT_COUNT; ++i) { \
-    _impl->portInfo[i].inAvailable [IO_Type_Bit]    = \
-        IO_ ## _name ## _INB__COUNT; \
-    _impl->portInfo[i].inAvailable [IO_Type_Range]  = \
-        IO_ ## _name ## _INR__COUNT; \
-    _impl->portInfo[i].outAvailable[IO_Type_Bit]    = \
-        IO_ ## _name ## _OUTB__COUNT; \
-    _impl->portInfo[i].outAvailable[IO_Type_Range]  = \
-        IO_ ## _name ## _OUTR__COUNT; }
+#define IO_COUNT_CHECK(_v) \
+    ((_v) >= 0 && (IO_Count)(_v) == (_v))
 
+#define IO_COUNT_ASSERT(_name) \
+    _Static_assert(IO_COUNT_CHECK(IO_ ## _name ## _INB__COUNT),  "IO_" #_name "_INB__COUNT not representable in IO_Count"); \
+    _Static_assert(IO_COUNT_CHECK(IO_ ## _name ## _INR__COUNT),  "IO_" #_name "_INR__COUNT not representable in IO_Count"); \
+    _Static_assert(IO_COUNT_CHECK(IO_ ## _name ## _OUTB__COUNT), "IO_" #_name "_OUTB__COUNT not representable in IO_Count"); \
+    _Static_assert(IO_COUNT_CHECK(IO_ ## _name ## _OUTR__COUNT), "IO_" #_name "_OUTR__COUNT not representable in IO_Count")
+
+#define IO_INIT_STATIC_PORT_INFO(_impl,_name) \
+    do { \
+        IO_COUNT_ASSERT(_name); \
+        for (unsigned int i = 0; i < IO_ ## _name ## _PORT_COUNT; ++i) { \
+        _impl->portInfo[i].inAvailable [IO_Type_Bit]    = \
+            IO_ ## _name ## _INB__COUNT; \
+        _impl->portInfo[i].inAvailable [IO_Type_Range]  = \
+            IO_ ## _name ## _INR__COUNT; \
+        _impl->portInfo[i].outAvailable[IO_Type_Bit]    = \
+            IO_ ## _name ## _OUTB__COUNT; \
+        _impl->portInfo[i].outAvailable[IO_Type_Range]  = \
+            IO_ ## _name ## _OUTR__COUNT; } \
+    } while (0)
 
 typedef uint16_t    IO_Count;
 typedef uint16_t    IO_Code;
