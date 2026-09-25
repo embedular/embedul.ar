@@ -52,6 +52,7 @@
             "type": "pickString",
             "description": "Framework example",
             "options": [
+                "screen_raytracing",
                 "hello_world",
                 "log_functions",
                 "log_context",

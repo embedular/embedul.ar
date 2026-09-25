@@ -129,7 +129,10 @@ ifneq ($(filter video,$(LIB_EMBEDULAR_SUBSYSTEMS)),)
             $(LIB_EMBEDULAR)/manager/screen/line.o \
             $(LIB_EMBEDULAR)/manager/screen/rect.o \
             $(LIB_EMBEDULAR)/manager/screen/sprite.o \
-            $(LIB_EMBEDULAR)/manager/screen/fade.o
+            $(LIB_EMBEDULAR)/manager/screen/fade.o \
+			$(LIB_EMBEDULAR)/manager/screen/rt.o
+    # Required third-party library
+    $(call emb_include,lib/3rd_party/cglm.mk)
 else
     $(call emb_warning,No video subsystem. Splash screens disabled)
     LIB_EMBEDULAR_CONFIG_SPLASH_SCREENS := 0

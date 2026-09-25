@@ -49,7 +49,7 @@
                             "`M40`3`L1" \
                             "`M40`4`L1"
 #define GREET_FWK_0_DESC    "embedded systems framework"
-#define GREET_FWK_1_AUTH    "© 2018-2023 santiago germino"
+#define GREET_FWK_1_AUTH    "© 2018-2026 santiago germino"
 #define GREET_FWK_2_WEB     "http://embedul.ar"
 #define GREET_FWK_3_BUILD   CC_BuildInfoStr
 #define GREET_FWK_4_VER     CC_VcsFwkVersionStr
