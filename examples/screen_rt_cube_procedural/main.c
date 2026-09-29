@@ -3,11 +3,11 @@
 
   Example: voxel raytracer renderer.
 
-  Renders three procedurally-built voxel objects (a cube, a corner pyramid
-  and an octahedron) that spin in place around a fixed camera.  Each object
-  is a small RGB332 voxel grid filled once at startup; per frame we only
-  recompute its rigid transform (translate * rotate * scale, centered) and
-  let SCREEN_RT_Render cast one ray per pixel.
+  Renders a single procedurally-built voxel object (a cube) that spins in
+  place around a fixed camera.  The object is a small RGB332 voxel grid
+  filled once at startup; per frame we only recompute its rigid transform
+  (translate * rotate * scale, centered) and let SCREEN_RT_Render cast one
+  ray per pixel.
 
   Press GP1[A] to exit.
 */
@@ -17,39 +17,35 @@
 
 #include <math.h>
 
-
-/* ------------------------------------------------------------------ */
-/* Voxel grid size (cells per axis) and per-shape build helpers.       */
-/* ------------------------------------------------------------------ */
-
-#define VGRID       10          /* voxels along X / Y / Z              */
+#define VGRID       10 /* voxels along X / Y / Z */
 #define VCENTER     ((float)VGRID / 2.0f)
-
-#define C_RED       ((RGB332_Color) 0xF8)
-#define C_GREEN     ((RGB332_Color) 0x3E)
-#define C_BLUE      ((RGB332_Color) 0x03)
-#define C_BG        ((RGB332_Color) 0xFF)
+#define C_FONT      ((RGB332_Color) 0b00000011)
+#define C_BG        ((RGB332_Color) 0b11111111)
 
 /* Flat voxel buffers (row-major, x fastest) matching the renderer layout:
    data[z * dy * dx + y * dx + x].  Filled once, then treated as ROM. */
-static RGB332_Color cubeData   [VGRID * VGRID * VGRID];
+static RGB332_Color cubeData [VGRID * VGRID * VGRID];
 
-static const struct SCREEN_RT_Voxels cubeVoxels = { cubeData,   { VGRID, VGRID, VGRID } };
+static const struct SCREEN_RT_Voxels cubeVoxels =
+    { .data = cubeData, .dX = VGRID, .dY = VGRID, .dZ = VGRID };
 
 /* The voxels pointer is `const * const`, so it must be fixed at declaration;
    only the matrix is updated at runtime (in initScene / updateObjects). */
-static struct SCREEN_RT_Object objects[1] = {
-    { &cubeVoxels, { { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, { 0, 0, 0, 0 } } }
+static struct SCREEN_RT_Object objects[1] =
+    { { .voxels = &cubeVoxels,
+        .matrix = { { 0, 0, 0, 0 }, { 0, 0, 0, 0 },
+                    { 0, 0, 0, 0 }, { 0, 0, 0, 0 } } }
 };
 
-static struct SCREEN_RT        renderer;
+static struct SCREEN_RT renderer;
 
 
 static void buildCube (RGB332_Color *const d)
 {
     for (int i = 0; i < VGRID * VGRID * VGRID; i++)
     {
-        d[i] = (RANDOM_GetUint32() % 2 == 0)? RANDOM_GetUint32() % 0xFF : SCREEN_RT_TRANSPARENT_VOXEL;
+        d[i] = (RANDOM_GetUint32() % 2 == 0)? 
+                    RANDOM_GetUint32() % 0xFF : SCREEN_RT_TRANSPARENT_VOXEL;
     }
 }
 
@@ -86,10 +82,6 @@ static void buildObjectMatrix (mat4 *const out, const vec3 pos,
 }
 
 
-/* ------------------------------------------------------------------ */
-/* Scene wiring.                                                       */
-/* ------------------------------------------------------------------ */
-
 static void initVoxels (void)
 {
     buildCube (cubeData);
@@ -109,7 +101,7 @@ static void initScene (void)
 }
 
 
-/* Update the three object transforms for time t (seconds). */
+/* Update the object transform for time t (seconds). */
 static void updateObjects (const float t)
 {
     vec3 aY   = { 0.0f, 1.0f, 0.0f };
@@ -154,16 +146,18 @@ void EMBEDULAR_Main (void *param)
     while (! MIO_GetInputBuffer (INPUT_PROFILE_Group_GP1, IO_Type_Bit,
                                  INPUT_PROFILE_GP1_Bit_A))
     {
-        const float t =
-            (float)(TICKS_Now () - start) * 0.001f;  /* seconds */
+        const float t = (float)(TICKS_Now () - start) * 0.001f;
 
         updateObjects (t);
         updateCamera  ();
 
-        uint32_t raysHitCount = SCREEN_RT_Render (&renderer, SCREEN_Role_Primary);
+        uint32_t raysHitCount = 
+            SCREEN_RT_Render (&renderer, SCREEN_Role_Primary);
 
-        SCREEN_FONT_DrawStringLite (SCREEN_Role_Primary, 0, 0, 0b00000011, "RAYTRACER DEMO");
-        SCREEN_FONT_DrawParsedStringLite (SCREEN_Role_Primary, 0, 8, 0b00000011, "RAYS HIT: `0", raysHitCount);
+        SCREEN_FONT_DrawStringLite (SCREEN_Role_Primary,
+            0, 0, C_FONT, "RAYTRACER DEMO");
+        SCREEN_FONT_DrawParsedStringLite (SCREEN_Role_Primary,
+            0, 8, C_FONT, "RAYS HIT: `0", raysHitCount);
 
         BOARD_Sync ();
     }

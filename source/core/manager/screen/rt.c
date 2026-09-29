@@ -135,9 +135,9 @@ static bool RT__voxelDDA (const struct SCREEN_RT_Voxels *const V,
                           const vec3 OL, const vec3 DL,
                           RGB332_Color *const HitColor)
 {
-    const uint16_t dx = V->dims[0];
-    const uint16_t dy = V->dims[1];
-    const uint16_t dz = V->dims[2];
+    const uint16_t dx = V->dX;
+    const uint16_t dy = V->dY;
+    const uint16_t dz = V->dZ;
 
     // Slab intersection of the ray with the grid box [0..dims].
     float tEnter    = 0.0f;
@@ -464,9 +464,9 @@ uint32_t SCREEN_RT_Render (struct SCREEN_RT *const R,
         glm_mat4_inv (eff[o], inv[o]);
 
         // World AABB of the 8 corners of the local grid [0..dims].
-        const uint16_t dx = Obj->voxels->dims[0];
-        const uint16_t dy = Obj->voxels->dims[1];
-        const uint16_t dz = Obj->voxels->dims[2];
+        const uint16_t dx = Obj->voxels->dX;
+        const uint16_t dy = Obj->voxels->dY;
+        const uint16_t dz = Obj->voxels->dZ;
 
         float minX = FLT_MAX,  minY = FLT_MAX,  minZ = FLT_MAX;
         float maxX = -FLT_MAX, maxY = -FLT_MAX, maxZ = -FLT_MAX;

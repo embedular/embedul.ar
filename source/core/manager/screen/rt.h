@@ -144,14 +144,16 @@
 struct SCREEN_RT_Voxels
 {
     /** Pointer to the row-major RGB332 color buffer
-     * (``dims.z * dims.y * dims.x``) in Flash. ``dims.x`` is the fastest
-     * (inner) axis.
+     * (``dimsZ * dimsY * dimsX``) in Flash. ``dimsX`` is the fastest
+     * (inner) axis: ``idx = z * dimsY * dimsX + y * dimsX + x``.
      */
     const RGB332_Color          * const data;
     /** Number of voxels along X / Y / Z. A voxel ``(i,j,k)`` occupies the
      * local cell ``[i, i+1] x [j, j+1] x [k, k+1]``.
      */
-    const uint16_t              dims[3];
+    const uint16_t              dX;
+    const uint16_t              dY;
+    const uint16_t              dZ;
 };
 
 

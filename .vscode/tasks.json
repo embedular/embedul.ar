@@ -52,8 +52,9 @@
             "type": "pickString",
             "description": "Framework example",
             "options": [
-                "screen_raytracing",
-                "hello_world",
+                "screen_rt_cube_procedural",
+                "screen_rt_voxel_object",
+                "low_hello_world",
                 "log_functions",
                 "log_context",
                 "log_assert",
